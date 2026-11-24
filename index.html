@@ -1,0 +1,1688 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>顶钻展作业地图 · 真实数据</title>
+<link rel="icon" href="data:,">
+<style>
+:root{
+  --bg:#0f1923; --panel:#1a2634; --panel2:#14202b; --line:#263544; --txt:#e8eef4; --sub:#8fa3b5;
+  --accent:#35d0ba; --gold:#f5c451; --danger:#ff6b6b; --orange:#ff8c3c; --blue:#4aa3ff; --purple:#b78cff; --gray:#6b7a89;
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+body{background:var(--bg); color:var(--txt); font:13px/1.55 -apple-system,"PingFang SC","Microsoft YaHei",sans-serif;}
+button{font:inherit; color:inherit; cursor:pointer;}
+header{display:flex; align-items:center; gap:14px; padding:14px 20px 10px; flex-wrap:wrap;}
+header h1{font-size:19px; letter-spacing:.5px;}
+header h1 small{color:var(--sub); font-size:11px; font-weight:400; margin-left:8px;}
+.badges{display:flex; gap:6px; margin-left:auto; flex-wrap:wrap;}
+.badge{font-size:11px; padding:3px 9px; border-radius:20px; border:1px solid var(--line); color:var(--sub);}
+.badge.ok{color:var(--accent); border-color:rgba(53,208,186,.4);}
+.badge.gold{color:var(--gold); border-color:rgba(245,196,81,.4);}
+.steps{display:flex; gap:6px; padding:0 20px 10px; flex-wrap:wrap; align-items:center;}
+.step{font-size:11px; color:var(--sub); background:var(--panel2); border:1px solid var(--line); padding:3px 10px; border-radius:20px;}
+.step b{color:var(--accent); margin-right:4px;}
+.step.arrow{border:0; background:none; padding:0 2px;}
+nav{display:flex; gap:4px; padding:0 20px 10px; flex-wrap:wrap;}
+nav button{background:var(--panel2); border:1px solid var(--line); border-radius:8px; padding:6px 14px; color:var(--sub);}
+nav button.on{background:var(--accent); border-color:var(--accent); color:#0f1923; font-weight:700;}
+.bar{display:flex; gap:10px; padding:0 20px 12px; flex-wrap:wrap; align-items:center;}
+.seg{display:flex; background:var(--panel2); border:1px solid var(--line); border-radius:8px; overflow:hidden;}
+.seg button{background:transparent; border:0; color:var(--sub); padding:6px 12px; font-size:12px;}
+.seg button.on{background:var(--accent); color:#0f1923; font-weight:700;}
+.seg.gold button.on{background:var(--gold);}
+select,input[type=date],input[type=text]{background:var(--panel2); color:var(--txt); border:1px solid var(--line); border-radius:8px; padding:6px 8px; font-size:12px;}
+.bar label{color:var(--sub); font-size:11px; display:flex; align-items:center; gap:5px;}
+.bar .reset{background:none; border:1px solid var(--line); color:var(--sub); border-radius:8px; padding:6px 10px;}
+.crumb{padding:0 20px 8px; color:var(--sub); font-size:12px; display:flex; gap:6px; align-items:center; flex-wrap:wrap;}
+.crumb button{background:none; border:0; color:var(--accent); padding:0;}
+.kpis{display:grid; grid-template-columns:repeat(8,1fr); gap:10px; padding:0 20px 12px;}
+.kpi{background:var(--panel); border:1px solid var(--line); border-top:3px solid var(--accent); border-radius:10px; padding:10px 12px; position:relative; min-height:96px;}
+.kpi .lbl{color:var(--sub); font-size:11px; display:flex; justify-content:space-between; gap:4px;}
+.kpi .val{font-size:21px; font-weight:800; margin:5px 0 2px; font-variant-numeric:tabular-nums;}
+.kpi .val small{font-size:11px; color:var(--sub); font-weight:400; margin-left:3px;}
+.kpi .subnote{color:var(--sub); font-size:10.5px;}
+.kpi .up{color:var(--accent);} .kpi .down{color:var(--danger);}
+.kpi svg{position:absolute; right:10px; bottom:10px; opacity:.85;}
+.main{display:grid; grid-template-columns:1fr 330px; gap:12px; padding:0 20px 12px;}
+.panel{background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:12px;}
+.panel h3{font-size:13px; display:flex; align-items:center; gap:8px; margin-bottom:8px;}
+.panel h3 .hint{color:var(--sub); font-weight:400; font-size:11px; margin-left:auto;}
+#map{height:520px;}
+.legend{display:flex; gap:12px; align-items:center; color:var(--sub); font-size:11px; padding-top:6px; flex-wrap:wrap;}
+.dot{width:9px; height:9px; border-radius:50%; display:inline-block; margin-right:4px;}
+.rank{max-height:520px; overflow:auto;}
+.rank .row{display:flex; align-items:center; gap:8px; padding:6px 4px; border-bottom:1px dashed var(--line); cursor:pointer;}
+.rank .row:hover{background:var(--panel2);}
+.rank .no{width:20px; height:20px; border-radius:6px; background:var(--panel2); color:var(--sub); font-size:11px; display:flex; align-items:center; justify-content:center; flex:none;}
+.rank .row:nth-child(-n+3) .no{background:var(--gold); color:#0f1923; font-weight:700;}
+.rank .nm{flex:1; min-width:0;}
+.rank .nm b{font-size:12px; display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+.rank .nm .pb{height:4px; background:var(--panel2); border-radius:2px; margin-top:3px;}
+.rank .nm .pb i{display:block; height:100%; background:var(--accent); border-radius:2px;}
+.rank .vv{text-align:right; font-variant-numeric:tabular-nums; font-size:11px; color:var(--sub);}
+.rank .vv b{display:block; color:var(--gold); font-size:12px;}
+#trend{height:230px;}
+footer{padding:10px 20px 26px; color:var(--sub); font-size:11px; border-top:1px solid var(--line); margin-top:6px;}
+footer b{color:var(--txt);}
+/* city / gantt / matrix */
+.wide{padding:0 20px 12px;}
+.summary{display:flex; gap:18px; flex-wrap:wrap; background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:12px 16px; margin-bottom:10px;}
+.summary .it{font-size:11px; color:var(--sub);}
+.summary .it b{display:block; font-size:17px; color:var(--txt); font-variant-numeric:tabular-nums;}
+.tabs{display:flex; gap:4px; margin-bottom:8px; flex-wrap:wrap;}
+.tabs button{background:var(--panel2); border:1px solid var(--line); color:var(--sub); border-radius:8px; padding:5px 12px; font-size:12px;}
+.tabs button.on{background:var(--accent); color:#0f1923; font-weight:700; border-color:var(--accent);}
+.tblwrap{overflow:auto; max-height:560px; background:var(--panel); border:1px solid var(--line); border-radius:12px;}
+table{width:100%; border-collapse:collapse; font-size:12px;}
+th{position:sticky; top:0; background:var(--panel2); color:var(--sub); font-weight:600; text-align:left; padding:8px 10px; border-bottom:1px solid var(--line); white-space:nowrap; z-index:2;}
+td{padding:7px 10px; border-bottom:1px solid var(--line); vertical-align:top;}
+tr:hover td{background:rgba(53,208,186,.05);}
+tr.sel td{background:rgba(53,208,186,.1);}
+.st{font-size:10.5px; padding:2px 7px; border-radius:10px; white-space:nowrap;}
+.st.free{background:rgba(53,208,186,.15); color:var(--accent);}
+.st.partial{background:rgba(245,196,81,.15); color:var(--gold);}
+.st.full{background:rgba(255,107,107,.15); color:var(--danger);}
+.st.expiring{background:rgba(255,140,60,.15); color:var(--orange);}
+.st.ooc{background:rgba(107,122,137,.2); color:var(--gray);}
+.st.conflict{box-shadow:0 0 0 1px var(--purple);}
+.money{font-variant-numeric:tabular-nums; font-weight:700; color:var(--gold);}
+.hintcell{font-size:11px; color:var(--sub); max-width:280px;}
+.hintcell b{color:var(--accent); font-weight:600;}
+.hintcell .bd{display:inline-block; font-size:10px; border:1px solid var(--line); border-radius:8px; padding:0 5px; margin-left:3px; color:var(--sub);}
+.hintcell button{background:none; border:0; color:var(--blue); font-size:11px; padding:0;}
+.pathlv{color:var(--sub);}
+.toolbar{display:flex; gap:8px; align-items:center; margin-bottom:8px; flex-wrap:wrap;}
+.toolbar .sp{flex:1;}
+.btn{background:var(--panel2); border:1px solid var(--line); border-radius:8px; padding:6px 12px; color:var(--txt); font-size:12px;}
+.btn.pri{background:var(--accent); border-color:var(--accent); color:#0f1923; font-weight:700;}
+/* gantt */
+.gantt{background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:14px;}
+.gantt-track{position:relative; height:64px; background:var(--panel2); border-radius:8px; margin:26px 0 6px; overflow:hidden;}
+.gantt-track .win{position:absolute; top:0; bottom:0; background:rgba(255,255,255,.06); border-left:2px dashed var(--accent); border-right:2px dashed var(--accent);}
+.gantt-track .occ{position:absolute; top:10px; height:16px; border-radius:4px;}
+.gantt-track .blank{position:absolute; top:36px; height:10px; border-radius:3px; background:var(--accent); opacity:.85;}
+.gantt-track .now{position:absolute; top:0; bottom:0; width:2px; background:var(--danger);}
+.gantt-axis{display:flex; color:var(--sub); font-size:10px; position:relative; height:16px;}
+.gantt-axis span{position:absolute; transform:translateX(-50%);}
+.ggrid{display:grid; grid-template-columns:1fr 340px; gap:12px;}
+.side .blk{background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:12px; margin-bottom:10px;}
+.side .blk h4{font-size:12px; color:var(--sub); margin-bottom:8px;}
+.side .kv{display:flex; justify-content:space-between; font-size:12px; padding:3px 0; border-bottom:1px dashed var(--line);}
+.side .kv span{color:var(--sub);}
+.calc input{width:130px;}
+.calc .res{font-weight:700; margin-top:8px; font-size:12px;}
+.calc .res.ok{color:var(--accent);} .calc .res.bad{color:var(--danger);} .calc .res.mid{color:var(--gold);}
+/* matrix */
+.mx{overflow:auto; background:var(--panel); border:1px solid var(--line); border-radius:12px; max-height:640px;}
+.mx table{font-size:11px;}
+.mx th{padding:6px 6px;}
+.mx td{padding:4px 6px; text-align:center;}
+.mx .provrow td{background:var(--panel2); cursor:pointer; font-weight:700; color:var(--txt);}
+.mx .cell{width:34px; height:20px; border-radius:4px; display:inline-block; cursor:pointer;}
+.mx .cell.active{background:rgba(53,208,186,.75);}
+.mx .cell.expiring{background:rgba(245,196,81,.8);}
+.mx .cell.pre{background:rgba(74,163,255,.7);}
+.mx .cell.wait{background:rgba(255,107,107,.55);}
+.mx .cell.none{background:transparent; border:1px dashed var(--line);}
+.mx th.selcol,.mx td.selcol{box-shadow:inset 0 0 0 1px var(--gold);}
+.mx .cityname{text-align:left; white-space:nowrap; color:var(--txt); cursor:pointer;}
+/* opp / cal / prov (M2) */
+.opptools{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:8px;}
+.opptools label{color:var(--sub);font-size:11px;display:flex;gap:4px;align-items:center;}
+.opptools input[type=number]{width:92px;background:var(--panel2);color:var(--txt);border:1px solid var(--line);border-radius:8px;padding:6px 8px;font-size:12px;}
+th.sortable{cursor:pointer;}
+th.sortable:hover{color:var(--txt);}
+th .ar{color:var(--accent);margin-left:2px;}
+.pager{display:flex;gap:6px;align-items:center;padding:8px 2px;color:var(--sub);font-size:12px;flex-wrap:wrap;}
+.pager button{background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:4px 10px;color:var(--txt);}
+.pager button:disabled{opacity:.4;cursor:default;}
+.grouprow td{background:var(--panel2);font-weight:700;color:var(--orange);}
+.calwrap{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:10px;}
+.calmonth{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;}
+.calmonth h4{font-size:13px;margin-bottom:8px;}
+.calgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
+.calgrid .wd{color:var(--sub);font-size:10px;text-align:center;padding:2px 0;}
+.calday{min-height:46px;border-radius:6px;background:var(--panel2);border:1px solid var(--line);padding:3px 5px;cursor:pointer;font-size:10px;color:var(--sub);}
+.calday .dn{font-size:11px;color:var(--txt);}
+.calday .ct{font-weight:700;color:var(--accent);font-size:12px;}
+.calday.today{border-color:var(--danger);}
+.calday.sel{box-shadow:0 0 0 2px var(--gold);}
+.calday.blank{background:transparent;border:0;cursor:default;}
+.pcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:10px;}
+.pcard{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px;cursor:pointer;}
+.pcard:hover{border-color:var(--accent);}
+.pcard h5{font-size:12.5px;margin-bottom:6px;line-height:1.5;}
+.pcard .kv{display:flex;justify-content:space-between;font-size:11px;padding:2px 0;color:var(--sub);}
+.pcard .kv b{color:var(--txt);font-variant-numeric:tabular-nums;}
+.pcard .pb{height:4px;background:var(--panel);border-radius:2px;margin:4px 0;}
+.pcard .pb i{display:block;height:100%;background:var(--accent);border-radius:2px;}
+@media (max-width:1000px){.calwrap{grid-template-columns:1fr;}}
+/* M3: light theme / global search / dict tree / freshness / city cards / keyboard / skeleton */
+body.light{--bg:#f4f6f9;--panel:#ffffff;--panel2:#eef2f6;--line:#d8e0e8;--txt:#1f2937;--sub:#5b6b7c;--gray:#8a97a5;}
+.gsearch{position:relative;}
+.gsearch input{width:230px;}
+#gres{position:absolute;top:110%;left:0;width:360px;max-height:380px;overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:10px;z-index:40;display:none;box-shadow:0 8px 24px rgba(0,0,0,.35);}
+#gres .g{padding:6px 10px;border-bottom:1px solid var(--line);}
+#gres .g h6{font-size:10.5px;color:var(--sub);margin-bottom:4px;}
+#gres button{display:block;width:100%;text-align:left;background:none;border:0;padding:4px 6px;border-radius:6px;font-size:12px;color:var(--txt);}
+#gres button:hover{background:var(--panel2);}
+#gres button small{color:var(--sub);margin-left:6px;}
+.dtree details{border:1px solid var(--line);border-radius:8px;margin-bottom:6px;background:var(--panel);}
+.dtree summary{cursor:pointer;padding:7px 10px;font-size:12px;font-weight:600;list-style:none;}
+.dtree summary::-webkit-details-marker{display:none;}
+.dtree summary:before{content:'▸';color:var(--sub);margin-right:6px;}
+.dtree details[open]>summary:before{content:'▾';}
+.dtree .in{padding:0 10px 8px 22px;}
+.dleaf{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:5px 4px;border-bottom:1px dashed var(--line);font-size:11.5px;}
+.dleaf .code{background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:1px 7px;color:var(--blue);cursor:pointer;font-size:10.5px;}
+.dleaf .stt{color:var(--sub);}
+.ccards{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px;max-height:520px;overflow:auto;}
+.ccard{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px;cursor:pointer;}
+.ccard:hover{border-color:var(--accent);}
+.ccard b{font-size:12.5px;}
+.ccard .pb{height:4px;background:var(--panel);border-radius:2px;margin:5px 0;}
+.ccard .pb i{display:block;height:100%;background:var(--accent);}
+.ccard .kv{display:flex;justify-content:space-between;font-size:11px;color:var(--sub);}
+#fresh{margin:0 20px 10px;padding:8px 14px;border-radius:8px;background:var(--panel);border:1px solid var(--line);color:var(--sub);font-size:11px;display:flex;gap:14px;flex-wrap:wrap;align-items:center;}
+#fresh .bad{color:var(--danger);font-weight:700;}
+#fresh button{background:none;border:0;color:var(--blue);font-size:11px;padding:0;}
+tr.kbsel td{background:rgba(74,163,255,.14)!important;box-shadow:inset 2px 0 0 var(--blue);}
+.skel{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:0 20px;}
+.skel i{display:block;height:86px;border-radius:10px;background:linear-gradient(90deg,var(--panel) 25%,var(--panel2) 50%,var(--panel) 75%);background-size:200% 100%;animation:sh 1.2s infinite;}
+@keyframes sh{to{background-position:-200% 0;}}
+@media print{nav,.bar,.steps,#fresh,.opptools,.toolbar,.gsearch{display:none!important;}body{background:#fff;color:#000;}}
+/* modal / toast / banner */
+#modal{position:fixed; inset:0; background:rgba(0,0,0,.55); display:none; align-items:center; justify-content:center; z-index:50;}
+#modal .box{background:var(--panel); border:1px solid var(--line); border-radius:12px; max-width:640px; width:92%; max-height:80vh; overflow:auto; padding:16px;}
+#modal h3{font-size:14px; margin-bottom:10px;}
+#toast{position:fixed; left:50%; bottom:34px; transform:translateX(-50%); background:var(--accent); color:#0f1923; font-weight:700; padding:8px 18px; border-radius:20px; display:none; z-index:60; font-size:12px;}
+#banner{display:none; margin:0 20px 10px; padding:8px 14px; border-radius:8px; background:rgba(245,196,81,.15); border:1px solid rgba(245,196,81,.5); color:var(--gold); font-size:12px;}
+#loading{padding:60px 20px; text-align:center; color:var(--sub);}
+.empty{padding:40px; text-align:center; color:var(--sub);}
+@media (max-width:1200px){ .kpis{grid-template-columns:repeat(4,1fr);} .main{grid-template-columns:1fr;} .ggrid{grid-template-columns:1fr;} }
+@media (max-width:700px){ .kpis{grid-template-columns:repeat(2,1fr);} #map{height:360px;} }
+</style>
+</head>
+<body>
+<header>
+  <h1>顶钻展作业地图<small>顶展2.0 / 钻展v1 / 顶展行政区 / 景区钻展 · 库存作战</small></h1>
+  <div class="gsearch"><input type="text" id="gq" placeholder="全局搜索：城市 / 类目 / 词包code" autocomplete="off"><div id="gres"></div></div>
+  <div class="badges">
+    <span class="badge ok">真实数据 · FBI 同源</span>
+    <span class="badge ok">口径已校准</span>
+    <span class="badge gold" id="badgeDate">数据截至 —</span>
+    <button class="badge" id="btnTheme">浅色</button>
+    <button class="badge" id="btnStats">使用统计</button>
+  </div>
+</header>
+<div class="steps">
+  <span class="step"><b>1</b>看热力：默认已售单数，可切机会热力</span><span class="step arrow">→</span>
+  <span class="step"><b>2</b>点城市：看哪些类目空着、值多少钱</span><span class="step arrow">→</span>
+  <span class="step"><b>3</b>看空位行：高优作业服务商提示</span><span class="step arrow">→</span>
+  <span class="step"><b>4</b>进甘特：排档期 / 试算 / 复制派单文案</span>
+</div>
+<nav>
+  <button data-view="map" class="on">地图首页</button>
+  <button data-view="opp">机会榜</button>
+  <button data-view="cal">释放日历</button>
+  <button data-view="prov">服务商增量榜</button>
+  <button data-view="dict">词包字典</button>
+  <button data-view="matrix">全城档期矩阵</button>
+  <button data-view="city" id="navCity" style="display:none">城市详情</button>
+  <button data-view="gantt" id="navGantt" style="display:none">单格甘特</button>
+</nav>
+<div class="bar">
+  <span style="color:var(--sub);font-size:11px">行业线</span>
+  <div class="seg" id="segLine"></div>
+  <span style="color:var(--sub);font-size:11px">方案层</span>
+  <div class="seg gold" id="segPlan"></div>
+  <span style="color:var(--sub);font-size:11px">时间窗</span>
+  <div class="seg" id="segWin"></div>
+  <input type="date" id="winS" style="display:none"><input type="date" id="winE" style="display:none">
+  <label>统计月份 <select id="selMonth"></select></label>
+</div>
+<div class="bar">
+  <label>省 <select id="selProv"></select></label>
+  <label>市 <select id="selCity"></select></label>
+  <label>类目 <input type="text" id="inpCat" placeholder="搜索类目路径，如 火锅 / 按摩" style="width:190px"></label>
+  <label><input type="checkbox" id="ckFree"> 只看未占量城市</label>
+  <label><input type="checkbox" id="ckOcc"> 只看已有占量</label>
+  <button class="reset" id="btnReset">一键重置</button>
+  <span class="sp" style="flex:1"></span>
+  <span style="color:var(--sub);font-size:11px" id="filterNote"></span>
+</div>
+<div class="crumb" id="crumb"></div>
+<div id="banner"></div>
+<div id="loading"><div class="skel"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><div style="padding:14px">正在加载真实数据资产（价目 12.28 万格 / 占量 / 景区 POI / 服务商名单 / 词包字典）…</div></div>
+
+<div id="viewMap" style="display:none">
+  <div class="kpis" id="kpis"></div>
+  <div class="main">
+    <div class="panel">
+      <h3>全国热力 <span class="hint" id="mapHint"></span>
+        <span style="margin-left:auto;display:flex;gap:6px;align-items:center">
+          <span class="seg" id="segMapMode"><button data-m="map">地图</button><button data-m="list">列表</button></span>
+          <select id="selMetric" style="font-size:11px">
+            <option value="occ">已售单数（默认）</option>
+            <option value="occval">已售刊例价值</option>
+            <option value="rate">占量率</option>
+            <option value="value">空白刊例价值（机会热力）</option>
+          </select>
+          <select id="selBubble" style="font-size:11px">
+            <option value="value">气泡=空白价值</option>
+            <option value="free">气泡=空白格数</option>
+            <option value="off">关闭气泡</option>
+          </select>
+        </span>
+      </h3>
+      <div id="map"></div>
+      <div id="mapList" class="ccards" style="display:none"></div>
+      <div class="legend">
+        <span><i class="dot" style="background:var(--accent)"></i>在投/已售</span>
+        <span><i class="dot" style="background:var(--blue)"></i>预排期</span>
+        <span><i class="dot" style="background:var(--gray)"></i>未覆盖</span>
+        <span id="coverCount"></span>
+        <span style="margin-left:auto">点击省区域下钻 · 点击城市气泡进详情</span>
+      </div>
+    </div>
+    <div class="panel">
+      <h3>增量空间排行 <span class="hint">点击下钻</span>
+        <span style="margin-left:auto"><span class="seg" id="segRank"><button data-l="prov" class="on">省</button><button data-l="city">城市</button></span></span>
+      </h3>
+      <div style="color:var(--sub);font-size:11px;margin-bottom:6px" id="rankTotal"></div>
+      <div class="rank" id="rank"></div>
+    </div>
+  </div>
+  <div class="wide"><div class="panel"><h3>月度新签营收趋势 <span class="hint">柱=当月新签刊例价值 · 折线=自起始月累计 · 金列=选中统计月</span></h3><div id="trend"></div></div></div>
+</div>
+
+<div id="viewCity" style="display:none" class="wide"></div>
+<div id="viewGantt" style="display:none" class="wide"></div>
+<div id="viewMatrix" style="display:none" class="wide"></div>
+<div id="viewOpp" style="display:none" class="wide"></div>
+<div id="viewCal" style="display:none" class="wide"></div>
+<div id="viewProv" style="display:none" class="wide"></div>
+<div id="viewDict" style="display:none" class="wide"></div>
+
+<div id="fresh"></div>
+<footer id="footer"></footer>
+<div id="modal"><div class="box" id="modalBox"></div></div>
+<div id="toast"></div>
+
+<script src="echarts.min.js"></script>
+<script src="china.geo.js"></script>
+<script src="city-coords.js"></script>
+<script>
+'use strict';
+/* ============ 口径常量（镜像 m0/config.js，改口径改那里再同步此处） ============ */
+const CFG = {
+  statusWhitelist: ['PERFORMANCING','WAIT_PUBLISH','SIGNING','WAIT_SIGN','COMPLETED'],
+  planNames: ['高频&顶展2.0','高频&钻展v1','高频&顶展&行政区'],
+  planLabels: ['顶展2.0','钻展v1','顶展行政区'],
+  lines: ['美食','休娱丽人','生活服务'],
+  windowDays: 30,
+  recommend: { topN:3,
+    lineMatch: {'美食':['美食'],'休娱丽人':['高频'],'生活服务':['高频'],scenic:['文旅','美食']},
+    weights: {city:6,province:3,national:1,specificCat:2,firstOpen:2,coreTier:1,is12:1} },
+  heatInquiryWeight: 0
+};
+const STATE_COLOR = {free:'var(--accent)', partial:'var(--gold)', full:'var(--danger)', expiring:'var(--orange)'};
+const STATE_LABEL = {free:'全窗空白', partial:'部分空白', full:'全窗占满', expiring:'即将释放'};
+const OCC_COLOR = {PERFORMANCING:'#35d0ba', WAIT_PUBLISH:'#4aa3ff', SIGNING:'#f5c451', WAIT_SIGN:'#f5c451', COMPLETED:'#6b7a89'};
+const OCC_LABEL = {PERFORMANCING:'在投', WAIT_PUBLISH:'待上刊', SIGNING:'签约中', WAIT_SIGN:'待签约', COMPLETED:'已完成'};
+
+/* ============ 状态 ============ */
+const S = {
+  line:0, plan:'all', W:30, winS:null, winE:null, month:null,
+  view:'map', prov:-1, city:-1, cat:'', onlyFree:false, onlyOcc:false,
+  metric:'occ', bubble:'value', rankLevel:'prov',
+  cityTab:0, cityQ:'', cellKey:null, mxOpen:{},
+  oppTab:0, oppState:'sell', oppMinVal:0, oppMinHeat:0, oppSp:'', oppPage:0, oppSort:{key:'value',dir:-1},
+  calTab:0, calDay:null, provQ:'',
+  dictQ:'', mapMode:(window.innerWidth<700?'list':'map'), kbRow:-1
+};
+let IDX=null, SHARDS={}, SCENIC=null, PROV=null, CELLS=[], SCELLS=[], POI={}, POIC={}, DIST={}, KBROWS=[];
+const TODAY = new Date(); TODAY.setHours(0,0,0,0);
+const iso = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const dparse = s => new Date(s.slice(0,10)+'T00:00:00');
+const DAY = 864e5;
+const fmtN = n => n>=1e8 ? (n/1e8).toFixed(2)+'亿' : n>=1e4 ? (n/1e4).toFixed(1)+'万' : Math.round(n).toLocaleString();
+const fmtMoney = n => '¥'+fmtN(n);
+const monthKey = d => iso(d).slice(0,7);
+const addDays = (d,n) => { const x=new Date(d); x.setDate(x.getDate()+n); return x; };
+const addMonths = (d,n) => { const x=new Date(d); x.setDate(1); x.setMonth(x.getMonth()+n); return x; };
+
+/* ============ 加载 ============ */
+async function loadAll(){
+  const V='?v='+iso(TODAY); // M8.3 版本号缓存 busting（按日）
+  const j = async u => { const r = await fetch(u+V); if(!r.ok) throw new Error(u+' '+r.status); return r.json(); };
+  IDX = await j('m0/out/public-index.json');
+  const [a,b,c,sc,pv,dd] = await Promise.all([
+    j('m0/out/public_美食.json'), j('m0/out/public_休娱丽人.json'), j('m0/out/public_生活服务.json'),
+    j('m0/out/scenic.json'), j('m0/out/providers-public.json'), j('m0/out/dict-dist.json')
+  ]);
+  SHARDS = {'美食':a,'休娱丽人':b,'生活服务':c}; SCENIC=sc; PROV=pv; DIST=dd;
+  // 展开格对象
+  CELLS = [];
+  IDX.dicts.lines.forEach((ln,li) => {
+    const sh = SHARDS[ln]; if(!sh) return;
+    for(const r of sh.cells){
+      CELLS.push({pi:r[0],ci:r[1],ai:r[2],hi:r[3],list:r[4],ti:r[5],combo:r[6],wins:r[7]||[],code:r[8]||null,li,prov:IDX.cityProv[r[1]],scenic:false});
+    }
+  });
+  SCELLS = SCENIC.cells.map(r => ({pi:r[0],ci:r[1],di:r[2],bi:r[3],wins:r[4]||[],scenic:true}));
+  for(const r of SCENIC.poiAgg){ POI[r[0]+'|'+r[1]+'|'+r[2]] = r[3]; const ck=r[0]+'|'+r[2]; POIC[ck]=(POIC[ck]||0)+r[3]; }
+  S.month = monthKey(TODAY);
+  parseHash();
+  if(localStorage.getItem('tdz_theme')==='light') document.body.classList.add('light');
+  applyThemeBtn();
+  localStorage.setItem('tdz_lastGood', new Date().toISOString());
+  document.getElementById('badgeDate').textContent = '数据截至 '+IDX.meta.pullDate+'（T+1）';
+  document.getElementById('loading').style.display='none';
+  bindGlobalSearch();
+  document.getElementById('btnTheme').onclick=()=>{ document.body.classList.toggle('light'); localStorage.setItem('tdz_theme',document.body.classList.contains('light')?'light':'dark'); applyThemeBtn(); render(); };
+  document.getElementById('btnStats').onclick=statsModal;
+  buildControls(); render();
+}
+loadAll().catch(e => {
+  let last=''; try{ last=localStorage.getItem('tdz_lastGood')||''; }catch(_){}
+  document.getElementById('loading').innerHTML = '<div class="empty">数据加载失败：'+e.message+'<br>请在本目录运行 <b>python3 -m http.server 8765</b> 后访问 http://localhost:8765/</div>';
+  const b=document.getElementById('banner'); b.style.display='block'; b.textContent='数据资产加载失败，页面不可用：'+e.message+(last?' · 上次成功加载 '+new Date(last).toLocaleString('zh-CN'):'');
+});
+function applyThemeBtn(){ document.getElementById('btnTheme').textContent=document.body.classList.contains('light')?'深色':'浅色'; }
+/* 主题调色板（M10.5：echarts 不吃 CSS 变量，图表颜色走这里） */
+function theme(){
+  return document.body.classList.contains('light')
+    ? {txt:'#1f2937',sub:'#5b6b7c',line:'#d8e0e8',panel:'#ffffff',panel2:'#eef2f6',mapArea:'#e6ecf2',mapBorder:'#b9c6d2',mapHi:'#d3e2ee',split:'#e3e9ef',vm:['#eef9f6','#bfe8e0','#20b2a0','#e0a63c']}
+    : {txt:'#e8eef4',sub:'#8fa3b5',line:'#263544',panel:'#1a2634',panel2:'#14202b',mapArea:'#1b2a38',mapBorder:'#3a4d61',mapHi:'#25405a',split:'#1f2c39',vm:['#1b2a38','#1d4a44','#35d0ba','#f5c451']};
+}
+/* ============ M8.5 本地埋点（仅本设备 localStorage，不外发；跨设备汇总需后端 v1.1） ============ */
+const AN_UID=(()=>{try{let u=localStorage.getItem('tdz_uid');if(!u){u='u'+Math.random().toString(36).slice(2,10);localStorage.setItem('tdz_uid',u);}return u;}catch(e){return 'u-anon';}})();
+const AN_SID=(()=>{try{let s=sessionStorage.getItem('tdz_sid');if(!s){s='s'+Date.now().toString(36);sessionStorage.setItem('tdz_sid',s);}return s;}catch(e){return 's-anon';}})();
+function track(type,detail){
+  try{
+    const ev=JSON.parse(localStorage.getItem('tdz_events')||'[]');
+    ev.push({t:Date.now(),sid:AN_SID,type,detail:detail||null});
+    while(ev.length>2000) ev.shift();
+    localStorage.setItem('tdz_events',JSON.stringify(ev));
+  }catch(e){}
+}
+let lastView=null, viewSince=Date.now();
+function statsModal(){
+  let ev=[]; try{ ev=JSON.parse(localStorage.getItem('tdz_events')||'[]'); }catch(e){}
+  const sids=new Set(ev.map(e=>e.sid));
+  const enters=ev.filter(e=>e.type==='enter').length;
+  const dwell={};
+  for(const e of ev) if(e.type==='leave'&&e.detail&&e.detail.view) dwell[e.detail.view]=(dwell[e.detail.view]||0)+e.detail.ms;
+  const acts={}; for(const e of ev) if(['export','copy','share','search'].includes(e.type)) acts[e.type]=(acts[e.type]||0)+1;
+  const dwellRows=Object.entries(dwell).sort((a,b)=>b[1]-a[1]);
+  document.getElementById('modalBox').innerHTML='<h3>使用统计（本设备） <span style="color:var(--sub);font-size:11px;margin-left:8px">M8.5 自建埋点 · 替代外链计数</span></h3>'
+    +'<div class="summary" style="margin-bottom:10px"><div class="it">PV(视图进入)<b>'+enters+'</b></div><div class="it">会话数<b>'+sids.size+'</b></div><div class="it">设备 UID<b style="font-size:12px">'+AN_UID+'</b></div><div class="it">事件总数<b>'+ev.length+'</b></div></div>'
+    +'<table><thead><tr><th>视图</th><th>累计停留</th></tr></thead><tbody>'
+    +(dwellRows.map(([v,ms])=>'<tr><td>'+v+'</td><td>'+(ms/60000).toFixed(1)+' 分钟</td></tr>').join('')||'<tr><td colspan="2">暂无停留记录</td></tr>')
+    +'</tbody></table>'
+    +'<div style="margin-top:8px;font-size:12px;color:var(--sub)">动作计数：导出 '+(acts.export||0)+' · 复制派单 '+(acts.copy||0)+' · 分享链接 '+(acts.share||0)+' · 搜索 '+(acts.search||0)+'</div>'
+    +'<div style="color:var(--sub);font-size:11px;margin-top:8px">v1 仅统计本设备（localStorage 环形 2000 条，不上传任何服务器）；跨设备 PV/UV 汇总需后端接收端，移 v1.1。</div>'
+    +'<div style="text-align:right;margin-top:10px;display:flex;gap:8px;justify-content:flex-end"><button class="btn" id="stExport">导出事件 JSON</button><button class="btn" id="stClear">清空本设备记录</button><button class="btn" id="modalClose">关闭</button></div>';
+  document.getElementById('modal').style.display='flex';
+  document.getElementById('modalClose').onclick=()=>document.getElementById('modal').style.display='none';
+  document.getElementById('stExport').onclick=()=>{ dl('tdz_usage_'+AN_UID+'.json', JSON.stringify(ev,null,1)); };
+  document.getElementById('stClear').onclick=()=>{ localStorage.removeItem('tdz_events'); toast('本设备埋点已清空'); document.getElementById('modal').style.display='none'; };
+}
+/* ============ M6.4 数据时效监控（常驻） ============ */
+function renderFresh(){
+  const m=IDX.meta, el=document.getElementById('fresh');
+  const syncT=m.syncTs?new Date(m.syncTs):new Date(m.pullDate+'T09:00:00');
+  const ageH=(Date.now()-syncT.getTime())/36e5;
+  const rows=[['价目 78158812','price'],['占量 78392161','occ'],['词包 78457217','dict'],['景区POI 78776428','scenic']];
+  let prev=null; try{ prev=JSON.parse(localStorage.getItem('tdz_counts')||'null'); }catch(e){}
+  const newBatch=!prev||prev.pullDate!==m.pullDate;
+  const chg=f=>(prev&&prev.counts&&prev.counts[f])?(m.counts[f]-prev.counts[f])/prev.counts[f]*100:null;
+  const sudden=!newBatch&&rows.some(([k,f])=>{const c=chg(f);return c!=null&&Math.abs(c)>20;});
+  if(newBatch){ try{ localStorage.setItem('tdz_counts',JSON.stringify({pullDate:m.pullDate,counts:m.counts})); }catch(e){} }
+  const stale=ageH>26;
+  el.innerHTML='<b style="color:var(--txt)">M6.4 时效</b>'
+    +'<span class="'+(stale?'bad':'')+'">同步 '+m.pullDate+' '+String(syncT.getHours()).padStart(2,'0')+':'+String(syncT.getMinutes()).padStart(2,'0')+'（'+ageH.toFixed(1)+'h 前'+(stale?' · 超26h未更新':'')+'）</span>'
+    +rows.map(([k,f])=>{const c=newBatch?null:chg(f);
+      return '<span class="'+(c!=null&&Math.abs(c)>20?'bad':'')+'">'+k+' '+m.counts[f].toLocaleString()+(c!=null&&c!==0?' ('+(c>0?'+':'')+c.toFixed(1)+'%)':'')+'</span>';}).join('')
+    +'<button id="freshStats">使用统计(本设备)</button>'
+    +(stale||sudden?'<span class="bad">告警：'+(stale?'超26h未更新':'行数骤变>20%')+' · 每日09:00批次失败自动重试3次/间隔10分钟</span>':'');
+  document.getElementById('freshStats').onclick=statsModal;
+  if(stale||sudden){ const b=document.getElementById('banner'); b.style.display='block'; b.textContent='数据时效告警：'+(stale?'超过26h未更新':'行数骤变>20%')+' · 上次成功同步 '+m.pullDate+'（当前展示上次成功口径）'; }
+}
+
+/* ============ 时间窗 & 六态 ============ */
+function winRange(){
+  if(S.winS && S.winE) return [dparse(S.winS), dparse(S.winE)];
+  return [TODAY, addDays(TODAY, S.W)];
+}
+const mCache = new Map();
+function metrics(c){
+  const [t1,t2] = winRange();
+  const key = c.scenic ? 's'+c.pi+'_'+c.ci+'_'+c.di+'_'+c.bi : c.pi+'_'+c.ci+'_'+c.ai+'_'+c.hi;
+  const ck = key+'@'+iso(t1)+'_'+iso(t2);
+  if(mCache.has(ck)) return mCache.get(ck);
+  let occDays=0, active=false, expiring=false, conflict=false; const iv=[];
+  for(const w of c.wins){
+    const ds=dparse(w[0]), de=dparse(w[1]);
+    if(w[2]==='PERFORMANCING' && ds<=TODAY && de>=TODAY) active=true;
+    if(active && de>=TODAY && de<=t2) expiring=true;
+    const a=Math.max(ds.getTime(),t1.getTime()), b=Math.min(de.getTime(),t2.getTime());
+    if(b>=a) iv.push([a,b]);
+  }
+  iv.sort((x,y)=>x[0]-y[0]);
+  let cur=null;
+  for(const [a,b] of iv){ if(!cur) cur=[a,b]; else if(a<=cur[1]) cur[1]=Math.max(cur[1],b); else { occDays+=(cur[1]-cur[0])/DAY+1; cur=[a,b]; } }
+  if(cur) occDays+=(cur[1]-cur[0])/DAY+1;
+  const Wd=Math.round((t2-t1)/DAY)+1;
+  const freeDays=Wd-occDays;
+  const state = occDays===0?'free':freeDays<=0?'full':expiring?'expiring':'partial';
+  const act=c.wins.filter(w=>w[2]!=='COMPLETED').map(w=>[dparse(w[0]).getTime(),dparse(w[1]).getTime()]).sort((x,y)=>x[0]-y[0]);
+  for(let i=1;i<act.length;i++) if(act[i][0]<=act[i-1][1]) conflict=true;
+  // 最早可上刊日：窗内第一个未被占日
+  let earliest=null;
+  if(freeDays>0){
+    const covered=new Set();
+    for(const [a,b] of iv){ for(let t=a;t<=b;t+=DAY) covered.add(t); }
+    for(let t=t1.getTime();t<=t2.getTime();t+=DAY){ if(!covered.has(t)){ earliest=new Date(t); break; } }
+  }
+  // 需求热度（询量权重0，决策#10①）：近180天已完成单
+  const deals=c.wins.filter(w=>w[2]==='COMPLETED' && dparse(w[1])>=addDays(TODAY,-180) && dparse(w[1])<=TODAY);
+  const lastDeal=deals.length?deals.map(w=>w[1]).sort().pop():null;
+  const since=lastDeal?Math.round((TODAY-dparse(lastDeal))/DAY):999;
+  const heat=Math.round(40*Math.min(1,deals.length/5)+30*Math.max(0,1-since/180));
+  const m={occDays,freeDays,state,active,expiring,conflict,earliest,deals:deals.length,lastDeal,heat,Wd,value:Math.round((c.list||0)/30*freeDays)};
+  mCache.set(ck,m); return m;
+}
+function cellPath(c){ return c.scenic ? SCENIC.dicts.buckets[c.bi] : SHARDS[IDX.dicts.lines[c.li]].dicts.paths[c.hi]; }
+function cellCity(c){ return IDX.dicts.cities[c.ci]; }
+function cellArea(c){ if(c.scenic) return SCENIC.dicts.districts[c.di]; const sh=SHARDS[IDX.dicts.lines[c.li]]; return c.ai<0?cellCity(c):sh.dicts.areas[c.ai]; }
+function cellPlan(c){ return c.scenic ? SCENIC.dicts.plans[c.pi] : IDX.dicts.plans[c.pi]; }
+function cellLine(c){ return c.scenic ? '景区' : IDX.dicts.lines[c.li]; }
+function cellCodeless(c){ return c.scenic ? SCENIC.dicts.buckets[c.bi] : cellPath(c); }
+// 景区 POI 计数：区县级格取区县聚合，城市级格（adcode_chn=城市名）取全市 rollup
+function poiOf(c){ if(!c.scenic) return 0; return cellArea(c)===cellCity(c) ? (POIC[c.ci+'|'+c.bi]||0) : (POI[c.ci+'|'+c.di+'|'+c.bi]||0); }
+function poiCitySum(ci){ let s=0; for(const k in POIC){ if(k.startsWith(ci+'|')) s+=POIC[k]; } return s; }
+
+/* ============ 释放口径（M4 释放专区 / M5 日历共用） ============ */
+// 到期日 = 当前在投(PERFORMANCING)单的最早结束日（今天之后）
+function expiryOf(c){
+  if('_exp' in c) return c._exp;
+  let best=null;
+  for(const w of c.wins){
+    if(w[2]!=='PERFORMANCING') continue;
+    const ds=dparse(w[0]), de=dparse(w[1]);
+    if(ds<=TODAY && de>=TODAY && (!best||de<best)) best=de;
+  }
+  c._exp=best; return best;
+}
+// [a,b] 闭区间内空闲天（占用并集补集）
+function freeDaysIn(c,a,b){
+  if(b<a) return 0;
+  const iv=[];
+  for(const w of c.wins){ const x=Math.max(dparse(w[0]).getTime(),a.getTime()), y=Math.min(dparse(w[1]).getTime(),b.getTime()); if(y>=x) iv.push([x,y]); }
+  iv.sort((x,y)=>x[0]-y[0]); let cur=null, occ=0;
+  for(const [x,y] of iv){ if(!cur)cur=[x,y]; else if(x<=cur[1])cur[1]=Math.max(cur[1],y); else {occ+=(cur[1]-cur[0])/DAY+1;cur=[x,y];} }
+  if(cur)occ+=(cur[1]-cur[0])/DAY+1;
+  return Math.round((b-a)/DAY)+1-occ;
+}
+// 释放价值 = 到期次日至当前窗末的空闲天 × 日均刊例（刊例口径，PRD 缺口#10）
+function releaseInfo(c){
+  const exp=expiryOf(c); if(!exp) return null;
+  const [w1,w2]=winRange();
+  const a=new Date(Math.max(exp.getTime()+DAY,w1.getTime()));
+  const days=a<=w2?freeDaysIn(c,a,w2):0;
+  return {exp,days,value:Math.round((c.list||0)/30*days)};
+}
+// 服务商覆盖判断（带缓存，机会榜筛选/服务商榜共用）
+const coversCache=new Map();
+function coversProv(p,c){
+  const path=cellPath(c);
+  const key=p.id+'|'+path;
+  if(coversCache.has(key)) return coversCache.get(key);
+  const r=covers(p,path);
+  coversCache.set(key,r); return r;
+}
+
+/* ============ 分享链接（hash 参数，M4.6） ============ */
+function parseHash(){
+  const h=location.hash.replace(/^#/,''); if(!h) return;
+  const q=new URLSearchParams(h);
+  const num=(k,d)=>q.has(k)?+q.get(k):d;
+  if(q.has('ln')) S.line=Math.min(IDX.dicts.lines.length-1,Math.max(0,num('ln',0)));
+  if(q.has('pl')){ const v=q.get('pl'); S.plan=(v==='all'||v==='scenic')?v:Math.min(2,Math.max(0,+v)); }
+  if(q.has('w')) S.W=[30,60,90].includes(num('w',30))?num('w',30):30;
+  if(q.has('ws')&&q.has('we')){ S.winS=q.get('ws'); S.winE=q.get('we'); }
+  if(q.has('pv')) S.prov=num('pv',-1);
+  if(q.has('ct')) S.city=num('ct',-1);
+  if(q.has('cat')) S.cat=q.get('cat');
+  if(q.has('v')&&['map','city','gantt','matrix','opp','cal','prov','dict'].includes(q.get('v'))) S.view=q.get('v');
+  if(q.has('os')&&['sell','free','expiring'].includes(q.get('os'))) S.oppState=q.get('os');
+  if(q.has('ot')) S.oppTab=num('ot',0)?1:0;
+  if(q.has('ov')) S.oppMinVal=Math.max(0,num('ov',0));
+  if(q.has('oh')) S.oppMinHeat=Math.max(0,num('oh',0));
+  if(q.has('sp')) S.oppSp=q.get('sp');
+  if(q.has('sk')) S.oppSort={key:q.get('sk'),dir:num('sd',-1)===1?1:-1};
+  mCache.clear();
+}
+function shareURL(){
+  const q=new URLSearchParams();
+  q.set('v',S.view); q.set('ln',S.line); q.set('pl',S.plan);
+  if(S.winS){ q.set('ws',S.winS); q.set('we',S.winE); } else q.set('w',S.W);
+  if(S.prov>=0) q.set('pv',S.prov);
+  if(S.city>=0) q.set('ct',S.city);
+  if(S.cat) q.set('cat',S.cat);
+  if(S.view==='opp'){
+    q.set('os',S.oppState); q.set('ot',S.oppTab);
+    if(S.oppMinVal) q.set('ov',S.oppMinVal);
+    if(S.oppMinHeat) q.set('oh',S.oppMinHeat);
+    if(S.oppSp) q.set('sp',S.oppSp);
+    q.set('sk',S.oppSort.key); q.set('sd',S.oppSort.dir);
+  }
+  history.replaceState(null,'','#'+q.toString());
+  return location.origin+location.pathname+'#'+q.toString();
+}
+
+/* ============ 过滤 ============ */
+function filteredCells(){
+  const isScenic = S.plan==='scenic';
+  let arr = isScenic ? SCELLS : CELLS;
+  if(!isScenic){
+    arr = arr.filter(c=>c.li===S.line);
+    if(S.plan!=='all') arr = arr.filter(c=>IDX.dicts.plans[c.pi]===CFG.planNames[S.plan]);
+  }
+  if(S.prov>=0) arr = arr.filter(c=>IDX.cityProv[c.ci]===S.prov);
+  if(S.city>=0) arr = arr.filter(c=>c.ci===S.city);
+  if(S.cat){ const q=S.cat.toLowerCase(); arr = arr.filter(c=>cellPath(c).toLowerCase().includes(q)); }
+  if(S.onlyFree||S.onlyOcc){
+    const byCity=new Map();
+    for(const c of arr){ const m=metrics(c); const o=byCity.get(c.ci)||{occ:0,n:0}; o.n++; if(m.occDays>0)o.occ++; byCity.set(c.ci,o); }
+    arr = arr.filter(c=>{ const o=byCity.get(c.ci); return S.onlyFree ? o.occ===0 : o.occ>0; });
+  }
+  return arr;
+}
+
+/* ============ 高优作业服务商（决策#12 / M4.8，移植 m0/recommend.js） ============ */
+const recCache=new Map();
+function covers(p, path){
+  if(p.cat==='all') return true;
+  return (p.cat||[]).some(t=>t.name && (path===t.name || path.startsWith(t.name+';') || (';'+path+';').includes(';'+t.name+';')));
+}
+function recommend(c){
+  const path=cellPath(c), ci=c.ci;
+  const ck=(c.scenic?'s':'')+ci+'|'+path;
+  if(recCache.has(ck)) return recCache.get(ck);
+  const lines = c.scenic ? CFG.recommend.lineMatch.scenic : (CFG.recommend.lineMatch[IDX.dicts.lines[c.li]]||[]);
+  const w=CFG.recommend.weights; const list=[];
+  for(const p of PROV.providers){
+    if(!lines.includes(p.line)) continue;
+    if(!(p.cities||[]).includes(ci)) continue;
+    if(!covers(p,path)) continue;
+    const scope=(p.scope==='national' && (p.first||[]).includes(ci))?'city':p.scope;
+    let s=0; const badges=[];
+    if(scope==='city'){s+=w.city;badges.push('本地包城');}
+    else if(scope==='province'){s+=w.province;badges.push('本省');}
+    else if(scope==='national'){s+=w.national;badges.push('全国');}
+    if(p.cat!=='all'){s+=w.specificCat;badges.push('类目专精');}
+    if((p.first||[]).includes(ci)){s+=w.firstOpen;badges.push('首开城');}
+    if(p.core){s+=w.coreTier;badges.push('核心城');}
+    if(p.t12){s+=w.is12;badges.push('12城');}
+    list.push({name:p.name,score:s,badges});
+  }
+  list.sort((a,b)=>b.score-a.score||a.name.localeCompare(b.name,'zh'));
+  const r={total:list.length,top:list.slice(0,CFG.recommend.topN),all:list};
+  recCache.set(ck,r); return r;
+}
+function hintHTML(c){
+  const m=metrics(c);
+  if(m.freeDays<=0) return '<span style="color:var(--gray)">窗内无空位</span>';
+  const r=recommend(c);
+  if(!r.total) return '<span style="color:var(--gray)">无匹配服务商</span>';
+  const t=r.top[0];
+  return '<b>'+t.name+'</b><span class="bd">'+t.badges.join('·')+'</span> 等'+r.total+'家 <button data-rec="'+(c.scenic?'s':'')+c.ci+'|'+cellPath(c).replace(/"/g,'')+'">展开</button>';
+}
+
+/* ============ 控件 ============ */
+function buildControls(){
+  const sl=document.getElementById('segLine');
+  sl.innerHTML=IDX.dicts.lines.map((l,i)=>'<button data-i="'+i+'"'+(i===S.line?' class="on"':'')+'>'+l+'</button>').join('');
+  sl.onclick=e=>{ const b=e.target.closest('button'); if(!b)return; S.line=+b.dataset.i; S.city=-1; S.cellKey=null; buildControls(); render(); };
+  const sp=document.getElementById('segPlan');
+  sp.innerHTML='<button data-p="all"'+(S.plan==='all'?' class="on"':'')+'>全部</button>'+CFG.planLabels.map((l,i)=>'<button data-p="'+i+'"'+(S.plan===i?' class="on"':'')+'>'+l+'</button>').join('')+'<button data-p="scenic"'+(S.plan==='scenic'?' class="on"':'')+'>景区钻展</button>';
+  sp.onclick=e=>{ const b=e.target.closest('button'); if(!b)return; const p=b.dataset.p; S.plan=(p==='all'||p==='scenic')?p:+p; S.city=-1; S.cellKey=null; buildControls(); render(); };
+  const sw=document.getElementById('segWin');
+  sw.innerHTML=[30,60,90].map(d=>'<button data-w="'+d+'"'+(S.W===d&&!S.winS?' class="on"':'')+'>D+'+d+'</button>').join('')+'<button data-w="custom"'+(S.winS?' class="on"':'')+'>自定义</button>';
+  sw.onclick=e=>{ const b=e.target.closest('button'); if(!b)return;
+    if(b.dataset.w==='custom'){ document.getElementById('winS').style.display=''; document.getElementById('winE').style.display='';
+      if(!S.winS){ S.winS=iso(TODAY); S.winE=iso(addDays(TODAY,30)); document.getElementById('winS').value=S.winS; document.getElementById('winE').value=S.winE; } }
+    else { S.W=+b.dataset.w; S.winS=S.winE=null; document.getElementById('winS').style.display='none'; document.getElementById('winE').style.display='none'; }
+    mCache.clear(); buildControls(); render(); };
+  document.getElementById('winS').onchange=e=>{ S.winS=e.target.value; mCache.clear(); render(); };
+  document.getElementById('winE').onchange=e=>{ S.winE=e.target.value; mCache.clear(); render(); };
+  // 统计月份：数据中出现过的月份（近12个月优先）
+  const months=[...new Set(IDX.revNew.map(r=>r[3]))].sort();
+  const sm=document.getElementById('selMonth');
+  sm.innerHTML=months.map(m=>'<option'+(m===S.month?' selected':'')+'>'+m+'</option>').join('');
+  sm.onchange=e=>{ S.month=e.target.value; render(); };
+  // 省/市
+  const spv=document.getElementById('selProv');
+  spv.innerHTML='<option value="-1">全国</option>'+IDX.dicts.provinces.map((p,i)=>'<option value="'+i+'"'+(i===S.prov?' selected':'')+'>'+p+'</option>').join('');
+  spv.onchange=e=>{ S.prov=+e.target.value; S.city=-1; buildControls(); render(); };
+  const scy=document.getElementById('selCity');
+  const cityList=IDX.dicts.cities.map((c,i)=>[c,i]).filter(([c,i])=>S.prov<0||IDX.cityProv[i]===S.prov);
+  scy.innerHTML='<option value="-1">全部城市</option>'+cityList.map(([c,i])=>'<option value="'+i+'"'+(i===S.city?' selected':'')+'>'+c+'</option>').join('');
+  scy.onchange=e=>{ S.city=+e.target.value; render(); };
+  document.getElementById('inpCat').value=S.cat;
+  document.getElementById('inpCat').oninput=e=>{ S.cat=e.target.value.trim(); render(); };
+  document.getElementById('ckFree').checked=S.onlyFree; document.getElementById('ckOcc').checked=S.onlyOcc;
+  document.getElementById('ckFree').onchange=e=>{ S.onlyFree=e.target.checked; if(S.onlyFree)S.onlyOcc=false; buildControls(); render(); };
+  document.getElementById('ckOcc').onchange=e=>{ S.onlyOcc=e.target.checked; if(S.onlyOcc)S.onlyFree=false; buildControls(); render(); };
+  document.getElementById('btnReset').onclick=()=>{ Object.assign(S,{prov:-1,city:-1,cat:'',onlyFree:false,onlyOcc:false,cellKey:null}); buildControls(); render(); };
+  document.getElementById('segRank').onclick=e=>{ const b=e.target.closest('button'); if(!b)return; S.rankLevel=b.dataset.l; [...document.getElementById('segRank').children].forEach(x=>x.classList.toggle('on',x===b)); renderRank(filteredCells()); };
+  document.getElementById('selMetric').innerHTML = S.plan==='scenic'
+    ? '<option value="occ">已售单数（默认）</option><option value="rate">占量率</option>'
+    : '<option value="occ">已售单数（默认）</option><option value="occval">已售刊例价值</option><option value="rate">占量率</option><option value="value">空白刊例价值（机会热力）</option>';
+  if(S.plan==='scenic'&&(S.metric==='occval'||S.metric==='value')) S.metric='occ';
+  document.getElementById('selBubble').innerHTML = S.plan==='scenic'
+    ? '<option value="poi">气泡=POI 数</option><option value="off">关闭气泡</option>'
+    : '<option value="value">气泡=空白价值</option><option value="free">气泡=空白格数</option><option value="off">关闭气泡</option>';
+  if(S.plan==='scenic'&&S.bubble!=='off') S.bubble='poi';
+  if(S.plan!=='scenic'&&S.bubble==='poi') S.bubble='value';
+  document.getElementById('selMetric').value=S.metric;
+  document.getElementById('selMetric').onchange=e=>{ S.metric=e.target.value; renderMap(filteredCells()); };
+  document.getElementById('selBubble').value=S.bubble;
+  document.getElementById('selBubble').onchange=e=>{ S.bubble=e.target.value; renderMap(filteredCells()); };
+  document.getElementById('segMapMode').onclick=e=>{ const b=e.target.closest('button'); if(!b)return; S.mapMode=b.dataset.m; renderMap(filteredCells()); };
+  document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{ S.view=b.dataset.view; render(); });
+}
+
+/* ============ 渲染主入口 ============ */
+function render(){
+  if(lastView!==S.view){ if(lastView) track('leave',{view:lastView,ms:Date.now()-viewSince}); track('enter',{view:S.view}); lastView=S.view; viewSince=Date.now(); }
+  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.view===S.view));
+  document.getElementById('navCity').style.display = S.city>=0?'':'none';
+  document.getElementById('navGantt').style.display = S.cellKey?'':'none';
+  ['map','city','gantt','matrix','opp','cal','prov','dict'].forEach(v=>document.getElementById('view'+v[0].toUpperCase()+v.slice(1)).style.display = S.view===v?'':'none');
+  const arr=filteredCells();
+  // 面包屑
+  const cr=document.getElementById('crumb');
+  let html='<button data-cr="root">全国</button>';
+  if(S.prov>=0) html+=' › <button data-cr="prov">'+IDX.dicts.provinces[S.prov]+'</button>';
+  if(S.city>=0) html+=' › <button data-cr="city">'+IDX.dicts.cities[S.city]+'</button>';
+  if(S.cellKey&&S.view==='gantt') html+=' › <span>单格甘特</span>';
+  html+=' <span style="margin-left:8px;color:var(--sub)">当前窗 '+iso(winRange()[0])+' ~ '+iso(winRange()[1])+' · '+(S.plan==='scenic'?'景区钻展（类目桶粒度，不展示金额）':(S.plan==='all'?'全部方案':CFG.planLabels[S.plan]))+' · '+cellLineLabel()+'</span>';
+  cr.innerHTML=html;
+  cr.onclick=e=>{ const b=e.target.closest('button'); if(!b)return;
+    if(b.dataset.cr==='root'){S.prov=-1;S.city=-1;S.cellKey=null;S.view='map';}
+    if(b.dataset.cr==='prov'){S.city=-1;S.cellKey=null;S.view='map';}
+    if(b.dataset.cr==='city'){S.cellKey=null;S.view='city';}
+    render(); };
+  document.getElementById('filterNote').textContent='当前筛选 '+arr.length.toLocaleString()+' 格';
+  // 下拉/分段与状态同步（不重建控件，避免输入失焦）
+  document.getElementById('selProv').value=S.prov;
+  document.getElementById('selCity').value=S.city;
+  document.getElementById('selMonth').value=S.month;
+  document.querySelectorAll('#segLine button').forEach(b=>b.classList.toggle('on',+b.dataset.i===S.line));
+  document.querySelectorAll('#segPlan button').forEach(b=>b.classList.toggle('on',String(S.plan)===b.dataset.p));
+  document.querySelectorAll('#segWin button').forEach(b=>b.classList.toggle('on',S.winS?b.dataset.w==='custom':+b.dataset.w===S.W));
+  document.querySelectorAll('#segMapMode button').forEach(b=>b.classList.toggle('on',b.dataset.m===S.mapMode));
+  if(S.view==='map'){ renderKPIs(arr); renderMap(arr); renderRank(arr); renderTrend(); }
+  if(S.view==='city') renderCity(arr);
+  if(S.view==='gantt') renderGantt();
+  if(S.view==='matrix') renderMatrix(arr);
+  if(S.view==='opp') renderOpp(arr);
+  if(S.view==='cal') renderCal(arr);
+  if(S.view==='prov') renderProvBoard();
+  if(S.view==='dict') renderDict();
+  renderFresh();
+  renderFooter();
+}
+function cellLineLabel(){ return S.plan==='scenic'?'景区（文旅+美食牌照）':IDX.dicts.lines[S.line]; }
+
+/* ============ KPI ============ */
+function revFiltered(month){
+  let amt=0,cnt=0;
+  const citySet=new Set(filteredCells().map(c=>c.ci));
+  for(const r of IDX.revNew){
+    if(r[3]!==month) continue;
+    if(S.plan==='scenic') continue;
+    if(r[1]!==S.line) continue;
+    if(S.plan!=='all' && IDX.dicts.plans[r[2]]!==CFG.planNames[S.plan]) continue;
+    if(!citySet.has(r[0])) continue;
+    amt+=r[4]; cnt+=r[5];
+  }
+  return {amt,cnt};
+}
+function spark(vals,color){
+  if(!vals.length||Math.max(...vals)===0) return '';
+  const w=64,h=22,mx=Math.max(...vals);
+  const pts=vals.map((v,i)=>(i/(vals.length-1||1)*w).toFixed(1)+','+(h-v/mx*(h-2)).toFixed(1)).join(' ');
+  return '<svg width="'+w+'" height="'+h+'"><polyline points="'+pts+'" fill="none" stroke="'+color+'" stroke-width="1.5"/></svg>';
+}
+function renderKPIs(arr){
+  const ms=arr.map(c=>metrics(c));
+  const n=arr.length, occ=ms.filter(m=>m.occDays>0).length, free=ms.filter(m=>m.freeDays>0).length;
+  const full=ms.filter(m=>m.state==='full').length;
+  const value=ms.reduce((s,m,i)=>s+(arr[i].list||0)/30*m.freeDays,0);
+  const pure=arr.reduce((s,c,i)=>s+(ms[i].state==='free'?(c.list||0)/30*ms[i].Wd:0),0);
+  const citiesOcc=new Set(arr.filter((c,i)=>ms[i].occDays>0).map(c=>c.ci)).size;
+  const rev=revFiltered(S.month);
+  const months=[...new Set(IDX.revNew.map(r=>r[3]))].sort();
+  const mi=months.indexOf(S.month);
+  const prev=mi>0?revFiltered(months[mi-1]):{amt:0,cnt:0};
+  const series=months.slice(Math.max(0,mi-5),mi+1).map(m=>revFiltered(m).amt);
+  const mom=prev.amt>0?((rev.amt-prev.amt)/prev.amt*100):null;
+  const cards=[
+    {lbl:'总可售格子',val:n.toLocaleString(),unit:'格',note:'分母 T+1 动态',color:'var(--accent)'},
+    {lbl:'窗内已占',val:occ.toLocaleString(),unit:'格',note:'含部分占用',color:'var(--blue)'},
+    {lbl:'剩余可售',val:free.toLocaleString(),unit:'格',note:'全窗占满 '+full.toLocaleString(),color:'var(--accent)'},
+    {lbl:'整体占率',val:(n?(occ/n*100):0).toFixed(1),unit:'%',note:'窗内口径',color:'var(--gold)'},
+    {lbl:'有占量城市',val:citiesOcc,unit:'城',note:'当前筛选范围',color:'var(--blue)'},
+    {lbl:'空白刊例价值',val:fmtMoney(value),unit:'',note:'窗内空闲天×日均刊例',color:'var(--gold)'},
+    {lbl:'营收 '+S.month,val:fmtMoney(rev.amt),unit:'',note:'新签 '+rev.cnt+' 笔 · 刊例口径'+(mom!=null?' · <span class="'+(mom>=0?'up':'down')+'">'+(mom>=0?'↑':'↓')+Math.abs(mom).toFixed(0)+'%</span>':''),color:'var(--accent)',svg:spark(series,'#35d0ba')},
+    {lbl:'增量空间',val:fmtMoney(pure),unit:'',note:'纯空白格整窗刊例',color:'var(--purple)'}
+  ];
+  document.getElementById('kpis').innerHTML=cards.map(c=>'<div class="kpi" style="border-top-color:'+c.color+'"><div class="lbl"><span>'+c.lbl+'</span></div><div class="val">'+c.val+'<small>'+c.unit+'</small></div><div class="subnote">'+c.note+'</div>'+(c.svg||'')+'</div>').join('');
+}
+
+/* ============ 地图 ============ */
+let mapChart=null, trendChart=null;
+function aggBy(arr,level){
+  const m=new Map();
+  for(const c of arr){
+    const k=level==='prov'?IDX.cityProv[c.ci]:c.ci;
+    if(k<0) continue;
+    const o=m.get(k)||{cells:0,occ:0,value:0,occval:0,free:0};
+    const mm=metrics(c);
+    o.cells++; if(mm.occDays>0)o.occ++;
+    o.value+=(c.list||0)/30*mm.freeDays;
+    o.occval+=(c.list||0)/30*mm.occDays;
+    if(mm.state==='free')o.free++;
+    m.set(k,o);
+  }
+  return m;
+}
+function renderMap(arr){
+  const th=theme();
+  const mapEl=document.getElementById('map'), listEl=document.getElementById('mapList');
+  // M10.4 地图↔城市卡片列表（移动端默认列表）
+  if(S.mapMode==='list'){
+    mapEl.style.display='none'; listEl.style.display='';
+    const city=aggBy(arr,'city');
+    const rows=[...city.entries()].map(([ci,o])=>({ci,o})).sort((a,b)=>b.o.value-a.o.value);
+    listEl.innerHTML=rows.map(r=>{
+      const rate=r.o.cells?r.o.occ/r.o.cells*100:0;
+      return '<div class="ccard" data-ci="'+r.ci+'"><b>'+IDX.dicts.cities[r.ci]+'</b> <span style="color:var(--sub);font-size:10px">'+IDX.dicts.provinces[IDX.cityProv[r.ci]]+'</span><div class="pb"><i style="width:'+rate.toFixed(1)+'%"></i></div><div class="kv"><span>可售 '+r.o.cells.toLocaleString()+' · 占率 '+rate.toFixed(1)+'%</span><b class="money">'+fmtMoney(r.o.value)+'</b></div></div>';
+    }).join('')||'<div class="empty">当前筛选无数据，请放宽条件</div>';
+    listEl.onclick=e=>{ const cd=e.target.closest('.ccard'); if(!cd)return; S.city=+cd.dataset.ci; S.view='city'; S.cityTab=0; render(); };
+    document.getElementById('mapHint').textContent='列表模式 · 按空白价值倒序 · 点击卡片进城市详情';
+    document.getElementById('coverCount').textContent='已覆盖 '+[...aggBy(arr,'prov').values()].filter(o=>o.cells>0).length+'/'+IDX.dicts.provinces.length+' 省级行政区';
+    return;
+  }
+  mapEl.style.display=''; listEl.style.display='none';
+  if(!mapChart){ mapChart=echarts.init(mapEl); echarts.registerMap('china',window.CHINA_GEO);
+    mapChart.on('click',p=>{
+      if(p.componentType==='series'&&p.seriesType==='map'){ const pi=IDX.dicts.provinces.indexOf(p.name); if(pi>=0){ S.prov=pi; S.city=-1; buildControls(); render(); } }
+      if(p.componentType==='series'&&p.seriesType==='scatter'){ const ci=IDX.dicts.cities.indexOf(p.name); if(ci>=0){ S.city=ci; S.view='city'; S.cityTab=0; render(); } }
+    });
+    window.addEventListener('resize',()=>{ mapChart&&mapChart.resize(); trendChart&&trendChart.resize(); });
+  }
+  const prov=aggBy(arr,'prov'), city=aggBy(arr,'city');
+  const metricVal=o=>S.metric==='occ'?o.occ:S.metric==='occval'?Math.round(o.occval):S.metric==='rate'?(o.cells?+(o.occ/o.cells*100).toFixed(1):0):Math.round(o.value);
+  const provData=IDX.dicts.provinces.map((p,i)=>({name:p,value:metricVal(prov.get(i)||{cells:0,occ:0,value:0,occval:0})}));
+  const mx=Math.max(1,...provData.map(d=>d.value));
+  const bubbleData=[];
+  if(S.bubble!=='off'){
+    for(const [ci,o] of city){
+      const name=IDX.dicts.cities[ci]; const co=window.CITY_COORDS[name]; if(!co) continue;
+      const rate=o.cells?o.occ/o.cells:0;
+      const bv=S.bubble==='poi'?poiCitySum(ci):S.bubble==='value'?Math.round(o.value):o.free;
+      bubbleData.push({name,value:[co[0],co[1],bv],
+        itemStyle:{color:rate<0.05?'#35d0ba':rate<0.2?'#f5c451':'#ff6b6b'}, _o:o, _rate:rate});
+    }
+  }
+  const bmx=Math.max(1,...bubbleData.map(d=>d.value[2]));
+  document.getElementById('mapHint').textContent='指标='+document.getElementById('selMetric').selectedOptions[0].text;
+  document.getElementById('coverCount').textContent='已覆盖 '+[...prov.values()].filter(o=>o.cells>0).length+'/'+IDX.dicts.provinces.length+' 省级行政区';
+  mapChart.resize();
+  mapChart.setOption({
+    backgroundColor:'transparent',
+    tooltip:{trigger:'item',backgroundColor:th.panel,borderColor:th.line,textStyle:{color:th.txt,fontSize:12},
+      formatter:p=>{
+        if(p.seriesType==='map'){ const o=prov.get(IDX.dicts.provinces.indexOf(p.name))||{cells:0,occ:0,value:0};
+          return '<b>'+p.name+'</b><br>可售格 '+o.cells.toLocaleString()+' · 已占 '+o.occ.toLocaleString()+'<br>占率 '+(o.cells?(o.occ/o.cells*100).toFixed(1):0)+'% · 空白价值 '+fmtMoney(o.value)+'<br><span style="color:'+th.sub+'">点击下钻该省</span>'; }
+        const o=p.data._o; const ci=IDX.dicts.cities.indexOf(p.name);
+        const tops=arr.filter(c=>c.ci===ci&&metrics(c).state==='free').sort((a,b)=>(b.list||0)-(a.list||0)).slice(0,3).map(c=>cellPath(c).split(';').pop());
+        return '<b>'+p.name+'</b>（'+IDX.dicts.provinces[IDX.cityProv[ci]]+'）<br>可售格 '+o.cells.toLocaleString()+' · 已占 '+o.occ.toLocaleString()+' · 占率 '+(p.data._rate*100).toFixed(1)+'%<br>空白价值 '+fmtMoney(o.value)+'<br>TOP3 空白类目：'+(tops.join('、')||'无')+'<br><span style="color:'+th.sub+'">点击进城市详情</span>';
+      }},
+    visualMap:{min:0,max:mx,calculable:true,orient:'vertical',left:8,bottom:24,itemHeight:90,textStyle:{color:th.sub,fontSize:10},
+      inRange:{color:th.vm},show:S.metric!=='rate'},
+    geo:{map:'china',roam:true,zoom:1.18,layoutCenter:['50%','52%'],layoutSize:'96%',itemStyle:{areaColor:th.mapArea,borderColor:th.mapBorder},emphasis:{itemStyle:{areaColor:th.mapHi},label:{show:false}},select:{disabled:true}},
+    series:[
+      {type:'map',map:'china',geoIndex:0,data:provData},
+      {type:'scatter',coordinateSystem:'geo',data:bubbleData,symbolSize:v=>6+Math.sqrt(v[2]/bmx)*26,
+        emphasis:{scale:1.4},zlevel:2}
+    ]
+  },true);
+}
+function renderRank(arr){
+  const level=S.rankLevel;
+  const m=aggBy(arr,level);
+  const rows=[...m.entries()].map(([k,o])=>({name:level==='prov'?IDX.dicts.provinces[k]:IDX.dicts.cities[k],k,o}))
+    .sort((a,b)=>b.o.value-a.o.value).slice(0,12);
+  const total=[...m.values()].reduce((s,o)=>s+o.value,0);
+  document.getElementById('rankTotal').textContent='全国合计空白刊例价值 '+fmtMoney(total);
+  document.getElementById('rank').innerHTML=rows.map((r,i)=>{
+    const cov=r.o.cells?r.o.occ/r.o.cells*100:0;
+    return '<div class="row" data-k="'+r.k+'"><span class="no">'+(i+1)+'</span><span class="nm"><b>'+r.name+'</b><span class="pb"><i style="width:'+cov.toFixed(1)+'%"></i></span></span><span class="vv"><b>'+fmtMoney(r.o.value)+'</b>已售 '+r.o.occ+'/'+r.o.cells+' · '+cov.toFixed(0)+'%</span></div>';
+  }).join('')||'<div class="empty">当前筛选无数据</div>';
+  document.getElementById('rank').onclick=e=>{ const row=e.target.closest('.row'); if(!row)return; const k=+row.dataset.k;
+    if(level==='prov'){ S.prov=k; S.city=-1; buildControls(); render(); } else { S.city=k; S.view='city'; render(); } };
+}
+function renderTrend(){
+  if(!trendChart) trendChart=echarts.init(document.getElementById('trend'));
+  const th=theme();
+  const months=[...new Set(IDX.revNew.map(r=>r[3]))].sort();
+  const mi=months.indexOf(S.month);
+  const show=months.slice(Math.max(0,mi-11),mi+1);
+  const vals=show.map(m=>revFiltered(m).amt);
+  const startAll=months[0];
+  let cum=0; const cumAll={};
+  for(const m of months){ cum+=revFiltered(m).amt; cumAll[m]=cum; }
+  const cums=show.map(m=>cumAll[m]);
+  const peak=Math.max(...vals);
+  trendChart.setOption({
+    backgroundColor:'transparent',
+    tooltip:{trigger:'axis',backgroundColor:th.panel,borderColor:th.line,textStyle:{color:th.txt,fontSize:12}},
+    grid:{left:60,right:60,top:30,bottom:24},
+    xAxis:{type:'category',data:show,axisLabel:{color:th.sub,fontSize:10},axisLine:{lineStyle:{color:th.line}}},
+    yAxis:[{type:'value',axisLabel:{color:th.sub,fontSize:10,formatter:v=>fmtN(v)},splitLine:{lineStyle:{color:th.split}}},
+           {type:'value',axisLabel:{color:th.sub,fontSize:10,formatter:v=>fmtN(v)},splitLine:{show:false}}],
+    series:[
+      {name:'当月新签刊例',type:'bar',data:vals.map((v,i)=>({value:v,itemStyle:{color:show[i]===S.month?'#f5c451':'#35d0ba'}})),barWidth:'46%',
+       label:{show:true,position:'top',color:th.sub,fontSize:9,formatter:p=>p.value===peak&&peak>0?'峰值 '+fmtN(p.value):''}},
+      {name:'自起始月累计',type:'line',yAxisIndex:1,data:cums,smooth:true,symbol:'circle',symbolSize:5,lineStyle:{color:'#4aa3ff',width:2},itemStyle:{color:'#4aa3ff'}}
+    ]
+  },true);
+}
+
+/* ============ 城市详情 ============ */
+function renderCity(arr){
+  const el=document.getElementById('viewCity');
+  if(S.city<0){ el.innerHTML='<div class="empty">请先在地图点击城市气泡，或在筛选条选择城市。</div>'; return; }
+  const city=IDX.dicts.cities[S.city];
+  const ms=arr.map(c=>metrics(c));
+  const occ=ms.filter(m=>m.occDays>0).length, value=ms.reduce((s,m,i)=>s+(arr[i].list||0)/30*m.freeDays,0);
+  const isScenic=S.plan==='scenic';
+  const areas=[...new Set(arr.map(c=>cellArea(c)))];
+  const tabs=['全部明细','未占类目','窗内可售'];
+  let rows=arr.map((c,i)=>({c,m:ms[i]}));
+  if(S.cityTab===1) rows=rows.filter(r=>r.m.state==='free');
+  if(S.cityTab===2) rows=rows.filter(r=>r.m.freeDays>0);
+  if(S.cityQ){ const q=S.cityQ.toLowerCase(); rows=rows.filter(r=>cellPath(r.c).toLowerCase().includes(q)||cellArea(r.c).toLowerCase().includes(q)); }
+  rows.sort((a,b)=>S.cityTab===0?(b.c.list||0)-(a.c.list||0):b.m.value-a.m.value);
+  KBROWS=rows.slice(0,400); S.kbRow=-1; // M10.3 键盘选行
+  const head=isScenic
+    ? '<th>类目桶</th><th>区县</th><th>方案</th><th>状态</th><th>窗内空闲天</th><th>POI 数</th><th>高优作业服务商</th>'
+    : '<th></th><th>类目路径</th><th>区域</th><th>状态</th><th>刊例价/30天</th><th>窗内空闲天</th><th>最早可上刊</th><th>窗内可售价值</th><th>热度</th><th>最近成交</th><th>高优作业服务商</th>';
+  const body=rows.slice(0,400).map((r,i)=>{
+    const c=r.c,m=r.m;
+    const poi=c.scenic?poiOf(c):null;
+    const lv=cellPath(c).split(';').length;
+    return '<tr data-i="'+i+'" class="'+(m.conflict?'sel':'')+'">'
+      +(isScenic?'':'<td><input type="checkbox" data-ck="'+i+'"></td>')
+      +'<td>'+(isScenic?'<b>'+cellPath(c)+'</b>':'<span class="pathlv">'+'　'.repeat(lv-1)+'</span>'+cellPath(c).split(';').pop()+'<div style="color:var(--sub);font-size:10px">'+cellPath(c)+'</div>')+'</td>'
+      +'<td>'+cellArea(c)+'</td>'
+      +(isScenic?'<td>'+cellPlan(c)+'</td>':'')
+      +'<td><span class="st '+m.state+(m.conflict?' conflict':'')+'">'+STATE_LABEL[m.state]+(m.conflict?' ·疑似冲突':'')+'</span></td>'
+      +(isScenic?'':'<td class="money">'+(c.list||0).toLocaleString()+'</td>')
+      +'<td>'+m.freeDays+'/'+m.Wd+'</td>'
+      +(isScenic?'<td>'+poi.toLocaleString()+'</td>':'<td>'+(m.earliest?iso(m.earliest):'—')+'</td><td class="money">'+fmtMoney(m.value)+'</td><td>'+m.heat+'</td><td>'+(m.lastDeal||'—')+'</td>')
+      +'<td class="hintcell">'+hintHTML(c)+'</td></tr>';
+  }).join('');
+  el.innerHTML=
+    '<div class="summary">'
+    +'<div class="it">省·城市<b>'+IDX.dicts.provinces[IDX.cityProv[S.city]]+' · '+city+'</b></div>'
+    +'<div class="it">可售格<b>'+arr.length.toLocaleString()+'</b></div>'
+    +'<div class="it">窗内已占<b>'+occ.toLocaleString()+'</b></div>'
+    +'<div class="it">占率<b>'+(arr.length?(occ/arr.length*100).toFixed(1):0)+'%</b></div>'
+    +'<div class="it">剩余可售<b>'+(arr.length-occ).toLocaleString()+'</b></div>'
+    +(isScenic?'<div class="it">POI 宇宙<b>'+fmtN(arr.reduce((s,c)=>s+poiOf(c),0))+'</b></div><div class="it">金额<b style="color:var(--sub)">景区口径待补</b></div>'
+             :'<div class="it">空白刊例价值<b class="money">'+fmtMoney(value)+'</b></div><div class="it">区域数<b>'+areas.length+'</b></div>')
+    +'</div>'
+    +'<div class="toolbar"><div class="tabs" id="cityTabs">'+tabs.map((t,i)=>'<button data-t="'+i+'"'+(i===S.cityTab?' class="on"':'')+'>'+t+'</button>').join('')+'</div>'
+    +'<input type="text" id="cityQ" placeholder="表内搜索类目/区域" value="'+S.cityQ+'" style="width:180px">'
+    +'<span class="sp"></span>'
+    +(isScenic?'':'<button class="btn" id="btnCsv">导出 CSV</button><button class="btn pri" id="btnCopy">复制派单文案</button>')
+    +'</div>'
+    +'<div class="tblwrap"><table><thead><tr>'+head+'</tr></thead><tbody>'+body+'</tbody></table>'
+    +(rows.length>400?'<div class="empty">仅显示前 400 行（共 '+rows.length.toLocaleString()+' 行），请用搜索/页签收窄</div>':'')
+    +(rows.length?'':'<div class="empty">当前页签/搜索无结果</div>')+'</div>'
+    +(!isScenic&&areas.length>1?areaThumb(arr):'')
+    +'<div style="color:var(--sub);font-size:11px;padding:8px 2px">行点击进单格甘特 · 勾选多行可复制派单文案 · 紫边=疑似冲突（CITY/AREA 重叠仅标注不告警，决策#10②）</div>';
+  document.getElementById('cityTabs').onclick=e=>{ const b=e.target.closest('button'); if(!b)return; S.cityTab=+b.dataset.t; renderCity(arr); };
+  document.getElementById('cityQ').oninput=e=>{ S.cityQ=e.target.value.trim(); const pos=e.target.selectionStart; renderCity(filteredCells()); const ni=document.getElementById('cityQ'); ni.focus(); ni.setSelectionRange(pos,pos); };
+  const tb=el.querySelector('tbody');
+  tb.onclick=e=>{
+    const rec=e.target.closest('button[data-rec]');
+    if(rec){ e.stopPropagation(); showRecModal(rec.dataset.rec); return; }
+    if(e.target.type==='checkbox') return;
+    const tr=e.target.closest('tr'); if(!tr)return;
+    const r=rows[+tr.dataset.i]; openGantt(r.c);
+  };
+  tb.onmouseover=e=>{ const tr=e.target.closest('tr'); if(!tr)return; const r=rows[+tr.dataset.i]; if(!r)return;
+    tr.title='近180天已完成 '+r.m.deals+' 单 · 最近成交 '+(r.m.lastDeal||'无')+' · 热度 '+r.m.heat; };
+  const csv=()=>{
+    const lines=[isScenic?'类目桶,区县,方案,状态,空闲天,POI数':'类目路径,区域,状态,刊例价30天,空闲天,最早可上刊,窗内可售价值,热度,最近成交'];
+    for(const r of rows){ const c=r.c,m=r.m;
+      lines.push(isScenic?[cellPath(c),cellArea(c),cellPlan(c),STATE_LABEL[m.state],m.freeDays,poiOf(c)].join(',')
+        :[ '"'+cellPath(c)+'"',cellArea(c),STATE_LABEL[m.state],c.list||0,m.freeDays,m.earliest?iso(m.earliest):'',m.value,m.heat,m.lastDeal||''].join(',')); }
+    dl('tdz_'+city+'_'+tabs[S.cityTab]+'.csv','﻿'+lines.join('\n'));
+  };
+  const copy=()=>{
+    const sel=[...el.querySelectorAll('input[data-ck]:checked')].map(x=>rows[+x.dataset.ck]);
+    const use=sel.length?sel:rows.slice(0,5);
+    const txt='【顶钻展派单建议 · '+city+' · 窗 '+iso(winRange()[0])+'~'+iso(winRange()[1])+'】\n'+use.map(r=>{
+      const c=r.c,m=r.m; const rec=recommend(c);
+      return '· '+cellPath(c)+'（'+cellArea(c)+'）'+STATE_LABEL[m.state]+'，空闲'+m.freeDays+'天'+(m.earliest?'，最早可上刊 '+iso(m.earliest):'')+(c.scenic?'':'，挂牌 '+fmtMoney(c.list)+'/30天，窗内可售 '+fmtMoney(m.value))+'；高优作业：'+(rec.top.map(t=>t.name+'['+t.badges.join('·')+']').join('、')||'无匹配')+' 等'+rec.total+'家';
+    }).join('\n');
+    navigator.clipboard.writeText(txt).then(()=>{toast('派单文案已复制（'+use.length+' 格）');track('copy','city');}).catch(()=>fallbackCopy(txt));
+  };
+  if(!isScenic){ document.getElementById('btnCsv').onclick=csv; document.getElementById('btnCopy').onclick=copy; }
+}
+function areaThumb(arr){
+  // M2.3 区×类目矩阵缩略图：行=区，列=该城 TOP8 类目，色块=六态
+  const paths=[...new Set(arr.map(c=>cellPath(c)))].slice(0,8);
+  const areas=[...new Set(arr.map(c=>cellArea(c)))].slice(0,14);
+  const get=(a,p)=>arr.find(c=>cellArea(c)===a&&cellPath(c)===p);
+  let h='<div class="panel" style="margin-top:10px"><h3>区 × 类目 状态缩略 <span class="hint">行=区域 · 列=TOP8 类目 · 色=六态</span></h3><div style="overflow:auto"><table style="font-size:10.5px"><thead><tr><th>区域</th>'+paths.map(p=>'<th>'+p.split(';').pop()+'</th>').join('')+'</tr></thead><tbody>';
+  for(const a of areas){
+    h+='<tr><td style="white-space:nowrap">'+a+'</td>'+paths.map(p=>{ const c=get(a,p); if(!c) return '<td><span class="cell none" style="width:22px;height:14px;border-radius:3px;display:inline-block;border:1px dashed var(--line)"></span></td>';
+      const m=metrics(c); const col={free:'rgba(53,208,186,.75)',partial:'rgba(245,196,81,.8)',full:'rgba(255,107,107,.6)',expiring:'rgba(255,140,60,.8)'}[m.state];
+      return '<td><span title="'+a+' · '+p+' · '+STATE_LABEL[m.state]+'" style="width:22px;height:14px;border-radius:3px;display:inline-block;background:'+col+(m.conflict?';box-shadow:0 0 0 1px var(--purple)':'')+'"></span></td>'; }).join('')+'</tr>';
+  }
+  return h+'</tbody></table></div></div>';
+}
+function showRecModal(key){
+  const [ciStr,path]=key.split('|'); const ci=+ciStr.replace(/^s/,'');
+  const fake={ci,scenic:key[0]==='s',bi:SCENIC.dicts.buckets.indexOf(path),li:S.line,hi:-1};
+  if(fake.scenic){ fake.bi=SCENIC.dicts.buckets.indexOf(path); }
+  else { const sh=SHARDS[IDX.dicts.lines[S.line]]; fake.hi=sh.dicts.paths.indexOf(path); fake.pi=0; fake.ai=-1; fake.wins=[]; fake.list=0; }
+  const r=recommend(fake);
+  document.getElementById('modalBox').innerHTML='<h3>高优作业服务商 · '+IDX.dicts.cities[ci]+' · '+path+'<span style="color:var(--sub);font-size:11px;margin-left:8px">共 '+r.total+' 家可作业</span></h3>'
+    +'<table><thead><tr><th>#</th><th>服务商</th><th>徽章</th><th>优先级分</th></tr></thead><tbody>'
+    +r.all.map((x,i)=>'<tr><td>'+(i+1)+'</td><td>'+x.name+'</td><td>'+x.badges.map(b=>'<span class="st free" style="margin-right:3px">'+b+'</span>').join('')+'</td><td>'+x.score+'</td></tr>').join('')
+    +'</tbody></table><div style="color:var(--sub);font-size:11px;margin-top:8px">排序=本地包城6&gt;本省3&gt;全国1，类目专精+2/首开城+2/核心城+1/12城+1（config.recommend.weights）；公共版不含渠道经理/工号/大区。</div>'
+    +'<div style="text-align:right;margin-top:10px"><button class="btn" id="modalClose">关闭</button></div>';
+  document.getElementById('modal').style.display='flex';
+  document.getElementById('modalClose').onclick=()=>document.getElementById('modal').style.display='none';
+}
+document.getElementById('modal').onclick=e=>{ if(e.target.id==='modal') e.target.style.display='none'; };
+
+/* ============ 单格甘特 ============ */
+function openGantt(c){
+  S.cellKey=(c.scenic?'s':'')+c.pi+'_'+c.ci+'_'+(c.scenic?c.di:c.ai)+'_'+(c.scenic?c.bi:c.hi);
+  S.view='gantt'; render();
+}
+function findCellByKey(k){
+  const sc=k[0]==='s'; const parts=k.replace(/^s/,'').split('_').map(Number);
+  if(sc) return SCELLS.find(c=>c.pi===parts[0]&&c.ci===parts[1]&&c.di===parts[2]&&c.bi===parts[3]);
+  return CELLS.find(c=>c.li===S.line&&c.pi===parts[0]&&c.ci===parts[1]&&c.ai===parts[2]&&c.hi===parts[3]);
+}
+function renderGantt(){
+  const el=document.getElementById('viewGantt');
+  const c=findCellByKey(S.cellKey);
+  if(!c){ el.innerHTML='<div class="empty">格子不存在</div>'; return; }
+  const m=metrics(c);
+  const t0=addDays(TODAY,-180), t1=addDays(TODAY,365);
+  const span=(t1-t0)/DAY;
+  const pct=t=>((dparse(t)-t0)/DAY/span*100);
+  const [w1,w2]=winRange();
+  const bars=c.wins.map(w=>'<div class="occ" style="left:'+pct(w[0]).toFixed(2)+'%;width:'+Math.max(0.4,(dparse(w[1])-dparse(w[0]))/DAY/span*100).toFixed(2)+'%;background:'+OCC_COLOR[w[2]]+'" title="'+OCC_LABEL[w[2]]+' '+w[0].slice(0,10)+' ~ '+w[1].slice(0,10)+'"></div>').join('');
+  // 窗内空白段
+  const iv=[]; for(const w of c.wins){ const a=Math.max(dparse(w[0]).getTime(),w1.getTime()), b=Math.min(dparse(w[1]).getTime(),w2.getTime()); if(b>=a) iv.push([a,b]); }
+  iv.sort((a,b)=>a[0]-b[0]); let cur=null; const merged=[];
+  for(const [a,b] of iv){ if(!cur)cur=[a,b]; else if(a<=cur[1])cur[1]=Math.max(cur[1],b); else {merged.push(cur);cur=[a,b];} } if(cur)merged.push(cur);
+  let blanks='', cursor=w1.getTime();
+  for(const [a,b] of merged){ if(a>cursor) blanks+=blankSeg(cursor,a-1); cursor=Math.max(cursor,b+1); }
+  if(cursor<=w2.getTime()) blanks+=blankSeg(cursor,w2.getTime());
+  function blankSeg(a,b){ const days=Math.round((b-a)/DAY)+1; return '<div class="blank" style="left:'+((a-t0)/DAY/span*100).toFixed(2)+'%;width:'+((b-a)/DAY/span*100).toFixed(2)+'%" title="空白 '+days+' 天"></div>'; }
+  // 月刻度
+  let axis=''; for(let d=addMonths(t0,1); d<=t1; d=addMonths(d,1)){ const lp=Math.min(98.5,Math.max(1.5,(d-t0)/DAY/span*100)); axis+='<span style="left:'+lp.toFixed(2)+'%">'+monthKey(d)+'</span>'; }
+  const rec=recommend(c);
+  const poi=c.scenic?poiOf(c):null;
+  const deals=c.wins.filter(w=>w[2]==='COMPLETED').sort((a,b)=>b[1].localeCompare(a[1])).slice(0,8);
+  const siblings=filteredCells().filter(x=>x.ci===c.ci).sort((a,b)=>(b.list||0)-(a.list||0));
+  const si=siblings.indexOf(c);
+  el.innerHTML='<div class="ggrid"><div class="gantt">'
+    +'<h3 style="font-size:14px;margin-bottom:4px">'+cellPath(c)+' <span style="color:var(--sub);font-size:11px">'+cellCity(c)+' · '+cellArea(c)+' · '+cellPlan(c)+(c.scenic?' · POI '+poi.toLocaleString():'')+'</span></h3>'
+    +'<div style="color:var(--sub);font-size:11px">状态 <span class="st '+m.state+'">'+STATE_LABEL[m.state]+'</span> 窗内空闲 '+m.freeDays+'/'+m.Wd+' 天'+(m.earliest?' · 最早可上刊 '+iso(m.earliest):'')+(c.scenic?'':' · 刊例 '+fmtMoney(c.list)+'/30天')+'</div>'
+    +'<div class="gantt-track"><div class="win" style="left:'+((w1-t0)/DAY/span*100).toFixed(2)+'%;width:'+((w2-w1)/DAY/span*100).toFixed(2)+'%"></div>'+bars+blanks+'<div class="now" style="left:'+((TODAY-t0)/DAY/span*100).toFixed(2)+'%"></div></div>'
+    +'<div class="gantt-axis">'+axis+'</div>'
+    +'<div class="legend" style="padding-top:10px">'+Object.entries(OCC_LABEL).map(([k,v])=>'<span><i class="dot" style="background:'+OCC_COLOR[k]+'"></i>'+v+'</span>').join('')+'<span><i class="dot" style="background:var(--accent)"></i>窗内空白段</span><span><i class="dot" style="background:var(--danger)"></i>今天</span></div>'
+    +'<div class="blk calc" style="background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:12px;margin-top:12px">'
+    +'<h4 style="font-size:12px;color:var(--sub);margin-bottom:8px">档期试算器：客户意向起止 → 可排 / 冲突 / 部分可排</h4>'
+    +'<input type="date" id="calcS" value="'+iso(TODAY)+'"> ~ <input type="date" id="calcE" value="'+iso(addDays(TODAY,30))+'"> <button class="btn pri" id="calcBtn">试算</button>'
+    +'<div style="margin:6px 0;display:flex;gap:6px;flex-wrap:wrap;align-items:center"><span style="color:var(--sub);font-size:11px">快捷档期（M10.2）</span>'+[7,14,30,60,90].map(n=>'<button class="btn" data-add="'+n+'" style="padding:2px 8px;font-size:11px">+'+n+'天</button>').join('')+'</div>'
+    +'<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:6px"><span style="color:var(--sub);font-size:11px">反推最晚签约日：上刊</span><input type="date" id="leadS" value="'+iso(addDays(TODAY,14))+'"><span style="color:var(--sub);font-size:11px">提前</span><input type="number" id="leadD" value="7" min="0" style="width:56px"><span style="color:var(--sub);font-size:11px">天（作业提前期为假设值，可调）</span><button class="btn" id="leadBtn" style="padding:2px 8px;font-size:11px">反推</button><span id="leadRes" style="font-size:12px;color:var(--gold)"></span></div>'
+    +'<div class="res" id="calcRes"></div></div>'
+    +'<div style="margin-top:12px;display:flex;gap:8px"><button class="btn" id="gPrev">← 上一格</button><button class="btn" id="gNext">下一格 →</button><button class="btn" id="gBack">返回城市详情</button><span style="color:var(--sub);font-size:11px;align-self:center">同城市按刊例价序 '+(si+1)+'/'+siblings.length+'</span></div>'
+    +'</div><div class="side">'
+    +'<div class="blk"><h4>格子档案</h4>'
+    +'<div class="kv"><span>方案</span><b>'+cellPlan(c)+'</b></div>'
+    +'<div class="kv"><span>城市/区域</span><b>'+cellCity(c)+' / '+cellArea(c)+'</b></div>'
+    +'<div class="kv"><span>行业线</span><b>'+cellLine(c)+'</b></div>'
+    +'<div class="kv"><span>类目'+(c.scenic?'桶':'路径')+'</span><b style="text-align:right;max-width:200px">'+cellPath(c)+'</b></div>'
+    +(c.scenic?'<div class="kv"><span>POI 宇宙</span><b>'+poi.toLocaleString()+' 个</b></div><div class="kv"><span>金额</span><b style="color:var(--sub)">景区刊例口径待补</b></div>'
+      :'<div class="kv"><span>刊例价/30天</span><b class="money">'+(c.list||0).toLocaleString()+'</b></div><div class="kv"><span>日均价</span><b>'+Math.round((c.list||0)/30).toLocaleString()+'</b></div>')
+    +'<div class="kv"><span>需求热度</span><b>'+m.heat+' / 100</b></div>'
+    +'<div class="kv"><span>疑似冲突</span><b>'+(m.conflict?'是（仅标注）':'否')+'</b></div></div>'
+    +'<div class="blk"><h4>高优作业服务商（决策#12）</h4>'
+    +(rec.total?rec.top.map((t,i)=>'<div class="kv"><span>'+(i+1)+'. '+t.name+'</span><b style="color:var(--accent)">'+t.score+'分</b></div><div style="margin:-2px 0 6px">'+t.badges.map(b=>'<span class="st free" style="margin-right:3px">'+b+'</span>').join('')+'</div>').join('')+'<div style="color:var(--sub);font-size:11px">共 '+rec.total+' 家可作业 <button class="btn" style="padding:2px 8px;font-size:11px" id="gRecAll">全量</button></div>'
+      :'<div style="color:var(--sub);font-size:12px">无匹配服务商</div>')+'</div>'
+    +'<div class="blk"><h4>历史成交（已完成单，刊例口径）</h4>'
+    +(deals.length?deals.map(w=>'<div class="kv"><span>'+w[0].slice(0,10)+' ~ '+w[1].slice(0,10)+'</span><b>'+(c.scenic?'—':fmtMoney((c.list||0)/30*((dparse(w[1])-dparse(w[0]))/DAY+1)))+'</b></div>').join(''):'<div style="color:var(--sub);font-size:12px">无已完成单</div>')+'</div>'
+    +'</div></div>';
+  document.getElementById('calcBtn').onclick=()=>{
+    const s=dparse(document.getElementById('calcS').value), e=dparse(document.getElementById('calcE').value);
+    const res=document.getElementById('calcRes');
+    if(!(s<=e)){ res.className='res bad'; res.textContent='起止日期无效'; return; }
+    const hit=c.wins.filter(w=>dparse(w[0])<=e&&dparse(w[1])>=s&&w[2]!=='COMPLETED');
+    const days=Math.round((e-s)/DAY)+1;
+    const quote=c.scenic?'景区金额口径待补':'刊例报价 '+fmtMoney((c.list||0)/30*days);
+    if(!hit.length){ res.className='res ok'; res.textContent='可排 '+days+' 天 · '+quote; }
+    else {
+      const freeIV=[]; let cur=s.getTime();
+      const occ=hit.map(w=>[Math.max(dparse(w[0]).getTime(),s.getTime()),Math.min(dparse(w[1]).getTime(),e.getTime())]).sort((a,b)=>a[0]-b[0]);
+      for(const [a,b] of occ){ if(a>cur) freeIV.push([cur,a-1]); cur=Math.max(cur,b+1); }
+      if(cur<=e.getTime()) freeIV.push([cur,e.getTime()]);
+      const fd=freeIV.reduce((t,[a,b])=>t+Math.round((b-a)/DAY)+1,0);
+      if(fd===0){ res.className='res bad'; res.textContent='冲突：与 '+hit.length+' 单重叠（'+hit.map(w=>OCC_LABEL[w[2]]+' '+w[0].slice(0,10)+'~'+w[1].slice(0,10)).join('；')+'）'; }
+      else { res.className='res mid'; res.textContent='部分可排 '+fd+'/'+days+' 天 · 建议改期 '+freeIV.map(([a,b])=>iso(new Date(a))+'~'+iso(new Date(b))).join('、')+' · '+quote; }
+    }
+  };
+  el.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>{ document.getElementById('calcE').value=iso(addDays(dparse(document.getElementById('calcS').value),+b.dataset.add)); document.getElementById('calcBtn').click(); });
+  document.getElementById('leadBtn').onclick=()=>{
+    const s=dparse(document.getElementById('leadS').value), n=Math.max(0,+document.getElementById('leadD').value||0);
+    const lead=addDays(s,-n);
+    document.getElementById('leadRes').textContent='最晚签约日 '+iso(lead)+(lead<TODAY?'（已过期，需加急或改期）':'');
+  };
+  document.getElementById('gPrev').onclick=()=>{ if(si>0) openGantt(siblings[si-1]); };
+  document.getElementById('gNext').onclick=()=>{ if(si<siblings.length-1) openGantt(siblings[si+1]); };
+  document.getElementById('gBack').onclick=()=>{ S.view='city'; render(); };
+  const ga=document.getElementById('gRecAll'); if(ga) ga.onclick=()=>showRecModal((c.scenic?'s':'')+c.ci+'|'+cellPath(c));
+}
+
+/* ============ 全城档期矩阵 ============ */
+function renderMatrix(arr){
+  const el=document.getElementById('viewMatrix');
+  if(!arr.length){ el.innerHTML='<div class="empty">当前筛选无格子，无法生成档期矩阵，请放宽筛选条件</div>'; return; }
+  const months=[]; for(let i=-3;i<=9;i++) months.push(monthKey(addMonths(TODAY,i)));
+  const byCity=new Map();
+  for(const c of arr){ if(!byCity.has(c.ci)) byCity.set(c.ci,[]); byCity.get(c.ci).push(c); }
+  const provGroups=new Map();
+  for(const [ci,cs] of byCity){ const p=IDX.cityProv[ci]; if(!provGroups.has(p)) provGroups.set(p,[]); provGroups.get(p).push([ci,cs]); }
+  const monthState=(cs,mk)=>{
+    const ms=mk+'-01', me=iso(addDays(addMonths(dparse(ms),1),-1));
+    let active=false,expiring=false,pre=false,any=false,orders=[];
+    for(const c of cs) for(const w of c.wins){
+      if(w[0].slice(0,10)>me||w[1].slice(0,10)<ms) continue;
+      any=true; orders.push(w);
+      if(w[2]==='PERFORMANCING'&&w[0].slice(0,10)<=ms&&w[1].slice(0,10)>=ms) active=true;
+      else if(w[1].slice(0,7)===mk) expiring=true;
+      else if(w[0].slice(0,10)>iso(TODAY)) pre=true;
+    }
+    return {state:active?'active':expiring?'expiring':pre?'pre':any?'active':'wait',orders};
+  };
+  let html='<div class="mx"><table><thead><tr><th style="text-align:left">省 / 城市</th>'+months.map(m=>'<th class="'+(m===S.month?'selcol':'')+'">'+m.slice(2)+'</th>').join('')+'</tr></thead><tbody>';
+  const pks=[...provGroups.keys()].sort((a,b)=>a-b);
+  for(const p of pks){
+    const groups=provGroups.get(p).sort((a,b)=>IDX.dicts.cities[a[0]].localeCompare(IDX.dicts.cities[b[0]],'zh'));
+    const tot=groups.reduce((s,[,cs])=>s+cs.length,0);
+    const occN=groups.reduce((s,[,cs])=>s+cs.filter(c=>metrics(c).occDays>0).length,0);
+    const open=S.mxOpen[p]!==false;
+    html+='<tr class="provrow" data-p="'+p+'"><td style="text-align:left">'+(open?'▾':'▸')+' '+IDX.dicts.provinces[p]+'　<span style="color:var(--sub);font-weight:400">已售 '+occN+'/'+tot+'</span></td>'+months.map(()=>'<td></td>').join('')+'</tr>';
+    if(!open) continue;
+    for(const [ci,cs] of groups){
+      html+='<tr><td class="cityname" data-ci="'+ci+'">'+IDX.dicts.cities[ci]+' <span style="color:var(--sub)">'+cs.length+'格</span></td>';
+      for(const mk of months){
+        const r=monthState(cs,mk);
+        const tip=r.orders.slice(0,4).map(w=>OCC_LABEL[w[2]]+' '+w[0].slice(0,10)+'~'+w[1].slice(0,10)).join('\n')||'无订单';
+        html+='<td class="'+(mk===S.month?'selcol':'')+'"><span class="cell '+r.state+'" data-ci="'+ci+'" data-m="'+mk+'" title="'+IDX.dicts.cities[ci]+' '+mk+'\n'+tip+'\n点击进该城刊例价最高格甘特"></span></td>';
+      }
+      html+='</tr>';
+    }
+  }
+  html+='</tbody></table></div><div style="color:var(--sub);font-size:11px;padding:8px 2px">月粒度总览：<span class="dot" style="background:rgba(53,208,186,.75)"></span>在投 <span class="dot" style="background:rgba(245,196,81,.8)"></span>到期 <span class="dot" style="background:rgba(74,163,255,.7)"></span>预排期 <span class="dot" style="background:rgba(255,107,107,.55)"></span>待售 · 金列=选中统计月 · 日粒度排期以单格甘特为准 · 点击省行折叠</div>';
+  el.innerHTML=html;
+  el.querySelector('.mx').onclick=e=>{
+    const pr=e.target.closest('.provrow'); if(pr){ const p=+pr.dataset.p; S.mxOpen[p]=S.mxOpen[p]===false; renderMatrix(arr); return; }
+    const cn=e.target.closest('.cityname'); if(cn){ S.city=+cn.dataset.ci; S.view='city'; render(); return; }
+    const cell=e.target.closest('.cell'); if(cell){ const ci=+cell.dataset.ci;
+      const cs=byCity.get(ci)||[]; const top=cs.slice().sort((a,b)=>(b.list||0)-(a.list||0))[0];
+      if(top){ S.city=ci; openGantt(top); } }
+  };
+}
+
+/* ============ M7 词包字典（自建，决策#5） ============ */
+let DICT=null, DICTW='';
+function buildDict(){
+  const wk=iso(winRange()[0])+'_'+iso(winRange()[1]);
+  if(DICT&&DICTW===wk) return DICT;
+  const byCode=new Map();
+  for(const c of CELLS){
+    const code=c.code; if(!code) continue;
+    let o=byCode.get(code);
+    if(!o){ o={code,path:cellPath(c),lines:new Set(),cities:new Map(),listMin:Infinity,listMax:0,cells:0,occ:0,value:0,deals:0}; byCode.set(code,o); }
+    o.lines.add(IDX.dicts.lines[c.li]);
+    const m=metrics(c);
+    o.cells++; if(m.occDays>0)o.occ++; o.value+=m.value; o.deals+=m.deals;
+    o.listMin=Math.min(o.listMin,c.list||0); o.listMax=Math.max(o.listMax,c.list||0);
+    let co=o.cities.get(c.ci); if(!co){ co={cells:0,occ:0,value:0,deals:0}; o.cities.set(c.ci,co); }
+    co.cells++; if(m.occDays>0)co.occ++; co.value+=m.value; co.deals+=m.deals;
+  }
+  const byPath=new Map();
+  for(const o of byCode.values()){
+    let p=byPath.get(o.path);
+    if(!p){ p={path:o.path,lines:new Set(),codes:[],cities:new Set(),cells:0,occ:0,value:0,listMin:Infinity,listMax:0}; byPath.set(o.path,p); }
+    p.codes.push(o); o.lines.forEach(l=>p.lines.add(l)); o.cities.forEach((v,ci)=>p.cities.add(ci));
+    p.cells+=o.cells; p.occ+=o.occ; p.value+=o.value;
+    p.listMin=Math.min(p.listMin,o.listMin); p.listMax=Math.max(p.listMax,o.listMax);
+  }
+  DICT={byCode,byPath}; DICTW=wk;
+  return DICT;
+}
+function renderDict(){
+  const el=document.getElementById('viewDict');
+  const {byCode,byPath}=buildDict();
+  const q=S.dictQ.toLowerCase();
+  let html='<div class="summary"><div class="it">词包 code<b>'+byCode.size+'</b></div><div class="it">类目路径<b>'+byPath.size+'</b></div><div class="it">来源<b style="font-size:12px">自有价目+词包数据集（决策#5 不复用外部词表）</b></div><div class="it" style="margin-left:auto"><input type="text" id="dictQ" placeholder="搜索类目路径 / code" value="'+S.dictQ+'" style="width:220px"></div></div><div class="dtree">';
+  let any=false;
+  for(const ln of IDX.dicts.lines){
+    const ps=[...byPath.values()].filter(p=>p.lines.has(ln)&&(!q||p.path.toLowerCase().includes(q)||p.codes.some(o=>o.code.toLowerCase().includes(q))));
+    if(!ps.length) continue;
+    any=true;
+    const l1=new Map();
+    for(const p of ps){ const a=p.path.split(';'); const k1=a[0]; if(!l1.has(k1)) l1.set(k1,new Map()); const k2=a[1]||'(一级直挂)'; const m2=l1.get(k1); if(!m2.has(k2)) m2.set(k2,[]); m2.get(k2).push(p); }
+    html+='<details'+(q?' open':'')+'><summary>'+ln+' <span style="color:var(--sub);font-weight:400">'+ps.length+' 路径</span></summary><div class="in">';
+    for(const [k1,m2] of l1){
+      html+='<details'+(q?' open':'')+'><summary>'+k1+'</summary><div class="in">';
+      for(const [k2,plist] of m2){
+        html+='<details'+(q?' open':'')+'><summary>'+k2+' <span style="color:var(--sub);font-weight:400">'+plist.length+'</span></summary><div class="in">';
+        for(const p of plist.sort((a,b)=>b.value-a.value)){
+          const rate=p.cells?(p.occ/p.cells*100).toFixed(1):0;
+          html+='<div class="dleaf"><b>'+p.path.split(';').pop()+'</b>'
+            +p.codes.map(o=>'<span class="code" data-code="'+o.code+'">'+o.code+'</span>').join('')
+            +'<span class="stt">'+p.cities.size+'城 · 占率'+rate+'% · 刊例 '+fmtN(p.listMin)+'~'+fmtN(p.listMax)+'/30天 · 空白价值 '+fmtMoney(p.value)+(DIST[p.path]!=null?' · 最大置顶距离'+DIST[p.path]:'')+'</span>'
+            +'<button class="btn" style="padding:1px 8px;font-size:10.5px" data-dpath="'+p.path.replace(/"/g,'')+'">详情</button></div>';
+        }
+        html+='</div></details>';
+      }
+      html+='</div></details>';
+    }
+    html+='</div></details>';
+  }
+  html+='</div>';
+  if(!any) html+='<div class="empty">无匹配类目/词包，请换关键词</div>';
+  html+='<div style="color:var(--sub);font-size:11px;padding:8px 2px">树=行业线→一级→二级→类目路径；叶子 chip=词包 code（点击看覆盖城市明细）。占率/空白价值=当前时间窗口径；最大置顶距离来自词包数据集 78457217。</div>';
+  el.innerHTML=html;
+  document.getElementById('dictQ').oninput=e=>{ S.dictQ=e.target.value.trim(); const pos=e.target.selectionStart; renderDict(); const ni=document.getElementById('dictQ'); ni.focus(); ni.setSelectionRange(pos,pos); };
+  el.onclick=e=>{
+    const c=e.target.closest('.code'); if(c){ openDictDetail(c.dataset.code,null); return; }
+    const d=e.target.closest('[data-dpath]'); if(d){ openDictDetail(null,d.dataset.dpath); return; }
+  };
+}
+function openDictDetail(code,path){
+  const {byCode,byPath}=buildDict();
+  const o=code?byCode.get(code):null;
+  const p=path?byPath.get(path):(o?byPath.get(o.path):null);
+  if(!p){ toast('未找到该词包/类目'); return; }
+  const src=code?[o]:p.codes;
+  const cities=[...p.cities].map(ci=>{
+    let cells=0,occ=0,value=0,deals=0;
+    for(const oc of src){ const co=oc.cities.get(ci); if(!co) continue; cells+=co.cells; occ+=co.occ; value+=co.value; deals+=co.deals; }
+    return {ci,cells,occ,value,deals};
+  }).filter(x=>x.cells>0);
+  const byVal=cities.slice().sort((a,b)=>b.value-a.value);
+  const byDeal=cities.slice().sort((a,b)=>b.deals-a.deals).filter(x=>x.deals>0).slice(0,8);
+  const rate=p.cells?(p.occ/p.cells*100).toFixed(1):0;
+  document.getElementById('modalBox').innerHTML='<h3>'+(code?'词包 '+code+' · ':'')+p.path+' <span style="color:var(--sub);font-size:11px;margin-left:8px">'+[...p.lines].join('/')+'</span></h3>'
+    +'<div class="summary" style="margin-bottom:10px"><div class="it">覆盖城市<b>'+cities.length+'</b></div><div class="it">可售格<b>'+p.cells.toLocaleString()+'</b></div><div class="it">当前占率<b>'+rate+'%</b></div><div class="it">刊例区间<b class="money">'+fmtN(p.listMin)+'~'+fmtN(p.listMax)+'</b></div><div class="it">空白价值<b class="money">'+fmtMoney(p.value)+'</b></div>'+(DIST[p.path]!=null?'<div class="it">最大置顶距离<b>'+DIST[p.path]+'</b></div>':'')+'</div>'
+    +(byDeal.length?'<div style="font-size:11px;color:var(--sub);margin-bottom:6px">近180天成交 TOP 城市：'+byDeal.map(x=>'<span class="st free" style="margin-right:4px">'+IDX.dicts.cities[x.ci]+' '+x.deals+'单</span>').join('')+'</div>':'')
+    +'<div class="tblwrap" style="max-height:340px"><table><thead><tr><th>城市</th><th>可售格</th><th>占率</th><th>窗内空白价值</th><th>近180天成交</th></tr></thead><tbody>'
+    +byVal.slice(0,60).map(x=>'<tr><td>'+IDX.dicts.cities[x.ci]+'</td><td>'+x.cells+'</td><td>'+(x.occ/x.cells*100).toFixed(1)+'%</td><td class="money">'+fmtMoney(x.value)+'</td><td>'+x.deals+'</td></tr>').join('')
+    +'</tbody></table>'+(byVal.length>60?'<div class="empty">仅显示前 60 城（共 '+byVal.length+' 城）</div>':'')+'</div>'
+    +'<div style="text-align:right;margin-top:10px;display:flex;gap:8px;justify-content:flex-end"><button class="btn pri" id="dGoOpp">机会榜看此类目</button><button class="btn" id="modalClose">关闭</button></div>';
+  document.getElementById('modal').style.display='flex';
+  document.getElementById('modalClose').onclick=()=>document.getElementById('modal').style.display='none';
+  document.getElementById('dGoOpp').onclick=()=>{ document.getElementById('modal').style.display='none'; S.cat=p.path; S.view='opp'; S.oppPage=0; buildControls(); render(); };
+  track('search','dict:'+(code||p.path));
+}
+/* ============ M10.1 全局搜索 ============ */
+function bindGlobalSearch(){
+  const inp=document.getElementById('gq'), box=document.getElementById('gres');
+  inp.oninput=()=>{
+    const q=inp.value.trim().toLowerCase();
+    if(!q){ box.style.display='none'; return; }
+    const {byCode,byPath}=buildDict();
+    const cities=IDX.dicts.cities.map((c,i)=>[c,i]).filter(([c])=>c.toLowerCase().includes(q)).slice(0,5);
+    const paths=[...byPath.values()].filter(p=>p.path.toLowerCase().includes(q)).slice(0,5);
+    const codes=[...byCode.values()].filter(o=>o.code.toLowerCase().includes(q)).slice(0,5);
+    let h='';
+    if(cities.length) h+='<div class="g"><h6>城市 → 城市详情</h6>'+cities.map(([c,i])=>'<button data-g="city" data-i="'+i+'">'+c+'<small>'+IDX.dicts.provinces[IDX.cityProv[i]]+'</small></button>').join('')+'</div>';
+    if(paths.length) h+='<div class="g"><h6>类目路径 → 机会榜过滤</h6>'+paths.map(p=>'<button data-g="path" data-p="'+p.path.replace(/"/g,'')+'">'+p.path+'<small>'+[...p.lines].join('/')+' · '+p.cities.size+'城</small></button>').join('')+'</div>';
+    if(codes.length) h+='<div class="g"><h6>词包 code → 词包详情</h6>'+codes.map(o=>'<button data-g="code" data-c="'+o.code+'">'+o.code+'<small>'+o.path.split(';').pop()+' · '+o.cities.size+'城</small></button>').join('')+'</div>';
+    box.innerHTML=h||'<div class="g"><h6>无匹配（订单名属管理档字段，v1 不支持搜索，缺口#10）</h6></div>';
+    box.style.display='block';
+  };
+  box.onclick=e=>{
+    const b=e.target.closest('button'); if(!b) return;
+    track('search',inp.value.trim());
+    box.style.display='none'; inp.value='';
+    if(b.dataset.g==='city'){ S.city=+b.dataset.i; S.view='city'; S.cityTab=0; render(); }
+    if(b.dataset.g==='path'){ S.cat=b.dataset.p; S.view='opp'; S.oppPage=0; buildControls(); render(); }
+    if(b.dataset.g==='code'){ openDictDetail(b.dataset.c,null); }
+  };
+  document.addEventListener('click',e=>{ if(!e.target.closest('.gsearch')) box.style.display='none'; });
+}
+
+/* ============ M4 机会榜 ============ */
+function oppRows(arr){
+  const [w1,w2]=winRange();
+  let rows=arr.map(c=>({c,m:metrics(c)}));
+  if(S.oppTab===1){
+    rows=rows.map(r=>({c:r.c,m:r.m,exp:expiryOf(r.c),rel:releaseInfo(r.c)})).filter(r=>r.exp&&r.exp<=w2);
+  } else {
+    if(S.oppState==='free') rows=rows.filter(r=>r.m.state==='free');
+    else if(S.oppState==='expiring') rows=rows.filter(r=>r.m.expiring);
+    else rows=rows.filter(r=>r.m.freeDays>0);
+    if(S.oppMinVal>0) rows=rows.filter(r=>r.m.value>=S.oppMinVal);
+    if(S.oppMinHeat>0) rows=rows.filter(r=>r.m.heat>=S.oppMinHeat);
+  }
+  if(S.oppSp){
+    const p=PROV.providers.find(x=>x.id===S.oppSp);
+    if(p) rows=rows.filter(r=>(p.cities||[]).includes(r.c.ci)&&coversProv(p,r.c));
+  }
+  return rows;
+}
+function oppSortRows(rows){
+  const k=S.oppSort.key, dir=S.oppSort.dir;
+  const val=r=>{
+    switch(k){
+      case 'city': return cellCity(r.c);
+      case 'area': return cellArea(r.c);
+      case 'path': return cellPath(r.c);
+      case 'code': return r.c.code||'';
+      case 'plan': return cellPlan(r.c);
+      case 'state': return r.m.state;
+      case 'free': return r.m.freeDays;
+      case 'earliest': return r.m.earliest?r.m.earliest.getTime():Infinity;
+      case 'list': return r.c.list||0;
+      case 'value': return r.m.value;
+      case 'heat': return r.m.heat;
+      case 'deal': return r.m.lastDeal||'';
+      case 'poi': return poiOf(r.c);
+      case 'exp': return r.exp?r.exp.getTime():Infinity;
+      case 'rel': return r.rel?r.rel.value:0;
+      case 'combo': return r.m.value/1e4*(1+r.m.heat/100);
+      default: return r.m.value;
+    }
+  };
+  rows.sort((a,b)=>{ const x=val(a),y=val(b); const cmp=typeof x==='string'?x.localeCompare(y,'zh'):x-y; return cmp*dir||(b.m.value-a.m.value); });
+}
+function renderOpp(arr){
+  const el=document.getElementById('viewOpp');
+  const isScenic=S.plan==='scenic';
+  const rows=oppRows(arr);
+  oppSortRows(rows);
+  const total=rows.length;
+  const capped=rows.slice(0,2000);
+  const pages=Math.max(1,Math.ceil(capped.length/100));
+  if(S.oppPage>=pages) S.oppPage=pages-1;
+  if(S.oppPage<0) S.oppPage=0;
+  const page=capped.slice(S.oppPage*100,S.oppPage*100+100);
+  KBROWS=page; S.kbRow=-1; // M10.3 键盘选行
+  const sumVal=rows.reduce((s,r)=>s+r.m.value,0);
+  const expN=arr.filter(c=>metrics(c).expiring).length;
+  const lineNames=isScenic?CFG.recommend.lineMatch.scenic:(CFG.recommend.lineMatch[IDX.dicts.lines[S.line]]||[]);
+  const spOpts=PROV.providers.filter(p=>lineNames.includes(p.line));
+  const spSel=S.oppSp?PROV.providers.find(p=>p.id===S.oppSp):null;
+  // 列定义
+  let cols=isScenic
+    ? [['city','城市'],['area','区县'],['path','类目桶'],['plan','方案'],['state','状态'],['free','空闲天'],['poi','POI 数']]
+    : [['city','城市'],['area','区域'],['path','类目路径'],['code','词包code'],['plan','方案'],['state','状态'],['free','空闲天'],['earliest','最早可上刊'],['list','刊例/30天'],['value','窗内价值'],['heat','热度'],['deal','最近成交']];
+  if(S.oppTab===1) cols=cols.concat([['exp','到期日'],['rel','释放价值']]);
+  const colspan=cols.length+1;
+  const head=cols.map(([k,t])=>'<th class="sortable" data-sk="'+k+'">'+t+(S.oppSort.key===k?'<span class="ar">'+(S.oppSort.dir===1?'▲':'▼')+'</span>':'')+'</th>').join('')+'<th>高优作业服务商</th>';
+  // 释放专区分组汇总
+  const gSum=new Map();
+  if(S.oppTab===1) for(const r of capped){ const g=iso(r.exp); const o=gSum.get(g)||{n:0,val:0}; o.n++; o.val+=r.rel.value; gSum.set(g,o); }
+  let lastG=null;
+  const body=page.map((r,i)=>{
+    const c=r.c, m=r.m;
+    let gh='';
+    if(S.oppTab===1){ const g=iso(r.exp);
+      if(g!==lastG){ lastG=g; const o=gSum.get(g);
+        gh='<tr class="grouprow"><td colspan="'+colspan+'">到期日 '+g+' · '+o.n+' 格 · 释放价值合计 '+fmtMoney(o.val)+'（到期次日至窗末空闲天×日均刊例）</td></tr>'; } }
+    return gh+'<tr data-i="'+i+'">'
+      +'<td>'+cellCity(c)+'</td><td>'+cellArea(c)+'</td>'
+      +'<td><b>'+cellPath(c).split(';').pop()+'</b><div style="color:var(--sub);font-size:10px">'+cellPath(c)+'</div></td>'
+      +(isScenic?'':'<td style="color:var(--sub);font-size:11px">'+(c.code||'—')+'</td>')
+      +'<td>'+cellPlan(c)+'</td>'
+      +'<td><span class="st '+m.state+(m.conflict?' conflict':'')+'">'+STATE_LABEL[m.state]+(m.conflict?' ·疑似冲突':'')+'</span></td>'
+      +'<td>'+m.freeDays+'/'+m.Wd+'</td>'
+      +(isScenic?'<td>'+poiOf(c).toLocaleString()+'</td>'
+        :'<td>'+(m.earliest?iso(m.earliest):'—')+'</td><td class="money">'+(c.list||0).toLocaleString()+'</td><td class="money">'+fmtMoney(m.value)+'</td><td>'+m.heat+'</td><td>'+(m.lastDeal||'—')+'</td>')
+      +(S.oppTab===1?'<td>'+iso(r.exp)+'</td><td class="money">'+fmtMoney(r.rel.value)+'</td>':'')
+      +'<td class="hintcell">'+hintHTML(c)+'</td></tr>';
+  }).join('');
+  el.innerHTML=
+    '<div class="summary">'
+    +'<div class="it">命中格子<b>'+total.toLocaleString()+'</b></div>'
+    +'<div class="it">窗内价值合计<b class="money">'+(isScenic?'景区口径待补':fmtMoney(sumVal))+'</b></div>'
+    +'<div class="it">即将释放<b style="color:var(--orange)">'+expN.toLocaleString()+' 格</b></div>'
+    +'<div class="it">当前排序<b style="font-size:12px">'+(S.oppSort.key==='combo'?'价值×热度综合':(cols.find(c=>c[0]===S.oppSort.key)||['','自定义'])[1])+(S.oppSort.dir===1?' 升序':' 倒序')+'</b></div>'
+    +(spSel?'<div class="it">服务商地盘<b style="font-size:12px;color:var(--accent)">'+spSel.name+'</b></div>':'')
+    +'</div>'
+    +'<div class="opptools">'
+    +'<div class="tabs" id="oppTabs"><button data-t="0"'+(S.oppTab===0?' class="on"':'')+'>全部可售</button><button data-t="1"'+(S.oppTab===1?' class="on"':'')+'>即将释放专区（'+expN+'）</button></div>'
+    +(S.oppTab===0?'<label>状态 <select id="oppState"><option value="sell"'+(S.oppState==='sell'?' selected':'')+'>全部可售</option><option value="free"'+(S.oppState==='free'?' selected':'')+'>仅全窗空白</option><option value="expiring"'+(S.oppState==='expiring'?' selected':'')+'>仅即将释放</option></select></label>'
+      +'<label>价值下限 <input type="number" id="oppMinVal" min="0" step="1000" value="'+S.oppMinVal+'" placeholder="元"> 元</label>'
+      +'<label>热度下限 <input type="number" id="oppMinHeat" min="0" max="100" value="'+S.oppMinHeat+'"></label>':'')
+    +'<label>服务商 <select id="oppSp"><option value="">全部（不过滤）</option>'+spOpts.map(p=>'<option value="'+p.id+'"'+(p.id===S.oppSp?' selected':'')+'>'+p.name+'（'+({city:'本地包城',province:'本省',national:'全国'}[p.scope]||p.scope)+'）</option>').join('')+'</select></label>'
+    +'<label><input type="checkbox" id="oppCombo"'+(S.oppSort.key==='combo'?' checked':'')+'> 价值×热度综合分</label>'
+    +'<span class="sp" style="flex:1"></span>'
+    +'<button class="btn" id="oppCsv">导出 CSV</button>'
+    +'<button class="btn" id="oppCopy">复制派单文案</button>'
+    +'<button class="btn pri" id="oppShare">复制分享链接</button>'
+    +'</div>'
+    +(spSel?'<div style="color:var(--sub);font-size:11px;padding:0 2px 8px">已过滤到「'+spSel.name+'」可作业地盘（覆盖城市×类目）；地盘允许与其他服务商重叠。'+(spSel.line==='高频'?'该服务商为高频牌照（休娱丽人+生活服务），机会榜按当前行业线展示，切换行业线可看另一半盘子。':'')+' <button class="btn" style="padding:2px 8px;font-size:11px" id="oppSpClear">清除</button></div>':'')
+    +'<div class="tblwrap"><table><thead><tr>'+head+'</tr></thead><tbody>'+body+'</tbody></table>'
+    +(total?'':'<div class="empty">当前筛选无命中格子，请放宽状态/价值/热度条件</div>')+'</div>'
+    +'<div class="pager"><button id="oppPrev"'+(S.oppPage===0?' disabled':'')+'>← 上一页</button><span>第 '+(S.oppPage+1)+'/'+pages+' 页 · 每页 100 行</span><button id="oppNext"'+(S.oppPage>=pages-1?' disabled':'')+'>下一页 →</button>'
+    +(total>2000?'<span style="color:var(--gold)">命中 '+total.toLocaleString()+' 格，仅展示前 2000（请用筛选/服务商收窄）</span>':'<span>共 '+total.toLocaleString()+' 格</span>')
+    +'<span style="margin-left:auto">点击表头排序 · 点击行进单格甘特 · 综合分=窗内价值(万)×(1+热度/100)</span></div>';
+  // 事件
+  document.getElementById('oppTabs').onclick=e=>{ const b=e.target.closest('button'); if(!b)return;
+    S.oppTab=+b.dataset.t; S.oppPage=0; S.oppSort=S.oppTab===1?{key:'exp',dir:1}:{key:'value',dir:-1}; renderOpp(filteredCells()); };
+  const st=document.getElementById('oppState'); if(st) st.onchange=e=>{ S.oppState=e.target.value; S.oppPage=0; renderOpp(filteredCells()); };
+  const mv=document.getElementById('oppMinVal'); if(mv) mv.onchange=e=>{ S.oppMinVal=Math.max(0,+e.target.value||0); S.oppPage=0; renderOpp(filteredCells()); };
+  const mh=document.getElementById('oppMinHeat'); if(mh) mh.onchange=e=>{ S.oppMinHeat=Math.max(0,+e.target.value||0); S.oppPage=0; renderOpp(filteredCells()); };
+  document.getElementById('oppSp').onchange=e=>{ S.oppSp=e.target.value; S.oppPage=0; renderOpp(filteredCells()); };
+  const spc=document.getElementById('oppSpClear'); if(spc) spc.onclick=()=>{ S.oppSp=''; S.oppPage=0; renderOpp(filteredCells()); };
+  document.getElementById('oppCombo').onchange=e=>{ S.oppSort=e.target.checked?{key:'combo',dir:-1}:{key:'value',dir:-1}; S.oppPage=0; renderOpp(filteredCells()); };
+  el.querySelector('thead').onclick=e=>{ const th=e.target.closest('th.sortable'); if(!th)return;
+    const k=th.dataset.sk;
+    if(S.oppSort.key===k) S.oppSort.dir*=-1;
+    else S.oppSort={key:k,dir:['city','area','path','code','plan','state','deal','exp'].includes(k)?1:-1};
+    S.oppPage=0; renderOpp(filteredCells()); };
+  document.getElementById('oppPrev').onclick=()=>{ if(S.oppPage>0){S.oppPage--; renderOpp(filteredCells());} };
+  document.getElementById('oppNext').onclick=()=>{ if(S.oppPage<pages-1){S.oppPage++; renderOpp(filteredCells());} };
+  const tb=el.querySelector('tbody');
+  tb.onclick=e=>{
+    const rec=e.target.closest('button[data-rec]');
+    if(rec){ e.stopPropagation(); showRecModal(rec.dataset.rec); return; }
+    const tr=e.target.closest('tr[data-i]'); if(!tr)return;
+    openGantt(page[+tr.dataset.i].c);
+  };
+  document.getElementById('oppCsv').onclick=()=>{
+    const lines=[cols.map(c=>c[1]).concat(['高优作业服务商']).join(',')];
+    for(const r of capped){ const c=r.c,m=r.m; const rec=recommend(c);
+      const base=[cellCity(c),cellArea(c),'"'+cellPath(c)+'"'];
+      if(!isScenic) base.push(c.code||'');
+      base.push(cellPlan(c),STATE_LABEL[m.state],m.freeDays+'/'+m.Wd);
+      if(isScenic) base.push(poiOf(c));
+      else base.push(m.earliest?iso(m.earliest):'',c.list||0,m.value,m.heat,m.lastDeal||'');
+      if(S.oppTab===1) base.push(iso(r.exp),r.rel.value);
+      base.push('"'+(rec.top.map(t=>t.name).join('、')||'无匹配')+' 等'+rec.total+'家"');
+      lines.push(base.join(',')); }
+    dl('tdz_机会榜_'+(S.oppTab===1?'即将释放':'全部可售')+'_'+iso(TODAY)+'.csv','﻿'+lines.join('\n'));
+  };
+  document.getElementById('oppCopy').onclick=()=>{
+    const use=capped.slice(0,10);
+    if(!use.length){ toast('当前无命中格子'); return; }
+    const txt='【顶钻展机会派单 · '+cellLineLabel()+' · 窗 '+iso(winRange()[0])+'~'+iso(winRange()[1])+'】\n'+use.map(r=>{
+      const c=r.c,m=r.m; const rec=recommend(c);
+      return '· '+cellCity(c)+' '+cellPath(c)+'（'+cellArea(c)+'）'+STATE_LABEL[m.state]+'，空闲'+m.freeDays+'天'+(m.earliest?'，最早可上刊 '+iso(m.earliest):'')+(c.scenic?'':'，挂牌 '+fmtMoney(c.list)+'/30天，窗内可售 '+fmtMoney(m.value))+(S.oppTab===1?'，到期日 '+iso(r.exp):'')+'；高优作业：'+(rec.top.map(t=>t.name+'['+t.badges.join('·')+']').join('、')||'无匹配')+' 等'+rec.total+'家';
+    }).join('\n');
+    navigator.clipboard.writeText(txt).then(()=>{toast('派单文案已复制（TOP'+use.length+'）');track('copy','opp');}).catch(()=>fallbackCopy(txt));
+  };
+  document.getElementById('oppShare').onclick=()=>{
+    const url=shareURL();
+    navigator.clipboard.writeText(url).then(()=>{toast('分享链接已复制（含当前全部筛选）');track('share');}).catch(()=>fallbackCopy(url));
+  };
+}
+
+/* ============ M5 释放日历 ============ */
+function calDayMap(arr){
+  const horizon=addDays(TODAY,89);
+  const dayMap=new Map();
+  for(const c of arr){
+    const exp=expiryOf(c); if(!exp||exp>horizon) continue;
+    const k=iso(exp);
+    if(!dayMap.has(k)) dayMap.set(k,{cells:[],amt:0});
+    const o=dayMap.get(k); const rel=releaseInfo(c);
+    o.cells.push({c,rel}); o.amt+=rel.value;
+  }
+  return dayMap;
+}
+function calListHTML(list){
+  const rows=list.slice().sort((a,b)=>b.rel.value-a.rel.value).slice(0,400);
+  const body=rows.map((r,i)=>{
+    const c=r.c, m=metrics(c);
+    return '<tr data-i="'+i+'"><td>'+cellCity(c)+'</td>'
+      +'<td><b>'+cellPath(c).split(';').pop()+'</b><div style="color:var(--sub);font-size:10px">'+cellPath(c)+'</div></td>'
+      +'<td>'+cellArea(c)+'</td><td>'+cellPlan(c)+'</td>'
+      +'<td>'+iso(r.rel.exp)+'</td>'
+      +'<td class="money">'+(c.scenic?'—':fmtMoney(r.rel.value))+'</td>'
+      +'<td>'+r.rel.days+' 天</td>'
+      +'<td>'+(m.deals>0?'<span class="st free">老客可续</span>':'<span style="color:var(--sub)">新客</span>')+'</td>'
+      +'<td class="hintcell">'+hintHTML(c)+'</td></tr>';
+  }).join('');
+  return {html:'<div class="tblwrap"><table><thead><tr><th>城市</th><th>类目</th><th>区域</th><th>方案</th><th>到期日</th><th>释放价值</th><th>释放后空闲天</th><th>老客可续</th><th>高优作业服务商</th></tr></thead><tbody>'+body+'</tbody></table>'
+    +(list.length>400?'<div class="empty">仅显示前 400 行（共 '+list.length.toLocaleString()+' 行），请用全局省/市/类目筛选收窄</div>':'')
+    +(list.length?'':'<div class="empty">该范围 90 天内无释放</div>')+'</div>', rows};
+}
+function renderCal(arr){
+  const el=document.getElementById('viewCal');
+  const dayMap=calDayMap(arr);
+  const totalCells=[...dayMap.values()].reduce((s,o)=>s+o.cells.length,0);
+  const totalAmt=[...dayMap.values()].reduce((s,o)=>s+o.amt,0);
+  const maxAmt=Math.max(1,...[...dayMap.values()].map(o=>o.amt));
+  const [,w2]=winRange();
+  const isScenic=S.plan==='scenic';
+  let html='<div class="summary">'
+    +'<div class="it">90 天释放格<b>'+totalCells.toLocaleString()+'</b></div>'
+    +'<div class="it">释放价值合计<b class="money">'+(isScenic?'景区口径待补':fmtMoney(totalAmt))+'</b></div>'
+    +'<div class="it">有释放天数<b>'+dayMap.size+'</b></div>'
+    +'<div class="it">口径<b style="font-size:12px">在投单到期 · 释放价值随当前时间窗</b></div>'
+    +'</div>'
+    +'<div class="tabs" id="calTabs"><button data-t="0"'+(S.calTab===0?' class="on"':'')+'>日历视图</button><button data-t="1"'+(S.calTab===1?' class="on"':'')+'>名单视图（金额倒序）</button></div>';
+  let listRows=null;
+  if(S.calTab===0){
+    html+='<div class="calwrap">';
+    for(let mo=0;mo<3;mo++){
+      const first=addMonths(TODAY,mo);
+      const y=first.getFullYear(), m=first.getMonth();
+      const dim=new Date(y,m+1,0).getDate();
+      const lead=(new Date(y,m,1).getDay()+6)%7;
+      html+='<div class="calmonth"><h4>'+y+'-'+String(m+1).padStart(2,'0')+'</h4><div class="calgrid">'
+        +['一','二','三','四','五','六','日'].map(w=>'<div class="wd">'+w+'</div>').join('');
+      for(let i=0;i<lead;i++) html+='<div class="calday blank"></div>';
+      for(let d=1;d<=dim;d++){
+        const dt=new Date(y,m,d); const k=iso(dt);
+        if(dt<TODAY){ html+='<div class="calday blank"><div class="dn" style="color:var(--gray)">'+d+'</div></div>'; continue; }
+        const o=dayMap.get(k);
+        const alpha=o&&o.amt>0?(0.15+0.7*o.amt/maxAmt):0;
+        const cls='calday'+(k===iso(TODAY)?' today':'')+(k===S.calDay?' sel':'');
+        const sty=o&&o.amt>0?' style="background:rgba(53,208,186,'+alpha.toFixed(2)+')"':'';
+        html+='<div class="'+cls+'" data-d="'+k+'"'+sty+' title="'+k+(o?' 释放 '+o.cells.length+' 格 · '+fmtMoney(o.amt):' 无释放')+'">'
+          +'<div class="dn">'+d+'</div>'+(o?'<div class="ct">'+o.cells.length+'格</div><div>'+(isScenic?'':(o.amt>0?fmtN(o.amt):(dt>w2?'<span style="color:var(--gray)">窗外</span>':'0')))+'</div>':'')+'</div>';
+      }
+      html+='</div></div>';
+    }
+    html+='</div>';
+    if(S.calDay){
+      const o=dayMap.get(S.calDay);
+      html+='<div class="panel"><h3>'+S.calDay+' 释放名单 <span class="hint">'+(o?o.cells.length+' 格 · 释放价值 '+fmtMoney(o.amt):'无释放')+' · 点击行进甘特</span></h3>';
+      if(o){ const r=calListHTML(o.cells); html+=r.html; listRows=r.rows; }
+      html+='</div>';
+    } else {
+      html+='<div style="color:var(--sub);font-size:12px;padding:4px 2px 10px">点击有数字的日期查看当天释放名单（城市/类目/方案/到期日/老客可续）。</div>';
+    }
+  } else {
+    const all=[]; for(const o of dayMap.values()) all.push(...o.cells);
+    const r=calListHTML(all); html+=r.html; listRows=r.rows;
+  }
+  html+='<div style="color:var(--sub);font-size:11px;padding:8px 2px">口径：释放=在投单到期；<b>释放价值=到期次日至当前窗末的空闲天×日均刊例</b>（刊例口径，PRD 缺口#10；订单名/原订单销售属管理档字段，v1 不展示，决策#13）。金额随当前时间窗变化，看满 90 天释放价值请把时间窗切到 D+90。老客可续=近 180 天有已完成单。色深=当日释放价值，数字=释放格数。</div>';
+  el.innerHTML=html;
+  document.getElementById('calTabs').onclick=e=>{ const b=e.target.closest('button'); if(!b)return; S.calTab=+b.dataset.t; renderCal(filteredCells()); };
+  el.querySelectorAll('.calday[data-d]').forEach(d=>d.onclick=()=>{ S.calDay=S.calDay===d.dataset.d?null:d.dataset.d; renderCal(filteredCells()); });
+  if(listRows){
+    el.querySelectorAll('.tblwrap tbody').forEach(tb=>tb.onclick=e=>{
+      const rec=e.target.closest('button[data-rec]');
+      if(rec){ e.stopPropagation(); showRecModal(rec.dataset.rec); return; }
+      const tr=e.target.closest('tr[data-i]'); if(!tr)return;
+      openGantt(listRows[+tr.dataset.i].c);
+    });
+  }
+}
+
+/* ============ M4.7 服务商增量空间榜（决策#13 公开版=服务商维度） ============ */
+let provBoardCache=null, provBoardKey='';
+function computeProvBoard(){
+  const [w1,w2]=winRange();
+  const key=iso(w1)+'_'+iso(w2)+'|'+S.prov+'|'+S.city+'|'+S.cat;
+  if(provBoardKey===key&&provBoardCache) return provBoardCache;
+  const q=S.cat.toLowerCase();
+  const geo=c=>(S.prov<0||IDX.cityProv[c.ci]===S.prov)&&(S.city<0||c.ci===S.city)&&(!q||cellPath(c).toLowerCase().includes(q));
+  // 每线按城市预分组（含预算好的 metrics），避免逐服务商重复算
+  const univ={};
+  for(const ln of IDX.dicts.lines){
+    const m=new Map();
+    for(const c of CELLS){
+      if(IDX.dicts.lines[c.li]!==ln||!geo(c)) continue;
+      if(!m.has(c.ci)) m.set(c.ci,[]);
+      m.get(c.ci).push({c,mm:metrics(c),hi:c.hi});
+    }
+    univ[ln]=m;
+  }
+  const suniv=new Map();
+  for(const c of SCELLS){ if(!geo(c)) continue; if(!suniv.has(c.ci)) suniv.set(c.ci,[]); suniv.get(c.ci).push({c,mm:metrics(c),bi:c.bi}); }
+  const groups={'美食':[],'高频':[],'文旅':[]};
+  for(const p of PROV.providers){
+    const g=groups[p.line]; if(!g) continue;
+    let y=0,x=0,val=0;
+    if(p.line==='文旅'){
+      const okB=SCENIC.dicts.buckets.map(b=>covers(p,b));
+      for(const ci of p.cities||[]){ const list=suniv.get(ci); if(!list) continue;
+        for(const it of list){ if(!okB[it.bi]) continue; y++; if(it.mm.occDays>0)x++; } }
+      g.push({p,y,x,val:null,cov:y?x/y:0});
+    } else {
+      const lns=p.line==='美食'?['美食']:['休娱丽人','生活服务'];
+      for(const ln of lns){
+        const u=univ[ln]; if(!u) continue;
+        const ok=SHARDS[ln].dicts.paths.map(pt=>covers(p,pt));
+        for(const ci of p.cities||[]){ const list=u.get(ci); if(!list) continue;
+          for(const it of list){ if(!ok[it.hi]) continue; y++; if(it.mm.occDays>0)x++; else val+=it.mm.value; } }
+      }
+      g.push({p,y,x,val,cov:y?x/y:0});
+    }
+  }
+  groups['美食'].sort((a,b)=>b.val-a.val||b.y-a.y);
+  groups['高频'].sort((a,b)=>b.val-a.val||b.y-a.y);
+  groups['文旅'].sort((a,b)=>b.y-a.y);
+  provBoardCache=groups; provBoardKey=key;
+  return groups;
+}
+function gotoProviderOpp(pid){
+  const p=PROV.providers.find(x=>x.id===pid); if(!p) return;
+  S.oppSp=pid; S.oppTab=0; S.oppState='sell'; S.oppPage=0; S.oppSort={key:'value',dir:-1};
+  if(p.line==='美食'){ S.line=IDX.dicts.lines.indexOf('美食'); S.plan='all'; }
+  else if(p.line==='高频'){ if(IDX.dicts.lines[S.line]==='美食') S.line=IDX.dicts.lines.indexOf('休娱丽人'); S.plan='all'; }
+  else { S.plan='scenic'; }
+  S.view='opp'; buildControls(); render();
+  toast('机会榜已过滤到「'+p.name+'」的可作业地盘');
+}
+function renderProvBoard(){
+  const el=document.getElementById('viewProv');
+  const data=computeProvBoard();
+  const q=S.provQ.toLowerCase();
+  const scopeLbl={city:'本地包城',province:'本省',national:'全国',special:'特殊规格',unresolved:'待核',empty:'未填'};
+  const cardHTML=r=>{
+    const p=r.p;
+    return '<div class="pcard" data-pid="'+p.id+'"><h5>'+p.name+' <span class="st free">'+(scopeLbl[p.scope]||p.scope)+'</span>'+(p.cat!=='all'?' <span class="st partial">类目专精</span>':'')+'</h5>'
+      +'<div class="kv"><span>覆盖城市</span><b>'+(p.cities||[]).length+' 城</b></div>'
+      +'<div class="kv"><span>可作业盘子</span><b>'+r.y.toLocaleString()+' 格</b></div>'
+      +'<div class="kv"><span>已售</span><b>'+r.x.toLocaleString()+' / '+r.y.toLocaleString()+'</b></div>'
+      +'<div class="pb"><i style="width:'+(r.cov*100).toFixed(1)+'%"></i></div>'
+      +'<div class="kv"><span>覆盖率</span><b>'+(r.cov*100).toFixed(1)+'%</b></div>'
+      +'<div class="kv"><span>增量空间</span><b class="money">'+(r.val==null?'— 景区口径待补':fmtMoney(r.val))+'</b></div></div>';
+  };
+  let html='<div class="summary">'
+    +'<div class="it">服务商总数<b>'+PROV.providers.length+'</b></div>'
+    +'<div class="it">分组<b style="font-size:12px">美食 / 高频 / 文旅牌照</b></div>'
+    +'<div class="it">盘子口径<b style="font-size:12px">覆盖城市×类目 · 当前窗 '+iso(winRange()[0])+'~'+iso(winRange()[1])+'</b></div>'
+    +'<div class="it" style="margin-left:auto"><input type="text" id="provQ" placeholder="搜索服务商名称" value="'+S.provQ+'" style="width:200px"></div>'
+    +'</div>';
+  const meta=[['美食','美食线 · 增量空间=覆盖格中全窗空白格的整窗刊例价值'],['高频','休娱丽人+生活服务两线合并盘子'],['文旅','景区钻展（类目桶粒度）· 金额口径待业务补充']];
+  for(const [gname,note] of meta){
+    let cards=data[gname]; if(q) cards=cards.filter(r=>r.p.name.toLowerCase().includes(q));
+    const sumVal=cards.reduce((s,r)=>s+(r.val||0),0);
+    html+='<div class="panel" style="margin-bottom:10px"><h3>'+gname+'牌照 <span class="hint">'+note+' · '+cards.length+' 家'+(gname!=='文旅'?' · 合计增量空间 '+fmtMoney(sumVal)+'（重叠未去重，不可直接加总对外）':'')+' · 点击卡片过滤机会榜</span></h3>'
+      +'<div class="pcards">'+(cards.map(cardHTML).join('')||'<div class="empty">无匹配服务商</div>')+'</div></div>';
+  }
+  html+='<div style="color:var(--sub);font-size:11px;padding:8px 2px">决策#13：公开版为服务商维度；<b>可作业盘子允许重叠</b>（一格可被多家服务商覆盖），各卡增量空间不可直接加总。盘子受全局省/市/类目筛选影响，不受行业线/方案层限制。渠道经理/大区维度版移 v1.1 管理档；公共版不含渠道经理/工号/大区/小区。</div>';
+  el.innerHTML=html;
+  document.getElementById('provQ').oninput=e=>{ S.provQ=e.target.value.trim(); renderProvBoard(); };
+  el.querySelectorAll('.pcard').forEach(cd=>cd.onclick=()=>gotoProviderOpp(cd.dataset.pid));
+}
+
+/* ============ 脚注 / 工具 ============ */
+function renderFooter(){
+  document.getElementById('footer').innerHTML=
+    '<b>口径脚注</b> · 当前窗 '+iso(winRange()[0])+' ~ '+iso(winRange()[1])+'（默认 D+30，与参考工具对数口径） · 占量有效状态白名单：PERFORMANCING / WAIT_PUBLISH / SIGNING / WAIT_SIGN / COMPLETED · '
+    +'目录外占量 143 行不计入占率分母（路径缺失59+地域组合缺失84，M6 质检台 v1.1 展示） · 多 code 歧义守卫=0（路径键 join，决策#11） · '
+    +'询量未成交不计热度（决策#10①） · CITY/AREA 重叠仅标注不告警（决策#10②） · '
+    +'<b>金额一律刊例口径</b>：上游占量表未暴露实付/签约日期（PRD 缺口#10），营收=新签刊例价值按上刊开始月归集；不露底价/实付/精确折扣（决策#10③） · '
+    +'景区=类目桶粒度（决策#11），POI 字典为下钻宇宙，景区金额口径待业务补充 · '
+    +'机会榜默认窗内价值倒序、展示上限 TOP2000，综合分=窗内价值(万)×(1+热度/100) · 释放价值=到期次日至当前窗末空闲天×日均刊例（M5 日历同口径） · '
+    +'服务商增量榜（决策#13）：盘子=覆盖城市×类目，允许重叠、各卡不可加总；渠道经理/大区维度 v1.1 管理档 · '
+    +'数据截至 '+IDX.meta.pullDate+'（FBI T+1，每日 09:00 同步，不承诺日内实时） · 公共版服务商名单不含渠道经理/工号/大区/小区';
+}
+function dl(name,text){
+  const b=new Blob([text],{type:'text/csv;charset=utf-8'}); const a=document.createElement('a');
+  a.href=URL.createObjectURL(b); a.download=name; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(a.href);
+  track('export',name);
+  toast('已导出 '+name);
+}
+function fallbackCopy(txt){
+  const ta=document.createElement('textarea'); ta.value=txt; document.body.appendChild(ta); ta.select();
+  document.execCommand('copy'); ta.remove(); track('copy','fallback'); toast('派单文案已复制');
+}
+let toastTimer=null;
+function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.style.display='block';
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.style.display='none',2200); }
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){ if(document.getElementById('modal').style.display==='flex'){document.getElementById('modal').style.display='none';return;}
+    if(S.view==='gantt'){S.view='city';render();} else if(S.view==='city'){S.view='map';render();}
+    else if(['opp','cal','prov','dict'].includes(S.view)){S.view='map';render();} return; }
+  // M10.3 ↑↓选行 / Enter 进甘特（输入框聚焦时不劫持）
+  const tag=(document.activeElement&&document.activeElement.tagName)||'';
+  if(['INPUT','SELECT','TEXTAREA'].includes(tag)) return;
+  if(!['city','opp'].includes(S.view)||!KBROWS.length) return;
+  if(e.key==='ArrowDown'||e.key==='ArrowUp'){
+    e.preventDefault();
+    S.kbRow=Math.min(KBROWS.length-1,Math.max(0,S.kbRow+(e.key==='ArrowDown'?1:-1)));
+    const viewEl=document.getElementById(S.view==='city'?'viewCity':'viewOpp');
+    viewEl.querySelectorAll('tbody tr.kbsel').forEach(tr=>tr.classList.remove('kbsel'));
+    const tr=viewEl.querySelector('tbody tr[data-i="'+S.kbRow+'"]');
+    if(tr){ tr.classList.add('kbsel'); tr.scrollIntoView({block:'nearest'}); }
+  }
+  if(e.key==='Enter'&&S.kbRow>=0&&KBROWS[S.kbRow]){ e.preventDefault(); openGantt(KBROWS[S.kbRow].c); }
+});
+</script>
+</body>
+</html>
