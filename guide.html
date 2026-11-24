@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>顶钻展作业地图 · 新手指引（小白版）</title>
+<meta name="description" content="顶钻展作业地图图文教程：12 课学会看热力、找空位、排档期、试算报价、抄机会榜作业。配真实界面截图。">
+<style>
+:root{
+  --bg:#f4f6fa; --card:#ffffff; --ink:#1c2733; --sub:#5b6b7c; --line:#e3e8ef;
+  --teal:#0e9488; --teal-bg:#e6f6f4; --blue:#2563eb; --blue-bg:#eaf1fe;
+  --amber:#b45309; --amber-bg:#fdf3e3; --red:#b91c1c; --red-bg:#fdecec;
+  --code:#f1f4f8; --shadow:0 1px 2px rgba(16,24,40,.05),0 8px 24px -12px rgba(16,24,40,.12);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth; scroll-padding-top:76px}
+body{margin:0; background:var(--bg); color:var(--ink);
+  font:15px/1.75 -apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;}
+a{color:var(--blue); text-decoration:none}
+a:hover{text-decoration:underline}
+.wrap{max-width:960px; margin:0 auto; padding:0 16px}
+/* top bar */
+.top{position:sticky; top:0; z-index:40; background:rgba(255,255,255,.92); backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--line);}
+.top .wrap{display:flex; align-items:center; gap:10px; height:56px}
+.logo{font-weight:800; font-size:16px; letter-spacing:.2px; white-space:nowrap}
+.logo small{display:block; font-size:11px; color:var(--sub); font-weight:500; line-height:1.2}
+.top .sp{flex:1}
+.btn{display:inline-flex; align-items:center; gap:6px; border:1px solid var(--line); background:#fff;
+  color:var(--ink); border-radius:9px; padding:7px 13px; font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap}
+.btn:hover{border-color:#c9d4e0; text-decoration:none}
+.btn.pri{background:var(--teal); border-color:var(--teal); color:#fff}
+.btn.pri:hover{background:#0b7f74}
+/* hero */
+.hero{padding:34px 0 8px}
+.hero h1{font-size:30px; line-height:1.3; margin:0 0 10px; letter-spacing:.3px}
+.hero .lead{font-size:16px; color:var(--sub); margin:0 0 16px; max-width:760px}
+.facts{display:flex; flex-wrap:wrap; gap:8px; margin:0 0 18px}
+.fact{background:var(--teal-bg); color:#0b6b62; border:1px solid #bfe6e1; border-radius:999px;
+  padding:5px 12px; font-size:12.5px; font-weight:600}
+.fact.b{background:var(--blue-bg); color:#1d4ed8; border-color:#c9dbfb}
+.fact.a{background:var(--amber-bg); color:var(--amber); border-color:#f0dcb8}
+.hero .cta{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:6px}
+/* toc */
+.toc{background:var(--card); border:1px solid var(--line); border-radius:14px; box-shadow:var(--shadow);
+  padding:14px 16px; margin:18px 0 8px}
+.toc h2{margin:0 0 8px; font-size:13px; color:var(--sub); letter-spacing:1px}
+.toc ol{list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:6px 14px}
+.toc a{display:flex; gap:8px; align-items:baseline; font-size:13.5px; color:var(--ink); padding:3px 0}
+.toc a b{color:var(--teal); font-size:12px; min-width:34px}
+.toc a:hover{color:var(--teal); text-decoration:none}
+/* lesson */
+section.lesson{background:var(--card); border:1px solid var(--line); border-radius:16px; box-shadow:var(--shadow);
+  margin:22px 0; padding:24px 26px 20px; scroll-margin-top:76px}
+section.lesson>header{display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; margin-bottom:4px}
+.no{font-size:12px; font-weight:800; color:#fff; background:var(--teal); border-radius:8px; padding:3px 9px; letter-spacing:1px}
+section.lesson h2{margin:0; font-size:21px; letter-spacing:.2px}
+.goal{color:var(--sub); font-size:14px; margin:2px 0 14px}
+.goal b{color:var(--ink)}
+h3{font-size:15.5px; margin:20px 0 8px; padding-left:10px; border-left:3px solid var(--teal)}
+p{margin:8px 0}
+ul,ol.plain{margin:8px 0; padding-left:22px}
+li{margin:4px 0}
+/* steps */
+ol.steps{list-style:none; counter-reset:st; margin:12px 0; padding:0}
+ol.steps>li{counter-increment:st; position:relative; padding:0 0 0 40px; margin:0 0 12px}
+ol.steps>li::before{content:counter(st); position:absolute; left:0; top:2px; width:26px; height:26px;
+  border-radius:50%; background:var(--blue-bg); color:var(--blue); font-weight:800; font-size:13px;
+  display:flex; align-items:center; justify-content:center; border:1px solid #c9dbfb}
+ol.steps>li::after{content:""; position:absolute; left:12.5px; top:32px; bottom:-8px; width:1px; background:var(--line)}
+ol.steps>li:last-child::after{display:none}
+.tap{display:inline-block; background:var(--code); border:1px solid var(--line); border-radius:6px;
+  padding:0 7px; font-size:13px; font-weight:600; color:#0f3f74; white-space:nowrap}
+.k{font-weight:700}
+/* callouts */
+.note,.win,.warn{border-radius:12px; padding:10px 14px; margin:12px 0; font-size:13.5px; border:1px solid}
+.note{background:var(--blue-bg); border-color:#c9dbfb; color:#1e40af}
+.win{background:var(--teal-bg); border-color:#bfe6e1; color:#0b6b62}
+.warn{background:var(--amber-bg); border-color:#f0dcb8; color:#8a4b06}
+.note b,.win b,.warn b{font-weight:800}
+.note::before{content:"提示 · "; font-weight:800}
+.win::before{content:"学会的标志 · "; font-weight:800}
+.warn::before{content:"别踩坑 · "; font-weight:800}
+/* figures */
+figure.shot{margin:14px 0; border:1px solid var(--line); border-radius:12px; overflow:hidden; background:#0f1923}
+figure.shot img{display:block; width:100%; height:auto; cursor:zoom-in}
+figure.shot figcaption{background:#fff; color:var(--sub); font-size:12.5px; padding:8px 12px; border-top:1px solid var(--line)}
+figure.shot figcaption b{color:var(--ink)}
+.shotrow{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+.shotrow figure.shot{margin:0}
+@media(max-width:700px){.shotrow{grid-template-columns:1fr}}
+/* term table */
+table.terms{width:100%; border-collapse:collapse; margin:10px 0; font-size:13.5px}
+table.terms th,table.terms td{border:1px solid var(--line); padding:8px 10px; text-align:left; vertical-align:top}
+table.terms th{background:var(--code); font-size:12.5px; color:var(--sub); white-space:nowrap}
+table.terms td:first-child{font-weight:700; white-space:nowrap}
+/* faq */
+details.faq{border:1px solid var(--line); border-radius:12px; margin:8px 0; background:#fff; overflow:hidden}
+details.faq summary{cursor:pointer; padding:11px 14px; font-weight:700; font-size:14px; list-style:none; display:flex; gap:8px}
+details.faq summary::before{content:"Q"; color:var(--teal); font-weight:800}
+details.faq summary::-webkit-details-marker{display:none}
+details.faq[open] summary{border-bottom:1px solid var(--line); background:var(--code)}
+details.faq .a{padding:10px 14px 12px; font-size:13.5px; color:#33445a}
+/* footer */
+footer{margin:26px 0 40px; color:var(--sub); font-size:12.5px; text-align:center; line-height:1.9}
+/* lightbox */
+#lb{position:fixed; inset:0; z-index:90; background:rgba(10,16,24,.86); display:none;
+  align-items:center; justify-content:center; flex-direction:column; padding:20px; cursor:zoom-out}
+#lb.on{display:flex}
+#lb img{max-width:100%; max-height:82vh; border-radius:8px; box-shadow:0 20px 60px rgba(0,0,0,.5); background:#0f1923}
+#lb .cap{color:#dbe6f0; font-size:13px; margin-top:12px; text-align:center; max-width:900px}
+#lb .hint{color:#8fa3b5; font-size:11.5px; margin-top:4px}
+#toTop{position:fixed; right:18px; bottom:22px; z-index:50; width:42px; height:42px; border-radius:50%;
+  border:1px solid var(--line); background:#fff; box-shadow:var(--shadow); cursor:pointer; font-size:16px; color:var(--sub); display:none}
+#toTop.on{display:block}
+@media(max-width:700px){
+  .hero h1{font-size:24px}
+  section.lesson{padding:18px 16px 14px; border-radius:14px}
+  .top .wrap{height:52px}
+  .logo small{display:none}
+}
+@media print{
+  .top,#toTop,#lb,.toc{display:none!important}
+  section.lesson{box-shadow:none; break-inside:avoid-page}
+  figure.shot img{cursor:default}
+}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <div class="wrap">
+    <div class="logo">顶钻展作业地图 · 新手指引<small>小白版图文教程 · 12 课</small></div>
+    <div class="sp"></div>
+    <a class="btn" href="#toc">目录</a>
+    <a class="btn pri" href="https://609725591-spec.github.io/tdz-work-map/" target="_blank" rel="noopener">打开工具 ↗</a>
+  </div>
+</div>
+
+<div class="wrap">
+
+<div class="hero">
+  <h1>拿到这个工具，<br>12 课学会「哪里空着、值多少钱、怎么排进去」</h1>
+  <p class="lead">顶钻展作业地图是一张<b>广告档期库存地图</b>：把顶展 2.0、钻展 v1、顶展行政区、景区钻展四种卖法，按「城市 × 类目词包 × 时间窗」摊成一个个格子，告诉你哪些格子空着能卖、哪些快到期能抢、哪些已经有主。本指引假设你第一次接触它，照着做即可，不需要任何技术背景。</p>
+  <div class="facts">
+    <span class="fact">无需登录 · 打开就能用</span>
+    <span class="fact b">每天 09:00 更新 · 数据 T+1</span>
+    <span class="fact a">金额均为刊例口径 · 非实付</span>
+    <span class="fact">手机 / 电脑都能看</span>
+  </div>
+  <div class="cta">
+    <a class="btn pri" href="https://609725591-spec.github.io/tdz-work-map/" target="_blank" rel="noopener">边看边练：打开工具 ↗</a>
+    <a class="btn" href="#s2">我只想快点找空位 → 第 2 课</a>
+    <a class="btn" href="#s10">先查常见问题 → 第 10 课</a>
+  </div>
+  <p style="color:var(--sub);font-size:12.5px;margin-top:10px">建议用法：电脑开工具、手机开本指引（或反之），一课一课对照点。所有截图均为真实界面（截于 2026-11-24），<b>点任意截图可放大</b>。</p>
+</div>
+
+<nav class="toc" id="toc">
+  <h2>目录 · 按顺序学约 25 分钟，按需跳读也可以</h2>
+  <ol>
+    <li><a href="#s0"><b>第0课</b>认识界面：三排按钮各管什么</a></li>
+    <li><a href="#s1"><b>第1课</b>六个词：格子 / 词包 / 时间窗 / 占量 / 刊例 / 热度</a></li>
+    <li><a href="#s2"><b>第2课</b>找空位：从全国热力到一城明细</a></li>
+    <li><a href="#s3"><b>第3课</b>谈客户：甘特排期 + 档期试算 + 派单文案</a></li>
+    <li><a href="#s4"><b>第4课</b>机会榜：全国空位按价值排队</a></li>
+    <li><a href="#s5"><b>第5课</b>释放日历：盯到期、抢释放、续老客</a></li>
+    <li><a href="#s6"><b>第6课</b>服务商增量榜：谁的地盘还有多少空间</a></li>
+    <li><a href="#s7"><b>第7课</b>词包字典：搞懂类目路径和 code</a></li>
+    <li><a href="#s8"><b>第8课</b>进阶：全城档期矩阵 / 景区钻展 / 统计月份</a></li>
+    <li><a href="#s9"><b>第9课</b>手机用法与快捷键</a></li>
+    <li><a href="#s10"><b>第10课</b>常见问题 FAQ</a></li>
+    <li><a href="#s11"><b>第11课</b>口径与边界：哪些数不能对外说</a></li>
+  </ol>
+</nav>
+
+<!-- ============ 0 ============ -->
+<section class="lesson" id="s0">
+  <header><span class="no">第 0 课</span><h2>认识界面：三排按钮各管什么</h2></header>
+  <p class="goal">目标：<b>30 秒内知道每个按钮在哪、管什么</b>，后面所有课都在这三排按钮上操作。</p>
+  <figure class="shot"><img src="guide/02-top.png" alt="工具顶部三排控制区" loading="lazy"><figcaption><b>图 0-1</b> · 顶部全景：标题行 → 四步提示行 → 视图导航 → 两排筛选器。右上角徽章写着数据截至日期。</figcaption></figure>
+  <h3>从上往下数，一共五层</h3>
+  <ol class="steps">
+    <li><span class="k">标题行</span>：左边是工具名和全局搜索框（placeholder 写着「全局搜索：城市 / 类目 / 词包code」）；右边徽章 <span class="tap">真实数据·FBI同源</span> <span class="tap">口径已校准</span> <span class="tap">数据截至 …(T+1)</span>，以及 <span class="tap">浅色</span>（切换明暗主题）和 <span class="tap">使用统计</span>。<b>看数据新不新，只看「数据截至」这一枚徽章。</b></li>
+    <li><span class="k">四步提示行</span>：工具自己写的用法口诀 —— 1 看热力 → 2 点城市 → 3 看空位行 → 4 进甘特。本指引第 2、3 课就是把它展开讲。</li>
+    <li><span class="k">视图导航</span>：六个页签 <span class="tap">地图首页</span> <span class="tap">机会榜</span> <span class="tap">释放日历</span> <span class="tap">服务商增量榜</span> <span class="tap">词包字典</span> <span class="tap">全城档期矩阵</span>。另有俩隐藏页签「城市详情」「单格甘特」，点进去才出现，不用找。</li>
+    <li><span class="k">筛选第一排（管"看哪种货、看多远"）</span>：<span class="tap">行业线</span>（生活服务 / 休娱丽人 / 美食）、<span class="tap">方案层</span>（全部 / 顶展2.0 / 钻展v1 / 顶展行政区 / 景区钻展）、<span class="tap">时间窗</span>（D+30 / D+60 / D+90 / 自定义）、<span class="tap">统计月份</span>（营收卡用哪个月）。</li>
+    <li><span class="k">筛选第二排（管"看哪里"）</span>：<span class="tap">省</span> <span class="tap">市</span> <span class="tap">类目</span> 搜索框，两个勾选 <span class="tap">只看未占量城市</span> <span class="tap">只看已有占量</span>，和 <span class="tap">一键重置</span>。最右边「当前筛选 N 格」告诉你现在筛出来多少个格子。</li>
+  </ol>
+  <div class="note"><b>所有筛选是全局的</b>：在第一排改了行业线或时间窗，六个视图全部跟着变。迷路了就点 <span class="tap">一键重置</span> 回到全国默认。</div>
+  <h3>地图首页中间还有什么</h3>
+  <div class="shotrow">
+    <figure class="shot"><img src="guide/03-kpis.png" alt="八张指标卡" loading="lazy"><figcaption><b>图 0-2</b> · 八张指标卡：总可售格子 / 窗内已占 / 剩余可售 / 整体占率 / 有占量城市 / 空白刊例价值 / 营收(月) / 增量空间。每张卡下面一行小字是口径。</figcaption></figure>
+    <figure class="shot"><img src="guide/04-mapctl.png" alt="地图控制条" loading="lazy"><figcaption><b>图 0-3</b> · 地图右上角控制条：<span class="tap">地图|列表</span> 切换、指标下拉（默认「已售单数」）、气泡下拉（空白价值 / 空白格数 / 关闭）。</figcaption></figure>
+  </div>
+  <p>指标卡不用背，记住三张就够开工：<b>剩余可售</b>（还有多少格能卖）、<b>空白刊例价值</b>（这些空位按刊例值多少钱）、<b>营收</b>（选中统计月已签了多少，刊例口径）。其余五张是解释口径用的。</p>
+  <div class="win">你能指出「时间窗在哪改」「数据截至在哪看」「一键重置在哪」，本课就过了。</div>
+</section>
+
+<!-- ============ 1 ============ -->
+<section class="lesson" id="s1">
+  <header><span class="no">第 1 课</span><h2>六个词：格子 / 词包 / 时间窗 / 占量 / 刊例 / 热度</h2></header>
+  <p class="goal">目标：<b>听懂工具里的黑话</b>。这六个词贯穿所有页面，先花 3 分钟读完再动手。</p>
+  <table class="terms">
+    <tr><th>词</th><th>人话解释</th><th>在界面上长什么样</th></tr>
+    <tr><td>格子</td><td>最小售卖单位 = <b>一个方案 × 一个城市(或区) × 一个词包 × 一段时间</b>。全国默认筛出两万多格，「当前筛选 N 格」就是它。</td><td>地图上的城市点、明细表里的一行、机会榜里的一行，都是格子。</td></tr>
+    <tr><td>方案层</td><td>四种卖法：<b>顶展2.0</b>（城市级置顶）、<b>钻展v1</b>（城市级钻石展位）、<b>顶展行政区</b>（只卖某个区）、<b>景区钻展</b>（景区类目桶）。方案列常显示成「高频&amp;顶展2.0」这类组合名。</td><td>筛选第一排「方案层」五个按钮；明细表「方案」列。</td></tr>
+    <tr><td>词包</td><td>一类商户的集合，用<b>类目路径</b>（如 生活服务;法律服务）+ <b>code</b>（如 gp621991）标识。一个词包就是"一类生意的广告位"。</td><td>明细表「类目路径 / 词包code」两列；第 7 课字典可查全量。</td></tr>
+    <tr><td>时间窗</td><td>你关心未来多少天：<b>D+30 = 今天起 30 天</b>。所有"空闲天、占率、价值"都只算窗内这一段。换窗，数字全变。</td><td>筛选第一排 D+30 / D+60 / D+90 / 自定义；页面顶部一行小字写着当前窗起止日期。</td></tr>
+    <tr><td>占量 / 状态</td><td>格子在窗内被订单占了多少。四种状态标签：<b>全窗空白</b>（整窗没人占，最好卖）、<b>部分空白</b>（占了一部分，还能插）、<b>全窗占满</b>（卖不了）、<b>即将释放</b>（有订单快到期末，到期后空出来）。订单本身另有五状态：在投 / 待上刊 / 签约中 / 待签约 / 已完成。</td><td>明细表、机会榜「状态」列的彩色小标签；甘特图上的色块。</td></tr>
+    <tr><td>刊例 / 价值</td><td><b>刊例价/30天</b> = 这个格子卖 30 天的挂牌价（不是成交价！）。<b>日均价</b> = 刊例÷30。<b>窗内价值</b> = 窗内空闲天 × 日均价，即"这段空档按挂牌价值多少钱"。<b>增量空间</b> = 只算全窗空白格的整窗刊例。</td><td>明细表「刊例/30天」「窗内可售价值」列；指标卡「空白刊例价值」「增量空间」。</td></tr>
+  </table>
+  <h3>再加三个辅助词</h3>
+  <ul>
+    <li><b>热度（0–100）</b>：需求侧打分，看这个类目最近 180 天成交了多少单、最近一单离现在多久。<b>询量不计入热度</b>（口径已定：询量权重 0）。热度高 = 这类商户最近真的在买。</li>
+    <li><b>高优作业服务商</b>：空位行右侧会提示"哪些服务商能作业这个格子"，带 <span class="tap">本地包城</span> <span class="tap">本省</span> <span class="tap">全国</span> 等地盘标签和「等 N 家 展开」。<b>看到空位不知道派给谁，就看这一列。</b></li>
+    <li><b>紫边 = 疑似冲突</b>：甘特上某段带紫色描边，表示系统怀疑档期重叠，<b>只做标注、不替你下结论</b>，人工复核后再承诺客户。</li>
+  </ul>
+  <div class="warn">全工具所有金额都是<b>刊例口径</b>，不是客户实付、不是底价。对外报价、对内复盘都别把它当成交金额（详见第 11 课）。</div>
+  <div class="win">随便指一行明细，你能说出它的方案、词包、状态、窗内价值各是什么意思。</div>
+</section>
+
+<!-- ============ 2 ============ -->
+<section class="lesson" id="s2">
+  <header><span class="no">第 2 课</span><h2>找空位：从全国热力到一城明细</h2></header>
+  <p class="goal">目标：<b>回答"我负责的城市，哪些类目空着、值多少钱、派给谁"</b>。这是工具最主线的一条路。</p>
+  <ol class="steps">
+    <li><span class="k">看全国热力。</span>打开工具默认在 <span class="tap">地图首页</span>，地图颜色 = 各城市<b>已售单数</b>（越亮卖得越多）。先扫一眼哪些省是冷的 —— 冷 ≠ 没机会，冷可能只是没被作业。</li>
+    <li><span class="k">切到"机会视角"。</span>地图右上指标下拉选 <span class="tap">空白刊例价值（机会热力）</span>：地图立刻改按"空位值多少钱"上色，<b>越亮 = 空档越值钱</b>。再开气泡（<span class="tap">气泡=空白价值</span>）看绝对量。这一步是找矿，不是看业绩。</li>
+  </ol>
+  <div class="shotrow">
+    <figure class="shot"><img src="guide/01-home.png" alt="地图首页默认已售热力" loading="lazy"><figcaption><b>图 2-1</b> · 默认视角：颜色=已售单数，下方城市排行。</figcaption></figure>
+    <figure class="shot"><img src="guide/22-home-value.png" alt="机会热力视角" loading="lazy"><figcaption><b>图 2-2</b> · 切「空白刊例价值（机会热力）」后：颜色=空位价值，找矿用这张。</figcaption></figure>
+  </div>
+  <ol class="steps" style="counter-reset:st 2">
+    <li><span class="k">点进一个城市。</span>在地图上点城市（或在第二排 <span class="tap">市</span> 下拉选），进入<b>城市详情</b>。三个页签：<span class="tap">全部明细</span> / <span class="tap">未占类目</span> / <span class="tap">窗内可售</span>。找空位直接点 <span class="tap">窗内可售</span>。</li>
+    <li><span class="k">读明细行。</span>每行一个格子：类目路径、区域、状态标签、刊例价/30天、窗内空闲天、最早上刊、窗内可售价值、热度、最近成交、<b>高优作业服务商</b>。表内还有搜索框可再过滤类目/区域。嫌全国太散？第二排勾 <span class="tap">只看未占量城市</span> 先圈范围。</li>
+    <li><span class="k">把结果带走。</span>右上角 <span class="tap">导出 CSV</span> 拿表格去分派；<span class="tap">复制派单文案</span> 直接生成一段可发群里的文字（含城市、类目、空档、价值、建议服务商）。<b>派单不用手抄。</b></li>
+  </ol>
+  <div class="shotrow">
+    <figure class="shot"><img src="guide/05-city.png" alt="城市详情页" loading="lazy"><figcaption><b>图 2-3</b> · 城市详情（示例：成都市）：页签 + 明细表 + 导出/复制按钮。</figcaption></figure>
+    <figure class="shot"><img src="guide/06-cityrows.png" alt="明细行与高优作业服务商" loading="lazy"><figcaption><b>图 2-4</b> · 放大看行：状态标签、窗内价值，以及右侧「高优作业服务商 + 本地包城 + 等 N 家 展开」。</figcaption></figure>
+  </div>
+  <div class="note">下钻永远尊重你当前的筛选：带着「美食 + D+60」点进城市，看到的就是美食、60 天窗的明细，不会偷偷变回全国全量。</div>
+  <div class="win">你能独立完成：切机会热力 → 点一个城市 → 窗内可售 → 复制一段派单文案发到自己群里。</div>
+</section>
+
+<!-- ============ 3 ============ -->
+<section class="lesson" id="s3">
+  <header><span class="no">第 3 课</span><h2>谈客户：甘特排期 + 档期试算 + 派单文案</h2></header>
+  <p class="goal">目标：<b>客户说"我想投 12 月 10 号到 1 月 10 号"，你能当场回答能不能排、报多少、最晚哪天签</b>。</p>
+  <ol class="steps">
+    <li><span class="k">定位到格子。</span>两条路：① 顶部全局搜索框输入城市/类目/词包code（如「成都」「火锅」「gp621991」），下拉结果里点一条；② 第 2 课明细表里点某一行。都会进入<b>单格甘特</b>。</li>
+    <li><span class="k">读甘特。</span>横轴是日期，色块是已有订单（在投/待上刊/签约中/待签约/已完成五色），空白处就是能插进去的档期。<b>紫边段 = 疑似冲突，仅标注</b>，承诺客户前人工复核。侧栏「格子档案」写着方案、城市/区域、类目路径、刊例价/30天、日均价、热度。</li>
+    <li><span class="k">用档期试算器。</span>在「档期试算器：客户意向起止 → 可排 / 冲突 / 部分可排」里填客户想要的起止日期（或点快捷 chips <span class="tap">+7</span> <span class="tap">+14</span> <span class="tap">+30</span> <span class="tap">+60</span> <span class="tap">+90</span> 天），结果直接告诉你<b>可排 / 冲突 / 部分可排</b>、可排天数和<b>刊例报价</b>。</li>
+    <li><span class="k">反推最晚签约日。</span>填上刊日期和提前天数（默认 7 天，假设值可调），点试算，得到「最晚签约日」。<b>谈单时把这条日期甩给客户，比催单话术管用。</b></li>
+    <li><span class="k">看谁做过、派给谁。</span>侧栏有历史成交记录；空位则给「高优作业服务商 TOP3 + 评分 + 地盘标签」，点 <span class="tap">全量</span> 看全部可作业服务商。谈完用 <span class="tap">复制派单文案</span> 把结论发出去；<span class="tap">← 上一格</span> <span class="tap">下一格 →</span> 可沿同城刊例价序连续看格。</li>
+  </ol>
+  <figure class="shot"><img src="guide/18-search.png" alt="全局搜索下拉" loading="lazy"><figcaption><b>图 3-1</b> · 全局搜索：输入即出城市/类目/词包候选，点一条直达。</figcaption></figure>
+  <div class="shotrow">
+    <figure class="shot"><img src="guide/07-gantt.png" alt="单格甘特" loading="lazy"><figcaption><b>图 3-2</b> · 单格甘特：色块=已有订单，空白=可插档期；侧栏格子档案 + 服务商推荐。</figcaption></figure>
+    <figure class="shot"><img src="guide/08-calc.png" alt="档期试算器结果" loading="lazy"><figcaption><b>图 3-3</b> · 试算结果示例：可排 15 天 · 刊例报价 ¥4.2万 · 最晚签约日 2026-12-01。</figcaption></figure>
+  </div>
+  <div class="warn">试算给的报价是<b>刊例口径</b>（空闲天 × 日均刊例），用于内部估量和话术锚点；正式对客报价走你们自己的报价流程，别把工具数字当合同价。</div>
+  <div class="win">客户给任意起止日期，你能在 1 分钟内给出：可排与否 + 刊例估量 + 最晚签约日 + 建议作业服务商。</div>
+</section>
+
+<!-- ============ 4 ============ -->
+<section class="lesson" id="s4">
+  <header><span class="no">第 4 课</span><h2>机会榜：全国空位按价值排队</h2></header>
+  <p class="goal">目标：<b>不局限一城，直接拿"全国最值钱的空位清单"</b>，做周会弹药或批量派单。</p>
+  <ol class="steps">
+    <li>点导航 <span class="tap">机会榜</span>。默认按<b>窗内价值倒序</b>排：最值钱的空位在最上面。顶部四个数：命中格子 / 窗内价值合计 / 即将释放 N 格 / 当前排序。</li>
+    <li><span class="k">用四个筛选收窄。</span><span class="tap">状态</span>（全部可售 / 仅全窗空白 / 仅即将释放）、<span class="tap">价值下限(元)</span>、<span class="tap">热度下限</span>、<span class="tap">服务商</span>（只看某家地盘内的空位，含本地包城/本省/全国）。例如「价值下限 100000 + 热度下限 40」= 又值钱又有人买的空位。</li>
+    <li><span class="k">换排序思路。</span>勾 <span class="tap">价值×热度综合分</span>：不再只看钱，而是"钱 × 需求"综合排队，适合挑"好卖又值钱"的格子。</li>
+    <li><span class="k">抢到期用专区。</span>点页签 <span class="tap">即将释放专区（N）</span>：只列窗内有订单到期的格子，按到期日升序 —— <b>越早释放越靠前</b>，配合第 5 课日历做续单/抢单。</li>
+    <li><span class="k">带走与转发。</span><span class="tap">导出 CSV</span> / <span class="tap">复制派单文案</span> / <span class="tap">复制分享链接</span>。分享链接<b>只带筛选条件</b>（行业线/方案/窗/省城市/排序等），同事打开就是你筛好的同一张榜，不带任何个人数据。</li>
+  </ol>
+  <div class="shotrow">
+    <figure class="shot"><img src="guide/09-opp.png" alt="机会榜全部可售" loading="lazy"><figcaption><b>图 4-1</b> · 全部可售：价值倒序，右侧高优作业服务商 + 展开。</figcaption></figure>
+    <figure class="shot"><img src="guide/10-opp-expiring.png" alt="即将释放专区" loading="lazy"><figcaption><b>图 4-2</b> · 即将释放专区：按到期日升序，抢释放专用。</figcaption></figure>
+  </div>
+  <div class="note">机会榜也吃全局筛选：先在第一排选「美食 + D+60」，榜里就只剩美食、60 天窗的空位。榜单翻页在表格底部。</div>
+  <div class="win">你能筛出「本省 + 价值≥10万 + 综合分排序」的清单，并把分享链接发进工作群。</div>
+</section>
+
+<!-- ============ 5 ============ -->
+<section class="lesson" id="s5">
+  <header><span class="no">第 5 课</span><h2>释放日历：盯到期、抢释放、续老客</h2></header>
+  <p class="goal">目标：<b>把"未来哪天有档期空出来"变成一张日历</b>，提前布局续单和抢单。</p>
+  <ol class="steps">
+    <li>点导航 <span class="tap">释放日历</span>。默认<b>日历视图</b>：每个日期格子里写着当天释放的格子数和金额；颜色越深释放越多。点某一天，下方列出当天释放明细。</li>
+    <li><span class="k">读"释放"口径。</span>释放价值 = <b>到期次日起到窗末的空闲天 × 日均刊例</b>。所以同一批订单，D+30 窗和 D+90 窗算出来的释放金额不一样 —— <b>换时间窗，日历金额跟着变</b>，这不是 bug。</li>
+    <li><span class="k">找老客续单。</span>明细里标 <b>老客可续</b> 的格子 = 近 180 天有已完成单的类目城市：客户刚投完、档期刚空，<b>续单成功率最高的一批</b>，优先打。</li>
+    <li><span class="k">换名单视图。</span>点页签 <span class="tap">名单视图（金额倒序）</span>：不按天看，直接按释放金额从大到小排清单，适合"这周先打哪几个电话"。</li>
+  </ol>
+  <div class="shotrow">
+    <figure class="shot"><img src="guide/11-cal.png" alt="释放日历月视图" loading="lazy"><figcaption><b>图 5-1</b> · 日历视图：日期格 = 当天释放格数 + 金额。</figcaption></figure>
+    <figure class="shot"><img src="guide/12-cal-day.png" alt="点某天的释放明细" loading="lazy"><figcaption><b>图 5-2</b> · 点某一天：展开当天释放明细，含老客可续标记。</figcaption></figure>
+  </div>
+  <div class="win">你能回答「下周三有哪些格子释放、合计值多少、哪几个是老客可续」。</div>
+</section>
+
+<!-- ============ 6 ============ -->
+<section class="lesson" id="s6">
+  <header><span class="no">第 6 课</span><h2>服务商增量榜：谁的地盘还有多少空间</h2></header>
+  <p class="goal">目标：<b>站在服务商视角看"你的地盘里还有多少没卖的钱"</b>，用于服务商沟通与目标拆解。</p>
+  <ol class="steps">
+    <li>点导航 <span class="tap">服务商增量榜</span>。顶部：服务商总数、分组（美食 / 高频 / 文旅牌照）、盘子口径说明；右上搜索框可按服务商名称找。</li>
+    <li><span class="k">读一张卡。</span>每张卡 = 一家服务商：名称 + 地盘标签（<span class="tap">全国</span> / <span class="tap">本地包城</span> / <span class="tap">本省</span> / <span class="tap">特殊规格</span>），下面五行：覆盖城市数、可作业盘子(格)、已售(格)、覆盖率(带进度条)、<b>增量空间(元)</b>。增量空间 = 覆盖格中<b>全窗空白格的整窗刊例价值</b>。</li>
+    <li><span class="k">点卡下钻。</span>点任意卡片 → 跳到机会榜并<b>自动过滤到这家服务商的地盘</b>：立刻看到"它还能卖哪些格子"，沟通时直接对着清单谈。</li>
+  </ol>
+  <figure class="shot"><img src="guide/13-prov.png" alt="服务商增量榜卡片墙" loading="lazy"><figcaption><b>图 6-1</b> · 卡片墙：分组标题行写着家数与合计增量空间，并注明「重叠未去重，不可直接加总对外」。</figcaption></figure>
+  <div class="warn"><b>各家盘子允许重叠，合计增量空间不可加总对外。</b>同一个格子可能同时落在多家服务商的可作业范围里，分组标题的合计是"未去重"口径，只供内部看量级。对外只说单家、或说去重后的全国增量空间（指标卡那张）。</div>
+  <div class="win">你能搜到一家服务商、读出它的覆盖率与增量空间、点卡拿到它的机会清单。</div>
+</section>
+
+<!-- ============ 7 ============ -->
+<section class="lesson" id="s7">
+  <header><span class="no">第 7 课</span><h2>词包字典：搞懂类目路径和 code</h2></header>
+  <p class="goal">目标：<b>客户说"我做火锅/按摩/法律服务"，你能立刻对应到词包和售卖规则</b>。</p>
+  <ol class="steps">
+    <li>点导航 <span class="tap">词包字典</span>。左侧是按行业线分层的类目树，搜索框输入关键词（如「火锅」）会<b>自动展开命中分支</b>，不用一层层点。</li>
+    <li><span class="k">读叶子节点。</span>每个叶子 = 一个词包：类目路径 + code + 状态标记 + <b>最大置顶距离</b>等售卖参数。状态标记告诉你这个词包当前能不能卖、属于哪种方案。</li>
+    <li><span class="k">看详情、跳机会。</span>点叶子打开详情弹窗：完整路径、code、售卖参数、覆盖情况；右下角 <span class="tap">机会榜看此类目</span> 一键带着这个类目跳机会榜 —— <b>从"客户做什么生意"到"哪里有空位"只隔一次点击</b>。</li>
+  </ol>
+  <div class="shotrow">
+    <figure class="shot"><img src="guide/14-dict.png" alt="词包字典搜索火锅" loading="lazy"><figcaption><b>图 7-1</b> · 搜「火锅」：命中分支自动展开。</figcaption></figure>
+    <figure class="shot"><img src="guide/15-dict-detail.png" alt="词包详情弹窗" loading="lazy"><figcaption><b>图 7-2</b> · 详情弹窗：路径 / code / 售卖参数 + 「机会榜看此类目」。</figcaption></figure>
+  </div>
+  <div class="win">客户报一个生意类型，你能在字典里找到对应词包 code，并一键看到该类目的全国空位。</div>
+</section>
+
+<!-- ============ 8 ============ -->
+<section class="lesson" id="s8">
+  <header><span class="no">第 8 课</span><h2>进阶：全城档期矩阵 / 景区钻展 / 统计月份</h2></header>
+  <p class="goal">目标：<b>三个进阶视角</b>，月粒度总览、景区货、以及营收卡的时间开关。前七课够用后可再学。</p>
+  <h3>8.1 全城档期矩阵：月粒度看全国</h3>
+  <p>导航 <span class="tap">全城档期矩阵</span>：行 = 省（点省行折叠/展开到城市），列 = 月份（<b>前 3 个月 + 后 9 个月</b>）。每格颜色四态：<b>在投(绿) / 到期(黄) / 预排期(蓝) / 待售(红)</b>；金色列 = 当前选中统计月。鼠标悬停看该城该月订单摘要，点城市格进该城刊例价最高格的甘特。</p>
+  <figure class="shot"><img src="guide/16-matrix.png" alt="全城档期矩阵" loading="lazy"><figcaption><b>图 8-1</b> · 矩阵：省行可折叠，月列四色；底部图例写明「日粒度排期以单格甘特为准」。</figcaption></figure>
+  <div class="note">矩阵是<b>月粒度总览</b>，用来扫"哪片城市哪几个月有空档"；真要排具体日期，回到单格甘特（日粒度）。</div>
+  <h3>8.2 景区钻展：另一种货</h3>
+  <p>第一排方案层选 <span class="tap">景区钻展</span>：格子粒度变成<b>景区类目桶</b>（不是城市×词包），侧栏多一个 <b>POI 宇宙</b>（该桶覆盖多少景区 POI）。<b>景区当前没有金额口径</b>（刊例待补），所以景区视图只看不算钱：看覆盖、看空档、看 POI 规模。</p>
+  <figure class="shot"><img src="guide/17-scenic.png" alt="景区钻展视图" loading="lazy"><figcaption><b>图 8-2</b> · 景区钻展（示例：北京市）：类目桶粒度 + POI 宇宙，金额列显示「景区刊例口径待补」。</figcaption></figure>
+  <h3>8.3 统计月份：营收卡的时间开关</h3>
+  <p>第一排 <span class="tap">统计月份</span> 下拉只影响<b>营收卡和相关趋势</b>：选 2026-11 就看 11 月新签笔数与刊例金额、环比箭头；选别的月就切到那个月。它<b>不影响</b>占量/空位/机会榜（那些永远跟时间窗走）。矩阵的金色列也跟着它走。</p>
+  <div class="win">你能用矩阵指出"某省未来三个月哪几个月待售最多"，并说清景区为什么没有金额。</div>
+</section>
+
+<!-- ============ 9 ============ -->
+<section class="lesson" id="s9">
+  <header><span class="no">第 9 课</span><h2>手机用法与快捷键</h2></header>
+  <p class="goal">目标：<b>外勤路上用手机也能查空位、抄清单</b>；电脑上用键盘更快。</p>
+  <ul>
+    <li><b>手机默认进列表模式</b>（屏宽 &lt;700px 时地图自动改列表），省流量也省眼睛；想看地图点 <span class="tap">地图|列表</span> 切回。筛选器在手机上折行排列，功能一个不少。</li>
+    <li><b>手机推荐路线</b>：机会榜（筛好本省/价值下限）→ 点行看格 → 复制派单文案 → 粘贴进钉钉群。全程不用打字搜索。</li>
+    <li><b>浅色主题</b>：右上角 <span class="tap">浅色</span> 一键切换，白天户外看浅色更清楚；选择会记住。</li>
+    <li><b>键盘</b>：搜索下拉里 <span class="tap">↑</span> <span class="tap">↓</span> 移动候选、<span class="tap">Enter</span> 选中、<span class="tap">Esc</span> 关弹窗/下拉。谈单时手不离键盘。</li>
+  </ul>
+  <div class="shotrow">
+    <figure class="shot"><img src="guide/20-mobile.png" alt="手机首页列表模式" loading="lazy"><figcaption><b>图 9-1</b> · 手机首页：默认列表模式。</figcaption></figure>
+    <figure class="shot"><img src="guide/21-mobile-opp.png" alt="手机机会榜" loading="lazy"><figcaption><b>图 9-2</b> · 手机机会榜：筛选折行、卡片化行。</figcaption></figure>
+  </div>
+  <figure class="shot"><img src="guide/19-light.png" alt="浅色主题" loading="lazy"><figcaption><b>图 9-3</b> · 浅色主题全貌：户外/投屏友好。</figcaption></figure>
+  <div class="win">你在手机上完成过一次「筛机会 → 复制派单文案 → 发群」。</div>
+</section>
+
+<!-- ============ 10 ============ -->
+<section class="lesson" id="s10">
+  <header><span class="no">第 10 课</span><h2>常见问题 FAQ</h2></header>
+  <p class="goal">目标：<b>遇到"数不对/找不到/不敢说"先来这里</b>，多数疑问是口径问题不是 bug。</p>
+  <details class="faq"><summary>金额为什么和成交/实付对不上？</summary><div class="a">全工具金额都是<b>刊例口径</b>（挂牌价推算），不是实付、不是底价、不是合同额。它用于估量级、排优先级、做话术锚点。对客报价与财务复盘请走正式口径。</div></details>
+  <details class="faq"><summary>数据多久更新？为什么徽章日期是昨天？</summary><div class="a">每天 09:00 自动同步，口径 <b>T+1</b>（今天看到的是昨天的库存快照），所以「数据截至」通常是昨天，正常。若超过 26 小时未更新，页面顶部会出<b>红色时效告警横幅</b>，并继续展示上次成功口径；同步失败会自动重试 3 次、间隔 10 分钟。</div></details>
+  <details class="faq"><summary>换了时间窗，所有数字都变了，是不是坏了？</summary><div class="a">没坏。空闲天、占率、窗内价值、释放金额全部<b>只算窗内</b>。D+30 和 D+90 是两张不同的账，对比时先统一窗。页面顶部小字写着当前窗起止，核对它。</div></details>
+  <details class="faq"><summary>「即将释放」和「全窗空白」有什么区别？</summary><div class="a">全窗空白 = 整个窗内没有任何订单，现在就能卖整窗。即将释放 = 窗内有订单但快到期末，<b>到期次日之后</b>才空出来；释放价值只算到期后到窗末那段。抢释放要算好客户上刊日是否接得上。</div></details>
+  <details class="faq"><summary>甘特上的紫边是什么意思？能直接承诺客户吗？</summary><div class="a">紫边 = <b>疑似冲突，仅标注</b>。系统怀疑档期重叠但不替你裁决；承诺客户前请人工复核订单实际起止。工具不做自动排期决策。</div></details>
+  <details class="faq"><summary>为什么有些类目/区域在明细里找不到？</summary><div class="a">存在<b>目录外</b>的路径与地域（当前 143 行：路径 59 + 地域 84），它们不计入占率分母、也不在主明细里展示，避免污染口径。字典里查不到 ≠ 数据错，先确认是否目录外。另有极个别地名歧义（如「贵阳省」）会被标记待人工确认。</div></details>
+  <details class="faq"><summary>景区为什么没有金额？</summary><div class="a">景区钻展的刊例口径<b>待补</b>，当前只给类目桶覆盖、空档与 POI 宇宙，不给钱。别用景区格子去凑金额合计。</div></details>
+  <details class="faq"><summary>询量为什么不算进热度？</summary><div class="a">口径已定：<b>询量权重 0</b>。热度只认真实成交（近 180 天已完成单数 + 最近成交距今时长），避免"问得多买得少"的类目虚高。</div></details>
+  <details class="faq"><summary>公开版能看到订单名、原销售、渠道经理工号吗？</summary><div class="a">看不到。公开版<b>不含</b>订单名称、原销售、渠道经理工号/大区/小区等内部字段；服务商维度只给名称与地盘标签。管理档（订单名/原销售等）规划在 v1.1，不在本公开链接里。</div></details>
+  <details class="faq"><summary>分享链接会泄露我的筛选或个人数据吗？</summary><div class="a">分享链接<b>只带筛选条件</b>（行业线/方案/窗/省市/类目/排序等），不含任何个人身份或本地记录。同事打开 = 你筛好的同一张视图。</div></details>
+  <details class="faq"><summary>导出的 CSV 用 Excel 打开乱码？</summary><div class="a">文件带 UTF-8 BOM，正常双击 Excel 不应乱码；若仍乱码，用「数据 → 从文本/CSV 导入」选 UTF-8。ID/code 列请按文本看待，别让 Excel 转成科学计数。</div></details>
+  <details class="faq"><summary>搜城市搜不到，比如「陵水」？</summary><div class="a">城市用<b>全称</b>存储与匹配（如「陵水黎族自治县」）。搜简称命中不了时改搜全称，或直接用省→市下拉选。下拉与搜索都支持模糊输入。</div></details>
+  <details class="faq"><summary>手机上为什么没有地图？</summary><div class="a">屏宽 &lt;700px 默认列表模式（性能与可读性考虑），点 <span class="tap">地图|列表</span> 可切回地图。不是功能缺失。</div></details>
+  <details class="faq"><summary>服务商增量榜各家加起来为什么比全国大？</summary><div class="a">各家可作业盘子<b>允许重叠</b>（一个格子可被多家作业），分组合计是未去重口径，页面已注明「不可直接加总对外」。全国去重口径看指标卡「增量空间」。</div></details>
+  <div class="win">以上 14 条扫一遍，日后 90% 的"数不对"都能自己解释。</div>
+</section>
+
+<!-- ============ 11 ============ -->
+<section class="lesson" id="s11">
+  <header><span class="no">第 11 课</span><h2>口径与边界：哪些数能对外说</h2></header>
+  <p class="goal">目标：<b>记住四条红线</b>，工具好用但口径有边界，说错比不说更伤。</p>
+  <ol class="plain">
+    <li><b>金额只说刊例。</b>对外表述统一加"刊例口径/估量"字样；不露底价、不露实付、不把工具金额当合同额。</li>
+    <li><b>增量空间不加总。</b>服务商盘子重叠未去重，分组合计只供内部看量级；对外用单家或全国去重口径。</li>
+    <li><b>冲突只标注不裁决。</b>紫边疑似冲突、目录外行、地名歧义标记，都是"提请人工复核"，不是结论。</li>
+    <li><b>数据 T+1 且公开无内部字段。</b>对外转发链接安全（无登录、无个人数据、无内部字段），但别承诺"实时库存"；以徽章「数据截至」为准。</li>
+  </ol>
+  <div class="note">免责：本工具为作业辅助视图，库存与档期最终以业务系统订单为准；刊例估量不构成报价承诺。景区金额口径、管理档字段等待后续版本补齐。</div>
+  <div class="win">你能用一句话向同事解释："这是刊例口径的 T+1 库存作业地图，空位和释放看它，成交和报价看业务系统。"</div>
+</section>
+
+<footer>
+  顶钻展作业地图 · 新手指引（小白版） · 配图截于 2026-11-24 真实界面<br>
+  工具地址：<a href="https://609725591-spec.github.io/tdz-work-map/" target="_blank" rel="noopener">609725591-spec.github.io/tdz-work-map</a> · 每天 09:00 更新（T+1）<br>
+  指引有看不懂的地方、或界面改了图对不上：钉钉找 <b>页城</b> 反馈，下一版修。
+</footer>
+
+</div><!-- /wrap -->
+
+<div id="lb" role="dialog" aria-modal="true" aria-label="截图放大">
+  <img id="lbImg" src="" alt="">
+  <div class="cap" id="lbCap"></div>
+  <div class="hint">点任意处或按 Esc 关闭</div>
+</div>
+<button id="toTop" title="回到顶部" aria-label="回到顶部">↑</button>
+
+<script>
+(function(){
+  var lb=document.getElementById('lb'), li=document.getElementById('lbImg'), lc=document.getElementById('lbCap');
+  document.querySelectorAll('figure.shot img').forEach(function(im){
+    im.addEventListener('click',function(){
+      li.src=im.src; li.alt=im.alt||'';
+      var fc=im.closest('figure').querySelector('figcaption');
+      lc.textContent=fc?fc.textContent:'';
+      lb.classList.add('on'); document.body.style.overflow='hidden';
+    });
+  });
+  function close(){ lb.classList.remove('on'); document.body.style.overflow=''; li.src=''; }
+  lb.addEventListener('click',close);
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&lb.classList.contains('on')) close(); });
+  var tt=document.getElementById('toTop');
+  tt.addEventListener('click',function(){ window.scrollTo({top:0,behavior:'smooth'}); });
+  window.addEventListener('scroll',function(){ tt.classList.toggle('on',window.scrollY>600); },{passive:true});
+})();
+</script>
+</body>
+</html>
