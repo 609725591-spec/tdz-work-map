@@ -30,6 +30,8 @@ header h1 small{color:var(--sub); font-size:11px; font-weight:400; margin-left:8
 .badge.info{color:var(--blue); border-color:rgba(74,163,255,.4);}
 .badge.gold{color:var(--gold); border-color:rgba(245,196,81,.4);}
 .badge.cta{background:var(--h-lime); border-color:var(--h-lime); color:#0f1923; font-weight:700;}
+.badge.adm{color:#b78cff; border-color:rgba(183,140,255,.45); font-weight:600;}
+body.light .badge.adm{color:#7a4fd0; border-color:rgba(122,79,208,.45);}
 .steps{display:flex; gap:6px; padding:0 20px 10px; flex-wrap:wrap; align-items:center;}
 .step{font-size:11px; color:var(--txt); background:color-mix(in srgb, var(--h) 12%, transparent); border:1px solid color-mix(in srgb, var(--h) 38%, transparent); padding:3px 10px 3px 4px; border-radius:20px; display:inline-flex; align-items:center;}
 .step b{background:var(--h); color:#0f1923; width:17px; height:17px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; margin-right:6px; font-size:10.5px; flex:none;}
@@ -256,6 +258,7 @@ tr.kbsel td{background:rgba(74,163,255,.14)!important;box-shadow:inset 2px 0 0 v
   <div class="gsearch"><input type="text" id="gq" placeholder="全局搜索：城市 / 类目 / 词包code" autocomplete="off"><div id="gres"></div></div>
   <div class="badges">
     <a class="badge cta" href="guide.html" style="cursor:pointer;text-decoration:none">新手指引</a>
+    <a class="badge adm" href="admin.html" style="cursor:pointer;text-decoration:none" title="管理者督导驾驶舱 · 需访问码">管理档 · 内部</a>
     <span class="badge ok">真实数据 · FBI 同源</span>
     <span class="badge info">口径已校准</span>
     <span class="badge gold" id="badgeDate">数据截至 —</span>
