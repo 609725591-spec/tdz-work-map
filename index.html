@@ -31,6 +31,8 @@ nav button.on{background:var(--accent); border-color:var(--accent); color:#0f192
 .seg{display:flex; background:var(--panel2); border:1px solid var(--line); border-radius:8px; overflow:hidden;}
 .seg button{background:transparent; border:0; color:var(--sub); padding:6px 12px; font-size:12px;}
 .seg button.on{background:var(--accent); color:#0f1923; font-weight:700;}
+#segLine button.flash{animation:lineflash 1.2s ease;}
+@keyframes lineflash{0%{outline:3px solid var(--accent); outline-offset:0;}100%{outline:3px solid transparent; outline-offset:7px;}}
 .seg.gold button.on{background:var(--gold);}
 select,input[type=date],input[type=text]{background:var(--panel2); color:var(--txt); border:1px solid var(--line); border-radius:8px; padding:6px 8px; font-size:12px;}
 .bar label{color:var(--sub); font-size:11px; display:flex; align-items:center; gap:5px;}
@@ -46,8 +48,9 @@ select,input[type=date],input[type=text]{background:var(--panel2); color:var(--t
 .kpi .up{color:var(--accent);} .kpi .down{color:var(--danger);}
 .kpi svg{position:absolute; right:10px; bottom:10px; opacity:.85;}
 .main{display:grid; grid-template-columns:1fr 330px; gap:12px; padding:0 20px 12px;}
-.panel{background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:12px;}
-.panel h3{font-size:13px; display:flex; align-items:center; gap:8px; margin-bottom:8px;}
+.main>*,.ggrid>*{min-width:0;} /* 防网格子项 min-content 撑破窄屏（移动端横溢修复 2026-11-24） */
+.panel{background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:12px; min-width:0;}
+.panel h3{font-size:13px; display:flex; align-items:center; gap:8px; margin-bottom:8px; flex-wrap:wrap;}
 .panel h3 .hint{color:var(--sub); font-weight:400; font-size:11px; margin-left:auto;}
 #map{height:520px;}
 .legend{display:flex; gap:12px; align-items:center; color:var(--sub); font-size:11px; padding-top:6px; flex-wrap:wrap;}
@@ -263,7 +266,7 @@ tr.kbsel td{background:rgba(74,163,255,.14)!important;box-shadow:inset 2px 0 0 v
   <div class="main">
     <div class="panel">
       <h3>全国热力 <span class="hint" id="mapHint"></span>
-        <span style="margin-left:auto;display:flex;gap:6px;align-items:center">
+        <span style="margin-left:auto;display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end">
           <span class="seg" id="segMapMode"><button data-m="map">地图</button><button data-m="list">列表</button></span>
           <select id="selMetric" style="font-size:11px">
             <option value="occ">已售单数（默认）</option>
@@ -377,6 +380,7 @@ async function loadAll(){
   for(const r of SCENIC.poiAgg){ POI[r[0]+'|'+r[1]+'|'+r[2]] = r[3]; const ck=r[0]+'|'+r[2]; POIC[ck]=(POIC[ck]||0)+r[3]; }
   S.month = monthKey(TODAY);
   parseHash();
+  followCatLine(S.cat,true); // 分享链接只带 cat 未带 ln 时同样自动跟随（静默）
   if(localStorage.getItem('tdz_theme')==='light') document.body.classList.add('light');
   applyThemeBtn();
   localStorage.setItem('tdz_lastGood', new Date().toISOString());
@@ -587,6 +591,41 @@ function shareURL(){
 }
 
 /* ============ 过滤 ============ */
+/* 类目跨行业线自动跟随（体感修复 2026-11-24）：
+   输入/跳转的类目若不在当前行业线，自动切到命中线并提示，避免"搜按摩却要先手动切休娱丽人"。
+   当前线已命中则不打扰；景区粒度不适用。 */
+function linesForCat(q){
+  const ql=(q||'').toLowerCase(); if(!ql) return [];
+  // 判据=真实格子：各分片 dicts.paths 为全线共享字典（234），不能用作"该线有没有这类货"的依据
+  const sets=IDX.dicts.lines.map(ln=>{
+    const sh=SHARDS[ln]; const s=new Set();
+    if(sh) sh.dicts.paths.forEach((pt,i)=>{ if(pt.toLowerCase().includes(ql)) s.add(i); });
+    return s;
+  });
+  const acc=IDX.dicts.lines.map((ln,li)=>({li,name:ln,n:0,leaf:0}));
+  for(const c of CELLS){
+    if(!sets[c.li].has(c.hi)) continue;
+    const a=acc[c.li]; a.n++;
+    const pl=SHARDS[a.name].dicts.paths[c.hi].toLowerCase();
+    if(pl===ql||pl.split(';').pop()===ql) a.leaf=1;
+  }
+  return acc.filter(a=>a.n>0).sort((a,b)=>(b.leaf-a.leaf)||(b.n-a.n));
+}
+function followCatLine(q,silent){
+  if(S.plan==='scenic'||!q) return false;
+  const hit=linesForCat(q); if(!hit.length) return false;
+  if(hit.some(h=>h.li===S.line)) return false;
+  const to=hit[0];
+  S.line=to.li; S.cellKey=null;
+  if(S.view==='gantt') S.view=S.city>=0?'city':'map';
+  if(!silent) toast('已自动切换行业线 → '+to.name+(q.length>=2?'（类目「'+q+'」）':''));
+  return true;
+}
+function flashLine(){
+  const b=document.querySelector('#segLine button[data-i="'+S.line+'"]'); if(!b) return;
+  b.classList.remove('flash'); void b.offsetWidth; b.classList.add('flash');
+  setTimeout(()=>b.classList.remove('flash'),1300);
+}
 function filteredCells(){
   const isScenic = S.plan==='scenic';
   let arr = isScenic ? SCELLS : CELLS;
@@ -676,11 +715,11 @@ function buildControls(){
   scy.innerHTML='<option value="-1">全部城市</option>'+cityList.map(([c,i])=>'<option value="'+i+'"'+(i===S.city?' selected':'')+'>'+c+'</option>').join('');
   scy.onchange=e=>{ S.city=+e.target.value; render(); };
   document.getElementById('inpCat').value=S.cat;
-  document.getElementById('inpCat').oninput=e=>{ S.cat=e.target.value.trim(); render(); };
+  document.getElementById('inpCat').oninput=e=>{ S.cat=e.target.value.trim(); const sw=followCatLine(S.cat); render(); if(sw) flashLine(); };
   document.getElementById('ckFree').checked=S.onlyFree; document.getElementById('ckOcc').checked=S.onlyOcc;
   document.getElementById('ckFree').onchange=e=>{ S.onlyFree=e.target.checked; if(S.onlyFree)S.onlyOcc=false; buildControls(); render(); };
   document.getElementById('ckOcc').onchange=e=>{ S.onlyOcc=e.target.checked; if(S.onlyOcc)S.onlyFree=false; buildControls(); render(); };
-  document.getElementById('btnReset').onclick=()=>{ Object.assign(S,{prov:-1,city:-1,cat:'',onlyFree:false,onlyOcc:false,cellKey:null}); buildControls(); render(); };
+  document.getElementById('btnReset').onclick=()=>{ Object.assign(S,{prov:-1,city:-1,cat:'',onlyFree:false,onlyOcc:false,cellKey:null,line:0}); buildControls(); render(); };
   document.getElementById('segRank').onclick=e=>{ const b=e.target.closest('button'); if(!b)return; S.rankLevel=b.dataset.l; [...document.getElementById('segRank').children].forEach(x=>x.classList.toggle('on',x===b)); renderRank(filteredCells()); };
   document.getElementById('selMetric').innerHTML = S.plan==='scenic'
     ? '<option value="occ">已售单数（默认）</option><option value="rate">占量率</option>'
@@ -720,7 +759,8 @@ function render(){
     if(b.dataset.cr==='prov'){S.city=-1;S.cellKey=null;S.view='map';}
     if(b.dataset.cr==='city'){S.cellKey=null;S.view='city';}
     render(); };
-  document.getElementById('filterNote').textContent='当前筛选 '+arr.length.toLocaleString()+' 格';
+  document.getElementById('filterNote').textContent='当前筛选 '+arr.length.toLocaleString()+' 格'
+    +(S.cat&&!arr.length&&!linesForCat(S.cat).length?' · 类目「'+S.cat+'」未命中任何行业线，可清空或改搜 火锅 / 按摩':'');
   // 下拉/分段与状态同步（不重建控件，避免输入失焦）
   document.getElementById('selProv').value=S.prov;
   document.getElementById('selCity').value=S.city;
@@ -1258,7 +1298,7 @@ function openDictDetail(code,path){
     +'<div style="text-align:right;margin-top:10px;display:flex;gap:8px;justify-content:flex-end"><button class="btn pri" id="dGoOpp">机会榜看此类目</button><button class="btn" id="modalClose">关闭</button></div>';
   document.getElementById('modal').style.display='flex';
   document.getElementById('modalClose').onclick=()=>document.getElementById('modal').style.display='none';
-  document.getElementById('dGoOpp').onclick=()=>{ document.getElementById('modal').style.display='none'; S.cat=p.path; S.view='opp'; S.oppPage=0; buildControls(); render(); };
+  document.getElementById('dGoOpp').onclick=()=>{ document.getElementById('modal').style.display='none'; S.cat=p.path; const sw=followCatLine(p.path); S.view='opp'; S.oppPage=0; buildControls(); render(); if(sw) flashLine(); };
   track('search','dict:'+(code||p.path));
 }
 /* ============ M10.1 全局搜索 ============ */
@@ -1283,7 +1323,7 @@ function bindGlobalSearch(){
     track('search',inp.value.trim());
     box.style.display='none'; inp.value='';
     if(b.dataset.g==='city'){ S.city=+b.dataset.i; S.view='city'; S.cityTab=0; render(); }
-    if(b.dataset.g==='path'){ S.cat=b.dataset.p; S.view='opp'; S.oppPage=0; buildControls(); render(); }
+    if(b.dataset.g==='path'){ S.cat=b.dataset.p; const sw=followCatLine(b.dataset.p); S.view='opp'; S.oppPage=0; buildControls(); render(); if(sw) flashLine(); }
     if(b.dataset.g==='code'){ openDictDetail(b.dataset.c,null); }
   };
   document.addEventListener('click',e=>{ if(!e.target.closest('.gsearch')) box.style.display='none'; });
