@@ -48,7 +48,7 @@ select,input[type=date],input[type=text]{background:var(--panel2); color:var(--t
 .kpi .up{color:var(--accent);} .kpi .down{color:var(--danger);}
 .kpi svg{position:absolute; right:10px; bottom:10px; opacity:.85;}
 .main{display:grid; grid-template-columns:1fr 330px; gap:12px; padding:0 20px 12px;}
-.main>*,.ggrid>*{min-width:0;} /* 防网格子项 min-content 撑破窄屏（移动端横溢修复 2026-11-24） */
+.main>*,.ggrid>*{min-width:0;} /* 防网格子项 min-content 撑破窄屏（移动端横溢修复 2026-11-25） */
 .panel{background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:12px; min-width:0;}
 .panel h3{font-size:13px; display:flex; align-items:center; gap:8px; margin-bottom:8px; flex-wrap:wrap;}
 .panel h3 .hint{color:var(--sub); font-weight:400; font-size:11px; margin-left:auto;}
@@ -591,7 +591,7 @@ function shareURL(){
 }
 
 /* ============ 过滤 ============ */
-/* 类目跨行业线自动跟随（体感修复 2026-11-24）：
+/* 类目跨行业线自动跟随（体感修复 2026-11-25）：
    输入/跳转的类目若不在当前行业线，自动切到命中线并提示，避免"搜按摩却要先手动切休娱丽人"。
    当前线已命中则不打扰；景区粒度不适用。 */
 function linesForCat(q){
