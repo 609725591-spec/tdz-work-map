@@ -154,7 +154,7 @@ footer{margin:26px 0 40px; color:var(--sub); font-size:12.5px; text-align:center
     <a class="btn" href="#s2">我只想快点找空位 → 第 2 课</a>
     <a class="btn" href="#s10">先查常见问题 → 第 10 课</a>
   </div>
-  <p style="color:var(--sub);font-size:12.5px;margin-top:10px">建议用法：电脑开工具、手机开本指引（或反之），一课一课对照点。所有截图均为真实界面（截于 2026-11-24），<b>点任意截图可放大</b>。</p>
+  <p style="color:var(--sub);font-size:12.5px;margin-top:10px">建议用法：电脑开工具、手机开本指引（或反之），一课一课对照点。所有截图均为真实界面（截于 2026-11-25），<b>点任意截图可放大</b>。</p>
 </div>
 
 <nav class="toc" id="toc">
@@ -182,7 +182,7 @@ footer{margin:26px 0 40px; color:var(--sub); font-size:12.5px; text-align:center
   <figure class="shot"><img src="guide/02-top.png" alt="工具顶部三排控制区" loading="lazy"><figcaption><b>图 0-1</b> · 顶部全景：标题行 → 四步提示行 → 视图导航 → 两排筛选器。右上角徽章写着数据截至日期。</figcaption></figure>
   <h3>从上往下数，一共五层</h3>
   <ol class="steps">
-    <li><span class="k">标题行</span>：左边是工具名和全局搜索框（placeholder 写着「全局搜索：城市 / 类目 / 词包code」）；右边徽章 <span class="tap">真实数据·FBI同源</span> <span class="tap">口径已校准</span> <span class="tap">数据截至 …(T+1)</span>，以及 <span class="tap">浅色</span>（切换明暗主题）和 <span class="tap">使用统计</span>。<b>看数据新不新，只看「数据截至」这一枚徽章。</b></li>
+    <li><span class="k">标题行</span>：左边是工具名和全局搜索框（placeholder 写着「全局搜索：城市 / 类目 / 词包code」）；右边徽章 <span class="tap">真实数据·FBI同源</span> <span class="tap">口径已校准</span> <span class="tap">数据截至 …(T+1)</span>，以及 <span class="tap">浅色</span>（切换明暗主题）和 <span class="tap">使用统计</span>。紫色徽章 <span class="tap">管理档·内部</span> 是管理者督导驾驶舱入口（v1.1 新增，需访问码，见第 11 课）。<b>看数据新不新，只看「数据截至」这一枚徽章。</b></li>
     <li><span class="k">四步提示行</span>：工具自己写的用法口诀 —— 1 看热力 → 2 点城市 → 3 看空位行 → 4 进甘特。本指引第 2、3 课就是把它展开讲。</li>
     <li><span class="k">视图导航</span>：六个页签 <span class="tap">地图首页</span> <span class="tap">机会榜</span> <span class="tap">释放日历</span> <span class="tap">服务商增量榜</span> <span class="tap">词包字典</span> <span class="tap">全城档期矩阵</span>。另有俩隐藏页签「城市详情」「单格甘特」，点进去才出现，不用找。</li>
     <li><span class="k">筛选第一排（管"看哪种货、看多远"）</span>：<span class="tap">行业线</span>（生活服务 / 休娱丽人 / 美食）、<span class="tap">方案层</span>（全部 / 顶展2.0 / 钻展v1 / 顶展行政区 / 景区钻展）、<span class="tap">时间窗</span>（D+30 / D+60 / D+90 / 自定义）、<span class="tap">统计月份</span>（营收卡用哪个月）。</li>
@@ -400,12 +400,13 @@ footer{margin:26px 0 40px; color:var(--sub); font-size:12.5px; text-align:center
     <li><b>冲突只标注不裁决。</b>紫边疑似冲突、目录外行、地名歧义标记，都是"提请人工复核"，不是结论。</li>
     <li><b>数据 T+1 且公开无内部字段。</b>对外转发链接安全（无登录、无个人数据、无内部字段），但别承诺"实时库存"；以徽章「数据截至」为准。</li>
   </ol>
-  <div class="note">免责：本工具为作业辅助视图，库存与档期最终以业务系统订单为准；刊例估量不构成报价承诺。景区金额口径、管理档字段等待后续版本补齐。</div>
+  <div class="note"><b>管理档（v1.1 · 内部）</b>：点紫色徽章 <span class="tap">管理档·内部</span> 进入管理者督导驾驶舱 —— 全国 → 区总 → 小区总 → 渠道经理 → 服务商主体 → 城市×类目格 六级下钻，看每个管理者辖内的盘子/机会双口径、可派率、无覆盖缺口、占量健康与本月新占，配四象限督导图、同级横比、自动待办和三级派单话术卡。<b>含真名/工号/组织链，属内部资产</b>：页面数据以 AES-256-GCM 密文托管，访问码仅经钉钉下发管理者本人，浏览器内存中解密、不上传任何数据；<b>链接可以转，访问码不能转</b>。金额仍为刊例口径；「本月新占」按覆盖格内上刊起始月归属，非服务商签约归属。</div>
+  <div class="note">免责：本工具为作业辅助视图，库存与档期最终以业务系统订单为准；刊例估量不构成报价承诺。景区金额口径待后续版本补齐；管理档已于 v1.1 上线（内部访问码保护）。</div>
   <div class="win">你能用一句话向同事解释："这是刊例口径的 T+1 库存作业地图，空位和释放看它，成交和报价看业务系统。"</div>
 </section>
 
 <footer>
-  顶钻展作业地图 · 新手指引（小白版） · 配图截于 2026-11-24 真实界面<br>
+  顶钻展作业地图 · 新手指引（小白版） · 配图截于 2026-11-25 真实界面<br>
   工具地址：<a href="https://609725591-spec.github.io/tdz-work-map/" target="_blank" rel="noopener">609725591-spec.github.io/tdz-work-map</a> · 每天 09:00 更新（T+1）<br>
   指引有看不懂的地方、或界面改了图对不上：钉钉找 <b>页城</b> 反馈，下一版修。
 </footer>
