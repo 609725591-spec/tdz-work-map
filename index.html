@@ -264,6 +264,7 @@ tr.kbsel td{background:rgba(74,163,255,.14)!important;box-shadow:inset 2px 0 0 v
     <span class="badge gold" id="badgeDate">数据截至 —</span>
     <button class="badge" id="btnTheme">浅色</button>
     <button class="badge" id="btnStats">使用统计</button>
+    <span class="badge info" data-tdz-user style="display:none"></span>
   </div>
 </header>
 <div class="steps">
@@ -378,6 +379,7 @@ tr.kbsel td{background:rgba(74,163,255,.14)!important;box-shadow:inset 2px 0 0 v
 <script src="echarts.min.js"></script>
 <script src="china.geo.js"></script>
 <script src="city-coords.js"></script>
+<script src="auth.js"></script>
 <script>
 'use strict';
 /* ============ 口径常量（镜像 m0/config.js，改口径改那里再同步此处） ============ */
@@ -473,6 +475,7 @@ function track(type,detail){
     while(ev.length>2000) ev.shift();
     localStorage.setItem('tdz_events',JSON.stringify(ev));
   }catch(e){}
+  if(window.tdzLog) window.tdzLog(type,detail); /* 决策#18：登记身份后同步云端使用日志（anon 仅写） */
 }
 let lastView=null, viewSince=Date.now();
 function statsModal(){
@@ -489,7 +492,7 @@ function statsModal(){
     +(dwellRows.map(([v,ms])=>'<tr><td>'+v+'</td><td>'+(ms/60000).toFixed(1)+' 分钟</td></tr>').join('')||'<tr><td colspan="2">暂无停留记录</td></tr>')
     +'</tbody></table>'
     +'<div style="margin-top:8px;font-size:12px;color:var(--sub)">动作计数：导出 '+(acts.export||0)+' · 复制派单 '+(acts.copy||0)+' · 分享链接 '+(acts.share||0)+' · 搜索 '+(acts.search||0)+'</div>'
-    +'<div style="color:var(--sub);font-size:11px;margin-top:8px">v1 仅统计本设备（localStorage 环形 2000 条，不上传任何服务器）；跨设备 PV/UV 汇总需后端接收端，移 v1.1。</div>'
+    +'<div style="color:var(--sub);font-size:11px;margin-top:8px">登记身份后事件同步云端使用日志（仅写不可读，汇总需内部访问码）；本设备环形 2000 条作离线兜底与明细导出。当前登记：'+(window.tdzUser&&window.tdzUser()?(window.tdzUser().kind==='inner'?window.tdzUser().name+'（'+window.tdzUser().emp+'）':window.tdzUser().company+'·'+window.tdzUser().name):'未登记')+'</div>'
     +'<div style="text-align:right;margin-top:10px;display:flex;gap:8px;justify-content:flex-end"><button class="btn" id="stExport">导出事件 JSON</button><button class="btn" id="stClear">清空本设备记录</button><button class="btn" id="modalClose">关闭</button></div>';
   document.getElementById('modal').style.display='flex';
   document.getElementById('modalClose').onclick=()=>document.getElementById('modal').style.display='none';
