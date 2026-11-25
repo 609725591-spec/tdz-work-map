@@ -64,6 +64,15 @@ input[type=text]:focus,select:focus,input[type=date]:focus{outline:2px solid col
 .ck:has(input:checked){background:color-mix(in srgb, var(--ckc) 14%, transparent); border-color:color-mix(in srgb, var(--ckc) 55%, transparent); color:color-mix(in srgb, var(--ckc) 70%, var(--txt)); font-weight:600;}
 .bar .reset{background:none; border:1px solid var(--line); color:var(--sub); border-radius:8px; padding:6px 10px;}
 .bar .reset:hover{border-color:var(--danger); color:var(--danger);}
+/* 下钻闭环：城市明细/单格甘特 顶部吸顶返回条（2026-11-25 交互闭环） */
+.drillbar{position:sticky; top:0; z-index:6; display:flex; gap:8px; align-items:center; flex-wrap:wrap; padding:8px 10px; margin:0 0 10px; background:color-mix(in srgb, var(--bg) 86%, transparent); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); border:1px solid var(--line); border-radius:10px; box-shadow:0 6px 18px rgba(0,0,0,.18);}
+.drillbar .where{font-size:12px; display:flex; align-items:center; gap:6px; min-width:0; flex-wrap:wrap;}
+.drillbar .where b{font-size:13px;}
+.drillbar .where span{color:var(--sub); font-size:11px;}
+.drillbar .sp{flex:1;}
+.drillbar .hint{color:var(--sub); font-size:10.5px;}
+.btn.cy{background:color-mix(in srgb, var(--h-cyan) 16%, transparent); border-color:color-mix(in srgb, var(--h-cyan) 55%, transparent); color:color-mix(in srgb, var(--h-cyan) 70%, var(--txt)); font-weight:600;}
+.btn.cy:hover{background:color-mix(in srgb, var(--h-cyan) 28%, transparent);}
 /* 滚动条纳入本体视觉语言 */
 *{scrollbar-width:thin; scrollbar-color:var(--line) var(--panel2);}
 ::-webkit-scrollbar{width:10px; height:10px;}
@@ -789,7 +798,7 @@ function buildControls(){
 
 /* ============ 渲染主入口 ============ */
 function render(){
-  if(lastView!==S.view){ if(lastView) track('leave',{view:lastView,ms:Date.now()-viewSince}); track('enter',{view:S.view}); lastView=S.view; viewSince=Date.now(); }
+  if(lastView!==S.view){ if(lastView) track('leave',{view:lastView,ms:Date.now()-viewSince}); track('enter',{view:S.view}); lastView=S.view; viewSince=Date.now(); window.scrollTo(0,0); /* 视图切换回顶：下钻/返回都能看到目标视图头部（交互闭环 2026-11-25） */ }
   document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.view===S.view));
   /* 行业线色随动：整条控制舱的"当前线"身份色（pod 边框/类目输入聚焦环/面包屑） */
   const lh=LINE_HUES[S.line]||'var(--accent)';
@@ -1037,7 +1046,11 @@ function renderCity(arr){
       +'<td class="hintcell">'+hintHTML(c)+'</td></tr>';
   }).join('');
   el.innerHTML=
-    '<div class="summary">'
+    '<div class="drillbar"><button class="btn pri" id="cityBackMap">← 返回地图</button>'
+    +(S.prov>=0?'<button class="btn cy" id="cityBackRoot">全国热力</button>':'')
+    +'<span class="where"><b>'+city+'</b><span>'+IDX.dicts.provinces[IDX.cityProv[S.city]]+' · 城市明细列表</span></span>'
+    +'<span class="sp"></span><span class="hint">点表格行 → 单格甘特</span></div>'
+    +'<div class="summary">'
     +'<div class="it">省·城市<b>'+IDX.dicts.provinces[IDX.cityProv[S.city]]+' · '+city+'</b></div>'
     +'<div class="it">可售格<b>'+arr.length.toLocaleString()+'</b></div>'
     +'<div class="it">窗内已占<b>'+occ.toLocaleString()+'</b></div>'
@@ -1058,6 +1071,10 @@ function renderCity(arr){
     +'<div style="color:var(--sub);font-size:11px;padding:8px 2px">行点击进单格甘特 · 勾选多行可复制派单文案 · 紫边=疑似冲突（CITY/AREA 重叠仅标注不告警，决策#10②）</div>';
   document.getElementById('cityTabs').onclick=e=>{ const b=e.target.closest('button'); if(!b)return; S.cityTab=+b.dataset.t; renderCity(arr); };
   document.getElementById('cityQ').oninput=e=>{ S.cityQ=e.target.value.trim(); const pos=e.target.selectionStart; renderCity(filteredCells()); const ni=document.getElementById('cityQ'); ni.focus(); ni.setSelectionRange(pos,pos); };
+  /* 下钻闭环：明细列表 → 地图（保留省筛选与地图/列表模式） */
+  document.getElementById('cityBackMap').onclick=()=>{ S.city=-1; S.cellKey=null; S.view='map'; render(); };
+  const cbr=document.getElementById('cityBackRoot');
+  if(cbr) cbr.onclick=()=>{ S.prov=-1; S.city=-1; S.cellKey=null; S.view='map'; buildControls(); render(); };
   const tb=el.querySelector('tbody');
   tb.onclick=e=>{
     const rec=e.target.closest('button[data-rec]');
@@ -1150,7 +1167,10 @@ function renderGantt(){
   const deals=c.wins.filter(w=>w[2]==='COMPLETED').sort((a,b)=>b[1].localeCompare(a[1])).slice(0,8);
   const siblings=filteredCells().filter(x=>x.ci===c.ci).sort((a,b)=>(b.list||0)-(a.list||0));
   const si=siblings.indexOf(c);
-  el.innerHTML='<div class="ggrid"><div class="gantt">'
+  el.innerHTML='<div class="drillbar"><button class="btn cy" id="gBackCityTop">← 返回城市明细</button><button class="btn pri" id="gBackMapTop">返回地图</button>'
+    +'<span class="where"><b>'+cellPath(c).split(';').pop()+'</b><span>'+cellCity(c)+' · '+cellArea(c)+' · 单格甘特</span></span>'
+    +'<span class="sp"></span><span class="hint">同城市按刊例价序 '+(si+1)+'/'+siblings.length+'</span></div>'
+    +'<div class="ggrid"><div class="gantt">'
     +'<h3 style="font-size:14px;margin-bottom:4px">'+cellPath(c)+' <span style="color:var(--sub);font-size:11px">'+cellCity(c)+' · '+cellArea(c)+' · '+cellPlan(c)+(c.scenic?' · POI '+poi.toLocaleString():'')+'</span></h3>'
     +'<div style="color:var(--sub);font-size:11px">状态 <span class="st '+m.state+'">'+STATE_LABEL[m.state]+'</span> 窗内空闲 '+m.freeDays+'/'+m.Wd+' 天'+(m.earliest?' · 最早可上刊 '+iso(m.earliest):'')+(c.scenic?'':' · 刊例 '+fmtMoney(c.list)+'/30天')+'</div>'
     +'<div class="gantt-track"><div class="win" style="left:'+((w1-t0)/DAY/span*100).toFixed(2)+'%;width:'+((w2-w1)/DAY/span*100).toFixed(2)+'%"></div>'+bars+blanks+'<div class="now" style="left:'+((TODAY-t0)/DAY/span*100).toFixed(2)+'%"></div></div>'
@@ -1206,6 +1226,8 @@ function renderGantt(){
   document.getElementById('gPrev').onclick=()=>{ if(si>0) openGantt(siblings[si-1]); };
   document.getElementById('gNext').onclick=()=>{ if(si<siblings.length-1) openGantt(siblings[si+1]); };
   document.getElementById('gBack').onclick=()=>{ S.view='city'; render(); };
+  document.getElementById('gBackCityTop').onclick=()=>{ S.cellKey=null; S.view='city'; render(); };
+  document.getElementById('gBackMapTop').onclick=()=>{ S.cellKey=null; S.city=-1; S.view='map'; render(); };
   const ga=document.getElementById('gRecAll'); if(ga) ga.onclick=()=>showRecModal((c.scenic?'s':'')+c.ci+'|'+cellPath(c));
 }
 
