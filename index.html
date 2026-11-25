@@ -211,6 +211,15 @@ body.light{--bg:#f4f6f9;--panel:#ffffff;--panel2:#eef2f6;--line:#d8e0e8;--txt:#1
 .gsearch{position:relative;}
 .gsearch input{width:230px;}
 #gres{position:absolute;top:110%;left:0;width:360px;max-height:380px;overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:10px;z-index:40;display:none;box-shadow:0 8px 24px rgba(0,0,0,.35);}
+/* 省/市模糊搜索组合框（2026-11-25 用户要求可输入文字模糊搜） */
+.combo{position:relative;display:inline-block;}
+.combo input{width:172px;}
+.cbox{display:none;position:absolute;top:calc(100% + 4px);left:0;z-index:60;min-width:100%;width:250px;max-width:92vw;max-height:280px;overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.35);padding:4px;}
+.cbox .opt{padding:6px 9px;border-radius:7px;font-size:12px;cursor:pointer;white-space:nowrap;color:var(--txt);}
+.cbox .opt:hover,.cbox .opt.on{background:var(--panel2);}
+.cbox .opt small{color:var(--sub);margin-left:6px;}
+.cbox .none{padding:6px 9px;font-size:12px;color:var(--sub);}
+@media (max-width:700px){ .combo{flex:1;min-width:0;} .combo input{width:100%;} }
 #gres .g{padding:6px 10px;border-bottom:1px solid var(--line);}
 #gres .g h6{font-size:10.5px;color:var(--sub);margin-bottom:4px;}
 #gres button{display:block;width:100%;text-align:left;background:none;border:0;padding:4px 6px;border-radius:6px;font-size:12px;color:var(--txt);}
@@ -305,8 +314,8 @@ tr.kbsel td{background:rgba(74,163,255,.14)!important;box-shadow:inset 2px 0 0 v
 <div class="bar">
   <div class="pod" style="--pod:var(--h-cyan)">
     <span class="podlbl">地域 / 类目</span>
-    <label>省 <select id="selProv"></select></label>
-    <label>市 <select id="selCity"></select></label>
+    <label>省 <span class="combo"><input type="text" id="provIn" placeholder="全国 · 输入省名模糊搜" autocomplete="off"><div class="cbox" id="provBox"></div></span></label>
+    <label>市 <span class="combo"><input type="text" id="cityIn" placeholder="全部城市 · 输入市名模糊搜" autocomplete="off"><div class="cbox" id="cityBox"></div></span></label>
     <label>类目 <input type="text" id="inpCat" placeholder="搜索类目路径，如 火锅 / 按摩" style="width:190px"></label>
   </div>
   <div class="pod" style="--pod:var(--gray)">
@@ -749,6 +758,59 @@ function hintHTML(c){
 
 /* ============ 控件 ============ */
 const LINE_HUES=['var(--h-teal)','var(--h-mag)','var(--h-amber)']; /* 行业线专属色：生活服务/休娱丽人/美食 */
+/* 省/市模糊搜索组合框（2026-11-25 用户要求可输入文字模糊搜）：前缀>包含>子序三级匹配，↑↓/Enter/Esc，失焦还原 */
+function comboMatch(opts,q){
+  q=(q||'').trim().toLowerCase();
+  if(!q) return opts;
+  const pre=[],inc=[],sub=[];
+  for(const o of opts){
+    const t=o.t.toLowerCase();
+    if(t.startsWith(q)) pre.push(o);
+    else if(t.includes(q)) inc.push(o);
+    else { let i=0; for(const ch of t){ if(ch===q[i]) i++; if(i===q.length) break; } if(i===q.length) sub.push(o); }
+  }
+  return pre.concat(inc,sub);
+}
+function syncCombos(){
+  const pv=document.getElementById('provIn'), cy=document.getElementById('cityIn');
+  if(pv&&document.activeElement!==pv) pv.value=S.prov<0?'':IDX.dicts.provinces[S.prov];
+  if(cy&&document.activeElement!==cy) cy.value=S.city<0?'':IDX.dicts.cities[S.city];
+}
+function wireCombo(inId,boxId,getOptions,getCur,onPick){
+  const inp=document.getElementById(inId), box=document.getElementById(boxId);
+  if(!inp||inp.dataset.wired) return; inp.dataset.wired='1';
+  let opts=[],act=-1;
+  const CAP=80;
+  function close(){ box.style.display='none'; act=-1; }
+  function paint(){
+    opts=comboMatch(getOptions(),inp.value);
+    const cur=getCur(), n=Math.min(opts.length,CAP);
+    if(act>=n) act=n-1;
+    if(!opts.length){ box.innerHTML='<div class="none">无匹配，试试全称（如 陵水黎族自治县）</div>'; }
+    else {
+      box.innerHTML=opts.slice(0,CAP).map((o,i)=>'<div class="opt'+(i===act?' on':'')+'" data-v="'+o.v+'">'+o.t+(o.v===cur?'<small>当前</small>':'')+'</div>').join('')
+        +(opts.length>CAP?'<div class="none">仅显示前 '+CAP+' 条，请继续输入缩小范围</div>':'');
+    }
+    box.style.display='block';
+    if(window.innerWidth<=700){ /* 移动端：fixed 全宽定位，避免窄屏左右溢出 */
+      const r=inp.getBoundingClientRect();
+      box.style.position='fixed'; box.style.left='12px'; box.style.right='12px'; box.style.width='auto'; box.style.minWidth='0'; box.style.maxWidth='none';
+      box.style.top=(r.bottom+284>window.innerHeight?Math.max(8,r.top-284):r.bottom+4)+'px';
+    } else { box.style.position=''; box.style.top=''; box.style.left=''; box.style.right=''; box.style.width=''; box.style.minWidth=''; box.style.maxWidth=''; }
+  }
+  function pick(v){ inp.blur(); close(); onPick(v); syncCombos(); }
+  inp.addEventListener('focus',()=>{ inp.select(); act=-1; paint(); });
+  inp.addEventListener('input',()=>{ act=-1; paint(); });
+  inp.addEventListener('keydown',e=>{
+    const n=Math.min(opts.length,CAP);
+    if(e.key==='ArrowDown'){ e.preventDefault(); if(box.style.display!=='block'){ paint(); return; } if(n){ act=(act+1)%n; paint(); const el=box.querySelector('.opt.on'); if(el)el.scrollIntoView({block:'nearest'}); } }
+    else if(e.key==='ArrowUp'){ e.preventDefault(); if(n){ act=(act-1+n)%n; paint(); const el=box.querySelector('.opt.on'); if(el)el.scrollIntoView({block:'nearest'}); } }
+    else if(e.key==='Enter'){ e.preventDefault(); if(opts.length) pick(opts[act>=0?act:0].v); }
+    else if(e.key==='Escape'){ close(); inp.blur(); syncCombos(); }
+  });
+  inp.addEventListener('blur',()=>{ setTimeout(()=>{ close(); syncCombos(); },120); });
+  box.addEventListener('mousedown',e=>{ e.preventDefault(); const o=e.target.closest('.opt'); if(o) pick(+o.dataset.v); });
+}
 function buildControls(){
   const sl=document.getElementById('segLine');
   sl.innerHTML=IDX.dicts.lines.map((l,i)=>'<button data-i="'+i+'" style="--h:'+LINE_HUES[i]+'"'+(i===S.line?' class="on"':'')+'>'+l+'</button>').join('');
@@ -770,14 +832,16 @@ function buildControls(){
   const sm=document.getElementById('selMonth');
   sm.innerHTML=months.map(m=>'<option'+(m===S.month?' selected':'')+'>'+m+'</option>').join('');
   sm.onchange=e=>{ S.month=e.target.value; render(); };
-  // 省/市
-  const spv=document.getElementById('selProv');
-  spv.innerHTML='<option value="-1">全国</option>'+IDX.dicts.provinces.map((p,i)=>'<option value="'+i+'"'+(i===S.prov?' selected':'')+'>'+p+'</option>').join('');
-  spv.onchange=e=>{ S.prov=+e.target.value; S.city=-1; buildControls(); render(); };
-  const scy=document.getElementById('selCity');
-  const cityList=IDX.dicts.cities.map((c,i)=>[c,i]).filter(([c,i])=>S.prov<0||IDX.cityProv[i]===S.prov);
-  scy.innerHTML='<option value="-1">全部城市</option>'+cityList.map(([c,i])=>'<option value="'+i+'"'+(i===S.city?' selected':'')+'>'+c+'</option>').join('');
-  scy.onchange=e=>{ S.city=+e.target.value; render(); };
+  // 省/市：模糊搜索组合框（替代原生 select；getOptions 闭包实时读 S，省切换后市列表自动收窄）
+  wireCombo('provIn','provBox',
+    ()=>[{v:-1,t:'全国'}].concat(IDX.dicts.provinces.map((p,i)=>({v:i,t:p}))),
+    ()=>S.prov,
+    v=>{ S.prov=v; S.city=-1; buildControls(); render(); });
+  wireCombo('cityIn','cityBox',
+    ()=>[{v:-1,t:'全部城市'}].concat(IDX.dicts.cities.map((c,i)=>({v:i,t:c})).filter(o=>S.prov<0||IDX.cityProv[o.v]===S.prov)),
+    ()=>S.city,
+    v=>{ S.city=v; render(); });
+  syncCombos();
   document.getElementById('inpCat').value=S.cat;
   document.getElementById('inpCat').oninput=e=>{ S.cat=e.target.value.trim(); const sw=followCatLine(S.cat); render(); if(sw) flashLine(); };
   document.getElementById('ckFree').checked=S.onlyFree; document.getElementById('ckOcc').checked=S.onlyOcc;
@@ -829,9 +893,8 @@ function render(){
     render(); };
   document.getElementById('filterNote').textContent='当前筛选 '+arr.length.toLocaleString()+' 格'
     +(S.cat&&!arr.length&&!linesForCat(S.cat).length?' · 类目「'+S.cat+'」未命中任何行业线，可清空或改搜 火锅 / 按摩':'');
-  // 下拉/分段与状态同步（不重建控件，避免输入失焦）
-  document.getElementById('selProv').value=S.prov;
-  document.getElementById('selCity').value=S.city;
+  // 下拉/分段与状态同步（不重建控件，避免输入失焦；省市组合框正在输入时不打断）
+  syncCombos();
   document.getElementById('selMonth').value=S.month;
   document.querySelectorAll('#segLine button').forEach(b=>b.classList.toggle('on',+b.dataset.i===S.line));
   document.querySelectorAll('#segPlan button').forEach(b=>b.classList.toggle('on',String(S.plan)===b.dataset.p));
