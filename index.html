@@ -9,34 +9,67 @@
 :root{
   --bg:#0f1923; --panel:#1a2634; --panel2:#14202b; --line:#263544; --txt:#e8eef4; --sub:#8fa3b5;
   --accent:#35d0ba; --gold:#f5c451; --danger:#ff6b6b; --orange:#ff8c3c; --blue:#4aa3ff; --purple:#b78cff; --gray:#6b7a89;
+  /* 色块驾驶舱：每个控制组/视图/行业线一个专属色相（2026-11-25 首页区分度升级） */
+  --h-teal:#35d0ba; --h-mag:#ff5fa2; --h-amber:#ffb020; --h-blue:#4aa3ff;
+  --h-violet:#b78cff; --h-lime:#a3e635; --h-orange:#ff8c3c; --h-cyan:#22d3ee;
 }
 *{box-sizing:border-box; margin:0; padding:0;}
 body{background:var(--bg); color:var(--txt); font:13px/1.55 -apple-system,"PingFang SC","Microsoft YaHei",sans-serif;}
 button{font:inherit; color:inherit; cursor:pointer;}
 header{display:flex; align-items:center; gap:14px; padding:14px 20px 10px; flex-wrap:wrap;}
-header h1{font-size:19px; letter-spacing:.5px;}
+header h1{font-size:19px; letter-spacing:.5px; display:flex; align-items:center;}
 header h1 small{color:var(--sub); font-size:11px; font-weight:400; margin-left:8px;}
+.mark{display:inline-flex; gap:3px; margin-right:9px; flex:none;}
+.mark i{width:6px; height:17px; border-radius:2px;}
+.mark i:nth-child(1){background:var(--h-teal);}
+.mark i:nth-child(2){background:var(--h-mag);}
+.mark i:nth-child(3){background:var(--h-amber);}
 .badges{display:flex; gap:6px; margin-left:auto; flex-wrap:wrap;}
 .badge{font-size:11px; padding:3px 9px; border-radius:20px; border:1px solid var(--line); color:var(--sub);}
 .badge.ok{color:var(--accent); border-color:rgba(53,208,186,.4);}
+.badge.info{color:var(--blue); border-color:rgba(74,163,255,.4);}
 .badge.gold{color:var(--gold); border-color:rgba(245,196,81,.4);}
+.badge.cta{background:var(--h-lime); border-color:var(--h-lime); color:#0f1923; font-weight:700;}
 .steps{display:flex; gap:6px; padding:0 20px 10px; flex-wrap:wrap; align-items:center;}
-.step{font-size:11px; color:var(--sub); background:var(--panel2); border:1px solid var(--line); padding:3px 10px; border-radius:20px;}
-.step b{color:var(--accent); margin-right:4px;}
-.step.arrow{border:0; background:none; padding:0 2px;}
+.step{font-size:11px; color:var(--txt); background:color-mix(in srgb, var(--h) 12%, transparent); border:1px solid color-mix(in srgb, var(--h) 38%, transparent); padding:3px 10px 3px 4px; border-radius:20px; display:inline-flex; align-items:center;}
+.step b{background:var(--h); color:#0f1923; width:17px; height:17px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; margin-right:6px; font-size:10.5px; flex:none;}
+.step.arrow{border:0; background:none; padding:0 2px; color:var(--sub);}
 nav{display:flex; gap:4px; padding:0 20px 10px; flex-wrap:wrap;}
-nav button{background:var(--panel2); border:1px solid var(--line); border-radius:8px; padding:6px 14px; color:var(--sub);}
-nav button.on{background:var(--accent); border-color:var(--accent); color:#0f1923; font-weight:700;}
+nav button{background:var(--panel2); border:1px solid var(--line); border-radius:8px; padding:6px 14px; color:var(--sub); display:inline-flex; align-items:center; gap:7px;}
+nav button::before{content:''; width:7px; height:7px; border-radius:2px; background:var(--h,var(--accent)); flex:none;}
+nav button:hover{border-color:color-mix(in srgb, var(--h,var(--accent)) 55%, transparent); color:var(--txt);}
+nav button.on{background:var(--h,var(--accent)); border-color:var(--h,var(--accent)); color:#0f1923; font-weight:700;}
+nav button.on::before{background:rgba(15,25,35,.5);}
 .bar{display:flex; gap:10px; padding:0 20px 12px; flex-wrap:wrap; align-items:center;}
+.pod{display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:5px 8px; border-radius:10px; background:color-mix(in srgb, var(--pod) 9%, transparent); border:1px solid color-mix(in srgb, var(--pod) 34%, transparent);}
+.podlbl{font-size:10.5px; font-weight:700; letter-spacing:.5px; color:color-mix(in srgb, var(--pod) 62%, var(--txt)); display:inline-flex; align-items:center; gap:5px; white-space:nowrap;}
+.podlbl::before{content:''; width:8px; height:8px; border-radius:2px; background:var(--pod); flex:none;}
 .seg{display:flex; background:var(--panel2); border:1px solid var(--line); border-radius:8px; overflow:hidden;}
-.seg button{background:transparent; border:0; color:var(--sub); padding:6px 12px; font-size:12px;}
-.seg button.on{background:var(--accent); color:#0f1923; font-weight:700;}
+.pod .seg{background:transparent; border-color:color-mix(in srgb, var(--pod) 26%, transparent);}
+.seg button{background:transparent; border:0; color:var(--sub); padding:6px 12px; font-size:12px; display:inline-flex; align-items:center; gap:6px;}
+.pod .seg button+button{border-left:1px solid color-mix(in srgb, var(--pod) 20%, transparent);}
+nav button::before,#segLine button::before,#segPlan button::before,#segWin button::before{content:''; width:7px; height:7px; border-radius:2px; background:var(--h,var(--accent)); flex:none;}
+.seg button:hover{color:var(--txt); background:color-mix(in srgb, var(--h,var(--accent)) 12%, transparent);}
+.seg button.on{background:var(--h,var(--accent)); color:#0f1923; font-weight:700;}
+nav button.on::before,#segLine button.on::before,#segPlan button.on::before,#segWin button.on::before{background:rgba(15,25,35,.5);}
 #segLine button.flash{animation:lineflash 1.2s ease;}
-@keyframes lineflash{0%{outline:3px solid var(--accent); outline-offset:0;}100%{outline:3px solid transparent; outline-offset:7px;}}
-.seg.gold button.on{background:var(--gold);}
+@keyframes lineflash{0%{outline:3px solid var(--h,var(--accent)); outline-offset:0;}100%{outline:3px solid transparent; outline-offset:7px;}}
 select,input[type=date],input[type=text]{background:var(--panel2); color:var(--txt); border:1px solid var(--line); border-radius:8px; padding:6px 8px; font-size:12px;}
+input[type=text]:focus,select:focus,input[type=date]:focus{outline:2px solid color-mix(in srgb, var(--lineH,var(--accent)) 55%, transparent); border-color:var(--lineH,var(--accent));}
 .bar label{color:var(--sub); font-size:11px; display:flex; align-items:center; gap:5px;}
+.ck{padding:4px 10px; border:1px solid var(--line); border-radius:8px; cursor:pointer;}
+.ck input{accent-color:var(--ckc,var(--accent));}
+.ck-free{--ckc:var(--h-teal);}
+.ck-occ{--ckc:var(--danger);}
+.ck:has(input:checked){background:color-mix(in srgb, var(--ckc) 14%, transparent); border-color:color-mix(in srgb, var(--ckc) 55%, transparent); color:color-mix(in srgb, var(--ckc) 70%, var(--txt)); font-weight:600;}
 .bar .reset{background:none; border:1px solid var(--line); color:var(--sub); border-radius:8px; padding:6px 10px;}
+.bar .reset:hover{border-color:var(--danger); color:var(--danger);}
+/* 滚动条纳入本体视觉语言 */
+*{scrollbar-width:thin; scrollbar-color:var(--line) var(--panel2);}
+::-webkit-scrollbar{width:10px; height:10px;}
+::-webkit-scrollbar-track{background:var(--panel2);}
+::-webkit-scrollbar-thumb{background:var(--line); border-radius:6px; border:2px solid var(--panel2);}
+::-webkit-scrollbar-thumb:hover{background:var(--accent);}
 .crumb{padding:0 20px 8px; color:var(--sub); font-size:12px; display:flex; gap:6px; align-items:center; flex-wrap:wrap;}
 .crumb button{background:none; border:0; color:var(--accent); padding:0;}
 .kpis{display:grid; grid-template-columns:repeat(8,1fr); gap:10px; padding:0 20px 12px;}
@@ -205,55 +238,70 @@ tr.kbsel td{background:rgba(74,163,255,.14)!important;box-shadow:inset 2px 0 0 v
 #loading{padding:60px 20px; text-align:center; color:var(--sub);}
 .empty{padding:40px; text-align:center; color:var(--sub);}
 @media (max-width:1200px){ .kpis{grid-template-columns:repeat(4,1fr);} .main{grid-template-columns:1fr;} .ggrid{grid-template-columns:1fr;} }
-@media (max-width:700px){ .kpis{grid-template-columns:repeat(2,1fr);} #map{height:360px;} }
+@media (max-width:700px){ .kpis{grid-template-columns:repeat(2,1fr);} #map{height:360px;} .seg{flex-wrap:wrap;} .pod .seg button+button{border-left:0;} .gsearch{flex:1;} .gsearch input{width:100%;} }
 </style>
 </head>
 <body>
 <header>
-  <h1>顶钻展作业地图<small>顶展2.0 / 钻展v1 / 顶展行政区 / 景区钻展 · 库存作战</small></h1>
+  <h1><span class="mark" aria-hidden="true"><i></i><i></i><i></i></span>顶钻展作业地图<small>顶展2.0 / 钻展v1 / 顶展行政区 / 景区钻展 · 库存作战</small></h1>
   <div class="gsearch"><input type="text" id="gq" placeholder="全局搜索：城市 / 类目 / 词包code" autocomplete="off"><div id="gres"></div></div>
   <div class="badges">
-    <a class="badge ok" href="guide.html" style="cursor:pointer;text-decoration:none;font-weight:700">新手指引</a>
+    <a class="badge cta" href="guide.html" style="cursor:pointer;text-decoration:none">新手指引</a>
     <span class="badge ok">真实数据 · FBI 同源</span>
-    <span class="badge ok">口径已校准</span>
+    <span class="badge info">口径已校准</span>
     <span class="badge gold" id="badgeDate">数据截至 —</span>
     <button class="badge" id="btnTheme">浅色</button>
     <button class="badge" id="btnStats">使用统计</button>
   </div>
 </header>
 <div class="steps">
-  <span class="step"><b>1</b>看热力：默认已售单数，可切机会热力</span><span class="step arrow">→</span>
-  <span class="step"><b>2</b>点城市：看哪些类目空着、值多少钱</span><span class="step arrow">→</span>
-  <span class="step"><b>3</b>看空位行：高优作业服务商提示</span><span class="step arrow">→</span>
-  <span class="step"><b>4</b>进甘特：排档期 / 试算 / 复制派单文案</span>
+  <span class="step" style="--h:var(--h-teal)"><b>1</b>看热力：默认已售单数，可切机会热力</span><span class="step arrow">→</span>
+  <span class="step" style="--h:var(--h-cyan)"><b>2</b>点城市：看哪些类目空着、值多少钱</span><span class="step arrow">→</span>
+  <span class="step" style="--h:var(--h-amber)"><b>3</b>看空位行：高优作业服务商提示</span><span class="step arrow">→</span>
+  <span class="step" style="--h:var(--h-orange)"><b>4</b>进甘特：排档期 / 试算 / 复制派单文案</span>
 </div>
 <nav>
-  <button data-view="map" class="on">地图首页</button>
-  <button data-view="opp">机会榜</button>
-  <button data-view="cal">释放日历</button>
-  <button data-view="prov">服务商增量榜</button>
-  <button data-view="dict">词包字典</button>
-  <button data-view="matrix">全城档期矩阵</button>
-  <button data-view="city" id="navCity" style="display:none">城市详情</button>
-  <button data-view="gantt" id="navGantt" style="display:none">单格甘特</button>
+  <button data-view="map" class="on" style="--h:var(--h-teal)">地图首页</button>
+  <button data-view="opp" style="--h:var(--h-amber)">机会榜</button>
+  <button data-view="cal" style="--h:var(--h-blue)">释放日历</button>
+  <button data-view="prov" style="--h:var(--h-violet)">服务商增量榜</button>
+  <button data-view="dict" style="--h:var(--h-mag)">词包字典</button>
+  <button data-view="matrix" style="--h:var(--h-lime)">全城档期矩阵</button>
+  <button data-view="city" id="navCity" style="display:none;--h:var(--h-cyan)">城市详情</button>
+  <button data-view="gantt" id="navGantt" style="display:none;--h:var(--h-orange)">单格甘特</button>
 </nav>
 <div class="bar">
-  <span style="color:var(--sub);font-size:11px">行业线</span>
-  <div class="seg" id="segLine"></div>
-  <span style="color:var(--sub);font-size:11px">方案层</span>
-  <div class="seg gold" id="segPlan"></div>
-  <span style="color:var(--sub);font-size:11px">时间窗</span>
-  <div class="seg" id="segWin"></div>
-  <input type="date" id="winS" style="display:none"><input type="date" id="winE" style="display:none">
-  <label>统计月份 <select id="selMonth"></select></label>
+  <div class="pod" id="podLine" style="--pod:var(--h-teal)">
+    <span class="podlbl">行业线</span>
+    <div class="seg" id="segLine"></div>
+  </div>
+  <div class="pod" style="--pod:var(--h-violet)">
+    <span class="podlbl">方案层</span>
+    <div class="seg" id="segPlan"></div>
+  </div>
+  <div class="pod" style="--pod:var(--h-blue)">
+    <span class="podlbl">时间窗</span>
+    <div class="seg" id="segWin"></div>
+    <input type="date" id="winS" style="display:none"><input type="date" id="winE" style="display:none">
+  </div>
+  <div class="pod" style="--pod:var(--gold)">
+    <span class="podlbl">统计月份</span>
+    <select id="selMonth"></select>
+  </div>
 </div>
 <div class="bar">
-  <label>省 <select id="selProv"></select></label>
-  <label>市 <select id="selCity"></select></label>
-  <label>类目 <input type="text" id="inpCat" placeholder="搜索类目路径，如 火锅 / 按摩" style="width:190px"></label>
-  <label><input type="checkbox" id="ckFree"> 只看未占量城市</label>
-  <label><input type="checkbox" id="ckOcc"> 只看已有占量</label>
-  <button class="reset" id="btnReset">一键重置</button>
+  <div class="pod" style="--pod:var(--h-cyan)">
+    <span class="podlbl">地域 / 类目</span>
+    <label>省 <select id="selProv"></select></label>
+    <label>市 <select id="selCity"></select></label>
+    <label>类目 <input type="text" id="inpCat" placeholder="搜索类目路径，如 火锅 / 按摩" style="width:190px"></label>
+  </div>
+  <div class="pod" style="--pod:var(--gray)">
+    <span class="podlbl">快速过滤</span>
+    <label class="ck ck-free"><input type="checkbox" id="ckFree"> 只看未占量城市</label>
+    <label class="ck ck-occ"><input type="checkbox" id="ckOcc"> 只看已有占量</label>
+    <button class="reset" id="btnReset">一键重置</button>
+  </div>
   <span class="sp" style="flex:1"></span>
   <span style="color:var(--sub);font-size:11px" id="filterNote"></span>
 </div>
@@ -685,15 +733,16 @@ function hintHTML(c){
 }
 
 /* ============ 控件 ============ */
+const LINE_HUES=['var(--h-teal)','var(--h-mag)','var(--h-amber)']; /* 行业线专属色：生活服务/休娱丽人/美食 */
 function buildControls(){
   const sl=document.getElementById('segLine');
-  sl.innerHTML=IDX.dicts.lines.map((l,i)=>'<button data-i="'+i+'"'+(i===S.line?' class="on"':'')+'>'+l+'</button>').join('');
+  sl.innerHTML=IDX.dicts.lines.map((l,i)=>'<button data-i="'+i+'" style="--h:'+LINE_HUES[i]+'"'+(i===S.line?' class="on"':'')+'>'+l+'</button>').join('');
   sl.onclick=e=>{ const b=e.target.closest('button'); if(!b)return; S.line=+b.dataset.i; S.city=-1; S.cellKey=null; buildControls(); render(); };
   const sp=document.getElementById('segPlan');
-  sp.innerHTML='<button data-p="all"'+(S.plan==='all'?' class="on"':'')+'>全部</button>'+CFG.planLabels.map((l,i)=>'<button data-p="'+i+'"'+(S.plan===i?' class="on"':'')+'>'+l+'</button>').join('')+'<button data-p="scenic"'+(S.plan==='scenic'?' class="on"':'')+'>景区钻展</button>';
+  sp.innerHTML='<button data-p="all" style="--h:var(--h-violet)"'+(S.plan==='all'?' class="on"':'')+'>全部</button>'+CFG.planLabels.map((l,i)=>'<button data-p="'+i+'" style="--h:var(--h-violet)"'+(S.plan===i?' class="on"':'')+'>'+l+'</button>').join('')+'<button data-p="scenic" style="--h:var(--h-lime)"'+(S.plan==='scenic'?' class="on"':'')+'>景区钻展</button>';
   sp.onclick=e=>{ const b=e.target.closest('button'); if(!b)return; const p=b.dataset.p; S.plan=(p==='all'||p==='scenic')?p:+p; S.city=-1; S.cellKey=null; buildControls(); render(); };
   const sw=document.getElementById('segWin');
-  sw.innerHTML=[30,60,90].map(d=>'<button data-w="'+d+'"'+(S.W===d&&!S.winS?' class="on"':'')+'>D+'+d+'</button>').join('')+'<button data-w="custom"'+(S.winS?' class="on"':'')+'>自定义</button>';
+  sw.innerHTML=[30,60,90].map(d=>'<button data-w="'+d+'" style="--h:var(--h-blue)"'+(S.W===d&&!S.winS?' class="on"':'')+'>D+'+d+'</button>').join('')+'<button data-w="custom" style="--h:var(--h-cyan)"'+(S.winS?' class="on"':'')+'>自定义</button>';
   sw.onclick=e=>{ const b=e.target.closest('button'); if(!b)return;
     if(b.dataset.w==='custom'){ document.getElementById('winS').style.display=''; document.getElementById('winE').style.display='';
       if(!S.winS){ S.winS=iso(TODAY); S.winE=iso(addDays(TODAY,30)); document.getElementById('winS').value=S.winS; document.getElementById('winE').value=S.winE; } }
@@ -742,6 +791,10 @@ function buildControls(){
 function render(){
   if(lastView!==S.view){ if(lastView) track('leave',{view:lastView,ms:Date.now()-viewSince}); track('enter',{view:S.view}); lastView=S.view; viewSince=Date.now(); }
   document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.view===S.view));
+  /* 行业线色随动：整条控制舱的"当前线"身份色（pod 边框/类目输入聚焦环/面包屑） */
+  const lh=LINE_HUES[S.line]||'var(--accent)';
+  document.body.style.setProperty('--lineH',lh);
+  document.getElementById('podLine').style.setProperty('--pod',lh);
   document.getElementById('navCity').style.display = S.city>=0?'':'none';
   document.getElementById('navGantt').style.display = S.cellKey?'':'none';
   ['map','city','gantt','matrix','opp','cal','prov','dict'].forEach(v=>document.getElementById('view'+v[0].toUpperCase()+v.slice(1)).style.display = S.view===v?'':'none');
@@ -752,7 +805,7 @@ function render(){
   if(S.prov>=0) html+=' › <button data-cr="prov">'+IDX.dicts.provinces[S.prov]+'</button>';
   if(S.city>=0) html+=' › <button data-cr="city">'+IDX.dicts.cities[S.city]+'</button>';
   if(S.cellKey&&S.view==='gantt') html+=' › <span>单格甘特</span>';
-  html+=' <span style="margin-left:8px;color:var(--sub)">当前窗 '+iso(winRange()[0])+' ~ '+iso(winRange()[1])+' · '+(S.plan==='scenic'?'景区钻展（类目桶粒度，不展示金额）':(S.plan==='all'?'全部方案':CFG.planLabels[S.plan]))+' · '+cellLineLabel()+'</span>';
+  html+=' <span style="margin-left:8px;color:var(--sub)">当前窗 '+iso(winRange()[0])+' ~ '+iso(winRange()[1])+' · '+(S.plan==='scenic'?'景区钻展（类目桶粒度，不展示金额）':(S.plan==='all'?'全部方案':CFG.planLabels[S.plan]))+' · <b style="color:var(--lineH);font-weight:600">'+cellLineLabel()+'</b></span>';
   cr.innerHTML=html;
   cr.onclick=e=>{ const b=e.target.closest('button'); if(!b)return;
     if(b.dataset.cr==='root'){S.prov=-1;S.city=-1;S.cellKey=null;S.view='map';}
