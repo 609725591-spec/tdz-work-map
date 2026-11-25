@@ -180,10 +180,17 @@ footer{margin:26px 0 40px; color:var(--sub); font-size:12.5px; text-align:center
 <section class="lesson" id="s0">
   <header><span class="no">第 0 课</span><h2>认识界面：三排按钮各管什么</h2></header>
   <p class="goal">目标：<b>30 秒内知道每个按钮在哪、管什么</b>，后面所有课都在这三排按钮上操作。</p>
+  <h3>第 0 步：先登记身份（v1.2 新增）</h3>
+  <figure class="shot"><img src="guide/24-login-gate.png" alt="登记式登录门" loading="lazy"><figcaption><b>图 0-0</b> · 登记门：两个页签选身份 —— 内部同事填花名+工号，服务商同事填公司名+姓名。无验证码，登记后进入。</figcaption></figure>
+  <ol class="steps">
+    <li><span class="k">选身份填两项</span>：内部同事 = <b>花名 + 工号</b>（数字工号，外包 WB 开头）；服务商同事点「服务商同事」页签 = <b>公司名 + 您的姓名</b>。填错格式会红字提示，改对再进。</li>
+    <li><span class="k">为什么登记</span>：按人统计使用情况（谁在用、常用哪些视图、有没有导出派单）。身份为自报、仅用于统计，不作安全鉴权；<b>管理档仍另需访问码</b>（第 11 课）。</li>
+    <li><span class="k">进去之后</span>：右上角徽章显示你的身份（花名(工号) 或 公司·姓名），本机记住、下次免填；换人点徽章旁 <span class="tap">退出</span> 回到登记门。</li>
+  </ol>
   <figure class="shot"><img src="guide/02-top.png" alt="工具顶部三排控制区" loading="lazy"><figcaption><b>图 0-1</b> · 顶部全景：标题行 → 四步提示行 → 视图导航 → 两排筛选器。右上角徽章写着数据截至日期。</figcaption></figure>
   <h3>从上往下数，一共五层</h3>
   <ol class="steps">
-    <li><span class="k">标题行</span>：左边是工具名和全局搜索框（placeholder 写着「全局搜索：城市 / 类目 / 词包code」）；右边徽章 <span class="tap">真实数据·FBI同源</span> <span class="tap">口径已校准</span> <span class="tap">数据截至 …(T+1)</span>，以及 <span class="tap">浅色</span>（切换明暗主题）和 <span class="tap">使用统计</span>。紫色徽章 <span class="tap">管理档·内部</span> 是管理者督导驾驶舱入口（v1.1 新增，需访问码，见第 11 课）。<b>看数据新不新，只看「数据截至」这一枚徽章。</b></li>
+    <li><span class="k">标题行</span>：左边是工具名和全局搜索框（placeholder 写着「全局搜索：城市 / 类目 / 词包code」）；右边徽章 <span class="tap">真实数据·FBI同源</span> <span class="tap">口径已校准</span> <span class="tap">数据截至 …(T+1)</span>，以及 <span class="tap">浅色</span>（切换明暗主题）和 <span class="tap">使用统计</span>。紫色徽章 <span class="tap">管理档·内部</span> 是管理者督导驾驶舱入口（v1.1 新增，需访问码，见第 11 课）；最右还有你的<b>登记身份徽章</b>（花名(工号) 或 公司·姓名，v1.2）与 <span class="tap">退出</span>。<b>看数据新不新，只看「数据截至」这一枚徽章。</b></li>
     <li><span class="k">四步提示行</span>：工具自己写的用法口诀 —— 1 看热力 → 2 点城市 → 3 看空位行 → 4 进甘特。本指引第 2、3 课就是把它展开讲。</li>
     <li><span class="k">视图导航</span>：六个页签 <span class="tap">地图首页</span> <span class="tap">机会榜</span> <span class="tap">释放日历</span> <span class="tap">服务商增量榜</span> <span class="tap">词包字典</span> <span class="tap">全城档期矩阵</span>。另有俩隐藏页签「城市详情」「单格甘特」，点进去才出现，不用找。</li>
     <li><span class="k">筛选第一排（管"看哪种货、看多远"）</span>：<span class="tap">行业线</span>（生活服务 / 休娱丽人 / 美食）、<span class="tap">方案层</span>（全部 / 顶展2.0 / 钻展v1 / 顶展行政区 / 景区钻展）、<span class="tap">时间窗</span>（D+30 / D+60 / D+90 / 自定义）、<span class="tap">统计月份</span>（营收卡用哪个月）。</li>
@@ -388,7 +395,8 @@ footer{margin:26px 0 40px; color:var(--sub); font-size:12.5px; text-align:center
   <details class="faq"><summary>搜城市搜不到，比如「陵水」？</summary><div class="a">城市用<b>全称</b>存储与匹配（如「陵水黎族自治县」）。搜简称命中不了时改搜全称，或直接用省→市下拉选。下拉与搜索都支持模糊输入。</div></details>
   <details class="faq"><summary>手机上为什么没有地图？</summary><div class="a">屏宽 &lt;700px 默认列表模式（性能与可读性考虑），点 <span class="tap">地图|列表</span> 可切回地图。不是功能缺失。</div></details>
   <details class="faq"><summary>服务商增量榜各家加起来为什么比全国大？</summary><div class="a">各家可作业盘子<b>允许重叠</b>（一个格子可被多家作业），分组合计是未去重口径，页面已注明「不可直接加总对外」。全国去重口径看指标卡「增量空间」。</div></details>
-  <div class="win">以上 15 条扫一遍，日后 90% 的"数不对"都能自己解释。</div>
+  <details class="faq"><summary>登录要验证码吗？没有工号怎么办？登记信息安全吗？</summary><div class="a"><b>不要验证码</b>：这是登记式登录，自报身份仅用于使用统计。没有工号 = 服务商同事，切「服务商同事」页签填公司名+姓名即可。身份只存本机浏览器（点「退出」可清除）；使用日志云端<b>仅写不可读</b>，汇总需内部访问码，公网拿不到任何人的工号/姓名明细。管理档的安全仍由访问码单独保护，与登记无关。</div></details>
+  <div class="win">以上 16 条扫一遍，日后 90% 的"数不对"都能自己解释。</div>
 </section>
 
 <!-- ============ 11 ============ -->
