@@ -1,0 +1,1253 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>顶钻展 · 管理档（内部）</title>
+<link rel="icon" href="data:,">
+<style>
+:root{
+  --bg:#0f1923; --panel:#1a2634; --panel2:#14202b; --line:#263544; --txt:#e8eef4; --sub:#8fa3b5;
+  --accent:#35d0ba; --gold:#f5c451; --danger:#ff6b6b; --orange:#ff8c3c; --blue:#4aa3ff; --purple:#b78cff; --gray:#6b7a89;
+  --h-teal:#35d0ba; --h-mag:#ff5fa2; --h-amber:#ffb020; --h-blue:#4aa3ff;
+  --h-violet:#b78cff; --h-lime:#a3e635; --h-orange:#ff8c3c; --h-cyan:#22d3ee;
+  /* 管理档专属：督导紫为主色，与公共版青绿区分身份 */
+  --adm:#b78cff;
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+body{background:var(--bg); color:var(--txt); font:13px/1.55 -apple-system,"PingFang SC","Microsoft YaHei",sans-serif;}
+body.light{--bg:#f4f6f9;--panel:#ffffff;--panel2:#eef2f6;--line:#d8e0e8;--txt:#1f2937;--sub:#5b6b7c;--gray:#8a97a5;}
+button{font:inherit; color:inherit; cursor:pointer;}
+a{color:var(--blue); text-decoration:none;}
+/* 滚动条纳入本体视觉语言 */
+*{scrollbar-width:thin; scrollbar-color:var(--line) var(--panel2);}
+::-webkit-scrollbar{width:10px; height:10px;}
+::-webkit-scrollbar-track{background:var(--panel2);}
+::-webkit-scrollbar-thumb{background:var(--line); border-radius:6px; border:2px solid var(--panel2);}
+::-webkit-scrollbar-thumb:hover{background:var(--adm);}
+.mark{display:inline-flex; gap:3px; margin-right:9px; flex:none;}
+.mark i{width:6px; height:17px; border-radius:2px;}
+.mark i:nth-child(1){background:var(--h-violet);}
+.mark i:nth-child(2){background:var(--h-mag);}
+.mark i:nth-child(3){background:var(--h-amber);}
+/* ===== 访问码门 ===== */
+#gate{position:fixed; inset:0; z-index:100; display:flex; align-items:center; justify-content:center; background:radial-gradient(1200px 600px at 20% -10%, rgba(183,140,255,.14), transparent 60%), radial-gradient(900px 500px at 90% 110%, rgba(255,95,162,.10), transparent 60%), var(--bg); padding:20px;}
+#gate .card{width:min(430px,94vw); background:var(--panel); border:1px solid color-mix(in srgb, var(--adm) 40%, var(--line)); border-radius:16px; padding:28px 26px; box-shadow:0 24px 60px rgba(0,0,0,.4);}
+#gate h1{font-size:19px; display:flex; align-items:center; margin-bottom:4px;}
+#gate .sub{color:var(--sub); font-size:12px; margin-bottom:18px;}
+#gate .lockrow{display:flex; gap:8px;}
+#gate input{flex:1; background:var(--panel2); border:1px solid var(--line); color:var(--txt); border-radius:10px; padding:11px 12px; font-size:14px; letter-spacing:2px; text-transform:uppercase;}
+#gate input:focus{outline:2px solid color-mix(in srgb, var(--adm) 60%, transparent); border-color:var(--adm);}
+#gate .go{background:var(--adm); border:0; color:#0f1923; font-weight:700; border-radius:10px; padding:11px 18px;}
+#gate .go:disabled{opacity:.55; cursor:wait;}
+#gate .err{color:var(--danger); font-size:12px; min-height:20px; margin-top:8px;}
+#gate .shake{animation:shk .4s;}
+@keyframes shk{0%,100%{transform:translateX(0)}25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+#gate .note{color:var(--sub); font-size:11px; border-top:1px dashed var(--line); margin-top:14px; padding-top:12px; line-height:1.7;}
+#gate .note b{color:var(--txt);}
+#gate .back{display:inline-block; margin-top:10px; font-size:12px;}
+/* ===== 加载 ===== */
+#loading{position:fixed; inset:0; z-index:99; display:none; align-items:center; justify-content:center; flex-direction:column; gap:14px; background:var(--bg);}
+#loading .bar{width:min(360px,80vw); height:6px; border-radius:3px; background:var(--panel2); overflow:hidden;}
+#loading .bar i{display:block; height:100%; width:0%; background:linear-gradient(90deg,var(--h-violet),var(--h-mag)); border-radius:3px; transition:width .2s;}
+#loading .t{color:var(--sub); font-size:12px;}
+/* ===== 头部 ===== */
+header{display:flex; align-items:center; gap:12px; padding:14px 20px 10px; flex-wrap:wrap;}
+header h1{font-size:19px; letter-spacing:.5px; display:flex; align-items:center;}
+header h1 small{color:var(--sub); font-size:11px; font-weight:400; margin-left:8px;}
+.badges{display:flex; gap:6px; margin-left:auto; flex-wrap:wrap; align-items:center;}
+.badge{font-size:11px; padding:3px 9px; border-radius:20px; border:1px solid var(--line); color:var(--sub);}
+.badge.ok{color:var(--accent); border-color:rgba(53,208,186,.4);}
+.badge.warn{color:var(--h-mag); border-color:rgba(255,95,162,.45); background:rgba(255,95,162,.08);}
+.badge.gold{color:var(--gold); border-color:rgba(245,196,81,.4);}
+.hbtn{background:var(--panel2); border:1px solid var(--line); border-radius:8px; padding:4px 10px; font-size:11px; color:var(--txt);}
+.hbtn:hover{border-color:var(--adm); color:var(--adm);}
+.hbtn.exit:hover{border-color:var(--danger); color:var(--danger);}
+#banner{display:none; margin:0 20px 10px; padding:8px 14px; border-radius:8px; background:rgba(255,107,107,.12); border:1px solid rgba(255,107,107,.4); color:var(--danger); font-size:12px;}
+/* ===== 控制舱（常驻，实时生效） ===== */
+.bar{display:flex; gap:10px; padding:0 20px 12px; flex-wrap:wrap; align-items:center;}
+.pod{display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:5px 8px; border-radius:10px; background:color-mix(in srgb, var(--pod) 9%, transparent); border:1px solid color-mix(in srgb, var(--pod) 34%, transparent);}
+.podlbl{font-size:10.5px; font-weight:700; letter-spacing:.5px; color:color-mix(in srgb, var(--pod) 62%, var(--txt)); display:inline-flex; align-items:center; gap:5px; white-space:nowrap;}
+.podlbl::before{content:''; width:8px; height:8px; border-radius:2px; background:var(--pod); flex:none;}
+.seg{display:flex; background:var(--panel2); border:1px solid var(--line); border-radius:8px; overflow:hidden; flex-wrap:wrap;}
+.pod .seg{background:transparent; border-color:color-mix(in srgb, var(--pod) 26%, transparent);}
+.seg button{background:transparent; border:0; color:var(--sub); padding:6px 12px; font-size:12px; display:inline-flex; align-items:center; gap:6px;}
+.pod .seg button+button{border-left:1px solid color-mix(in srgb, var(--pod) 20%, transparent);}
+.seg button::before{content:''; width:7px; height:7px; border-radius:2px; background:var(--h,var(--accent)); flex:none;}
+.seg button:hover{color:var(--txt); background:color-mix(in srgb, var(--h,var(--accent)) 12%, transparent);}
+.seg button.on{background:var(--h,var(--accent)); color:#0f1923; font-weight:700;}
+.seg button.on::before{background:rgba(15,25,35,.5);}
+.seg button:disabled{opacity:.35; cursor:not-allowed;}
+select,input[type=date],input[type=text]{background:var(--panel2); color:var(--txt); border:1px solid var(--line); border-radius:8px; padding:6px 8px; font-size:12px;}
+input[type=text]:focus,select:focus,input[type=date]:focus{outline:2px solid color-mix(in srgb, var(--adm) 55%, transparent); border-color:var(--adm);}
+.bar label{color:var(--sub); font-size:11px; display:flex; align-items:center; gap:5px;}
+.ck{padding:4px 10px; border:1px solid var(--line); border-radius:8px; cursor:pointer;}
+.ck input{accent-color:var(--ckc,var(--accent));}
+.ck-zero{--ckc:var(--h-mag);}
+.ck:has(input:checked){background:color-mix(in srgb, var(--ckc) 14%, transparent); border-color:color-mix(in srgb, var(--ckc) 55%, transparent); color:color-mix(in srgb, var(--ckc) 70%, var(--txt)); font-weight:600;}
+input[type=range]{accent-color:var(--h-amber); width:130px;}
+.bar .reset{background:none; border:1px solid var(--line); color:var(--sub); border-radius:8px; padding:6px 10px;}
+.bar .reset:hover{border-color:var(--danger); color:var(--danger);}
+.btn{background:var(--panel2); border:1px solid var(--line); border-radius:8px; padding:6px 12px; color:var(--txt); font-size:12px;}
+.btn.pri{background:var(--adm); border-color:var(--adm); color:#0f1923; font-weight:700;}
+.btn.cy{background:color-mix(in srgb, var(--h-cyan) 16%, transparent); border-color:color-mix(in srgb, var(--h-cyan) 55%, transparent); color:color-mix(in srgb, var(--h-cyan) 70%, var(--txt)); font-weight:600;}
+.btn.cy:hover{background:color-mix(in srgb, var(--h-cyan) 28%, transparent);}
+.btn.gold{background:color-mix(in srgb, var(--gold) 16%, transparent); border-color:color-mix(in srgb, var(--gold) 55%, transparent); color:color-mix(in srgb, var(--gold) 75%, var(--txt)); font-weight:600;}
+/* ===== 布局：左树 + 主区 ===== */
+.layout{display:grid; grid-template-columns:258px 1fr; gap:12px; padding:0 20px 12px; align-items:start;}
+.layout>*{min-width:0;}
+#tree{position:sticky; top:10px; max-height:calc(100vh - 20px); overflow:auto; background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:10px;}
+#tree h3{font-size:12px; color:var(--sub); margin-bottom:8px; display:flex; align-items:center; gap:6px;}
+#tree h3::before{content:''; width:8px; height:8px; border-radius:2px; background:var(--adm);}
+.tnode{display:flex; width:100%; text-align:left; background:none; border:0; border-radius:8px; padding:6px 8px; font-size:12px; color:var(--txt); align-items:center; gap:6px;}
+.tnode:hover{background:var(--panel2);}
+.tnode.on{background:color-mix(in srgb, var(--adm) 20%, transparent); box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--adm) 60%, transparent); font-weight:700;}
+.tnode .nm{flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+.tnode .nm small{color:var(--sub); font-weight:400; margin-left:4px;}
+.tnode .ct{font-size:10px; color:var(--sub); background:var(--panel2); border-radius:8px; padding:1px 7px; flex:none;}
+.tnode.on .ct{color:var(--adm);}
+#tree details{margin-left:8px;}
+#tree summary{list-style:none; cursor:pointer;}
+#tree summary::-webkit-details-marker{display:none;}
+#tree .lv1{margin-left:0;}
+#tree .lv2{margin-left:14px;}
+#tree .lv3{margin-left:28px;}
+#tree .dot{width:7px; height:7px; border-radius:2px; flex:none;}
+#treeToggle{display:none;}
+/* ===== 下钻吸顶返回条 ===== */
+.drillbar{position:sticky; top:0; z-index:6; display:flex; gap:8px; align-items:center; flex-wrap:wrap; padding:8px 10px; margin:0 0 10px; background:color-mix(in srgb, var(--bg) 86%, transparent); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); border:1px solid var(--line); border-radius:10px; box-shadow:0 6px 18px rgba(0,0,0,.18);}
+.drillbar .where{font-size:12px; display:flex; align-items:center; gap:6px; min-width:0; flex-wrap:wrap;}
+.drillbar .where b{font-size:13px;}
+.drillbar .where span{color:var(--sub); font-size:11px;}
+.drillbar .sp{flex:1;}
+.drillbar .hint{color:var(--sub); font-size:10.5px;}
+.crumb{color:var(--sub); font-size:12px; display:flex; gap:6px; align-items:center; flex-wrap:wrap; margin-bottom:8px;}
+.crumb button{background:none; border:0; color:var(--adm); padding:0;}
+/* ===== 记分卡 ===== */
+.kpis{display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:12px;}
+.kpi{background:var(--panel); border:1px solid var(--line); border-top:3px solid var(--kc,var(--accent)); border-radius:10px; padding:10px 12px; position:relative; min-height:92px;}
+.kpi .lbl{color:var(--sub); font-size:11px; display:flex; justify-content:space-between; gap:4px;}
+.kpi .val{font-size:21px; font-weight:800; margin:5px 0 2px; font-variant-numeric:tabular-nums;}
+.kpi .val small{font-size:11px; color:var(--sub); font-weight:400; margin-left:3px;}
+.kpi .subnote{color:var(--sub); font-size:10.5px;}
+.kpi .up{color:var(--accent);} .kpi .down{color:var(--danger);}
+.kpi svg.spark{position:absolute; right:10px; bottom:10px; opacity:.9;}
+/* ===== 面板 / 表格 ===== */
+.panel{background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:12px; min-width:0; margin-bottom:12px;}
+.panel h3{font-size:13px; display:flex; align-items:center; gap:8px; margin-bottom:8px; flex-wrap:wrap;}
+.panel h3::before{content:''; width:8px; height:8px; border-radius:2px; background:var(--ph,var(--adm)); flex:none;}
+.panel h3 .hint{color:var(--sub); font-weight:400; font-size:11px; margin-left:auto;}
+.grid2{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+.grid2>*{min-width:0;}
+.tblwrap{overflow:auto; max-height:520px; background:var(--panel); border:1px solid var(--line); border-radius:12px;}
+table{width:100%; border-collapse:collapse; font-size:12px;}
+th{position:sticky; top:0; background:var(--panel2); color:var(--sub); font-weight:600; text-align:left; padding:8px 10px; border-bottom:1px solid var(--line); white-space:nowrap; z-index:2;}
+td{padding:7px 10px; border-bottom:1px solid var(--line); vertical-align:top;}
+tbody tr{cursor:pointer;}
+tbody tr:hover td{background:rgba(183,140,255,.06);}
+th.sortable{cursor:pointer;}
+th.sortable:hover{color:var(--txt);}
+th .ar{color:var(--adm); margin-left:2px;}
+.money{font-variant-numeric:tabular-nums; font-weight:700; color:var(--gold);}
+.st{font-size:10.5px; padding:2px 7px; border-radius:10px; white-space:nowrap; display:inline-block;}
+.st.free{background:rgba(53,208,186,.15); color:var(--accent);}
+.st.partial{background:rgba(245,196,81,.15); color:var(--gold);}
+.st.full{background:rgba(255,107,107,.15); color:var(--danger);}
+.st.expiring{background:rgba(255,140,60,.15); color:var(--orange);}
+.tag{font-size:10px; padding:1px 7px; border-radius:8px; white-space:nowrap; display:inline-block; margin:1px 2px 1px 0;}
+.tag.red{background:rgba(255,107,107,.14); color:var(--danger); border:1px solid rgba(255,107,107,.35);}
+.tag.mag{background:rgba(255,95,162,.12); color:var(--h-mag); border:1px solid rgba(255,95,162,.35);}
+.tag.blue{background:rgba(74,163,255,.12); color:var(--blue); border:1px solid rgba(74,163,255,.35);}
+.tag.lime{background:rgba(163,230,53,.12); color:var(--h-lime); border:1px solid rgba(163,230,53,.35);}
+.tag.gray{background:var(--panel2); color:var(--sub); border:1px solid var(--line);}
+.pb{height:4px; background:var(--panel2); border-radius:2px; margin-top:3px; min-width:60px;}
+.pb i{display:block; height:100%; border-radius:2px; background:var(--pc,var(--accent));}
+.pager{display:flex; gap:6px; align-items:center; padding:8px 2px; color:var(--sub); font-size:12px; flex-wrap:wrap;}
+.pager button{background:var(--panel2); border:1px solid var(--line); border-radius:6px; padding:4px 10px; color:var(--txt);}
+.pager button:disabled{opacity:.4; cursor:default;}
+.empty{color:var(--sub); text-align:center; padding:26px 10px; font-size:12px;}
+/* 四象限 */
+#quad{height:340px;}
+.qchips{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px;}
+.qchip{font-size:11px; padding:3px 10px; border-radius:14px; border:1px solid var(--line); background:var(--panel2); color:var(--sub);}
+.qchip.on{color:#0f1923; font-weight:700; background:var(--qc); border-color:var(--qc);}
+.qchip .n{opacity:.75; margin-left:4px;}
+/* 待办 */
+.todo{display:flex; gap:8px; align-items:flex-start; padding:7px 4px; border-bottom:1px dashed var(--line); font-size:12px;}
+.todo:last-child{border-bottom:0;}
+.todo .ic{width:20px; height:20px; border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:#0f1923; flex:none; margin-top:1px;}
+.todo .tx{flex:1; min-width:0;}
+.todo .tx b{font-weight:600;}
+.todo .tx small{display:block; color:var(--sub); font-size:10.5px;}
+.todo .act{display:flex; gap:5px; flex:none;}
+.todo .act button{background:var(--panel2); border:1px solid var(--line); border-radius:6px; padding:3px 8px; font-size:10.5px; color:var(--txt);}
+.todo .act button:hover{border-color:var(--adm); color:var(--adm);}
+.tsec{margin-bottom:10px;}
+.tsec h4{font-size:11.5px; color:var(--sub); margin-bottom:4px; display:flex; gap:6px; align-items:center;}
+.tsec h4 .cnt{background:var(--panel2); border-radius:8px; padding:0 7px; font-size:10px;}
+/* 甘特抽屉 / 弹窗 */
+#modal{position:fixed; inset:0; z-index:80; display:none; align-items:flex-start; justify-content:center; background:rgba(8,13,19,.66); backdrop-filter:blur(3px); padding:30px 16px; overflow:auto;}
+#modal .box{width:min(860px,96vw); background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:16px; box-shadow:0 24px 60px rgba(0,0,0,.5);}
+#modal .box h3{font-size:14px; margin-bottom:8px; display:flex; align-items:center; gap:8px; flex-wrap:wrap;}
+#modal .x{margin-left:auto; background:var(--panel2); border:1px solid var(--line); border-radius:8px; padding:3px 10px; font-size:12px;}
+.gantt-track{position:relative; height:64px; background:var(--panel2); border-radius:8px; margin:26px 0 6px; overflow:hidden;}
+.gantt-track .win{position:absolute; top:0; bottom:0; background:rgba(255,255,255,.05); border-left:2px dashed var(--adm); border-right:2px dashed var(--adm);}
+.gantt-track .occ{position:absolute; top:10px; height:16px; border-radius:4px;}
+.gantt-track .blank{position:absolute; top:36px; height:10px; border-radius:3px; background:var(--accent); opacity:.85;}
+.gantt-track .now{position:absolute; top:0; bottom:0; width:2px; background:var(--danger);}
+.gantt-axis{display:flex; color:var(--sub); font-size:10px; position:relative; height:16px;}
+.gantt-axis span{position:absolute; transform:translateX(-50%); white-space:nowrap;}
+.gantt-axis span:first-child{transform:none;}
+.gantt-axis span:last-child{transform:translateX(-100%);}
+.kv{display:flex; justify-content:space-between; font-size:12px; padding:3px 0; border-bottom:1px dashed var(--line); gap:10px;}
+.kv span{color:var(--sub); flex:none;}
+.kv b{text-align:right; font-variant-numeric:tabular-nums;}
+.talk{background:var(--panel2); border:1px solid var(--line); border-left:3px solid var(--tc,var(--adm)); border-radius:10px; padding:10px 12px; margin-bottom:8px;}
+.talk h5{font-size:11px; color:var(--sub); margin-bottom:5px; display:flex; align-items:center; gap:6px;}
+.talk h5 button{margin-left:auto; background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:2px 9px; font-size:10.5px; color:var(--txt);}
+.talk h5 button:hover{border-color:var(--tc); color:var(--tc);}
+.talk p{font-size:12px; line-height:1.7; white-space:pre-wrap;}
+#toast{position:fixed; left:50%; bottom:26px; transform:translateX(-50%) translateY(20px); z-index:120; background:var(--panel); border:1px solid var(--adm); color:var(--txt); border-radius:10px; padding:9px 18px; font-size:12px; opacity:0; pointer-events:none; transition:.25s; box-shadow:0 10px 30px rgba(0,0,0,.4);}
+#toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+footer{padding:10px 20px 26px; color:var(--sub); font-size:11px; border-top:1px solid var(--line); margin-top:6px; line-height:1.8;}
+footer b{color:var(--txt);}
+/* ===== 响应式 ===== */
+@media (max-width:1100px){
+  .layout{grid-template-columns:1fr;}
+  #tree{display:none; position:fixed; inset:0; z-index:70; max-height:none; border-radius:0; padding:16px; overflow:auto;}
+  #tree.open{display:block;}
+  #treeToggle{display:inline-flex;}
+  .grid2{grid-template-columns:1fr;}
+}
+@media (max-width:700px){
+  .kpis{grid-template-columns:repeat(2,1fr);}
+  header{padding:12px 12px 8px;}
+  .bar,.layout{padding-left:12px; padding-right:12px;}
+  .pod{width:100%;}
+  .drillbar .hint{display:none;}
+  #quad{height:280px;}
+  .kvgrid{grid-template-columns:1fr!important;}
+}
+/* ===== 打印一页纸 ===== */
+@media print{
+  body{background:#fff; color:#111; font-size:11px;}
+  #gate,#loading,.bar,#tree,.drillbar .btn,.badges .hbtn,#treeToggle,.noprint,#toast,#modal,footer .noprint{display:none!important;}
+  .layout{grid-template-columns:1fr; padding:0;}
+  .panel,.kpi,.tblwrap{border-color:#bbb; background:#fff; break-inside:avoid; box-shadow:none;}
+  .kpi .val{color:#111;}
+  th{background:#eee; color:#333;}
+  td{border-color:#ccc;}
+  .tblwrap{max-height:none; overflow:visible;}
+  #quad{height:260px;}
+  .money{color:#8a6d00;}
+}
+</style>
+</head>
+<body>
+
+<!-- 访问码门：密文在公网，明文只在本机内存 -->
+<div id="gate">
+  <div class="card" id="gateCard">
+    <h1><span class="mark"><i></i><i></i><i></i></span>顶钻展 · 管理档</h1>
+    <div class="sub">督导驾驶舱 · 区总 / 小区总 / 渠道经理 逐级下钻 · 内部资产</div>
+    <div class="lockrow">
+      <input id="codeInput" type="text" placeholder="输入访问码 TDZ-XXXX-XXXX-XXXX" autocomplete="off" spellcheck="false" maxlength="24">
+      <button class="go" id="btnUnlock">解锁</button>
+    </div>
+    <div class="err" id="gateErr"></div>
+    <div class="note">
+      <b>安全说明</b>：组织与工号数据以 AES-256-GCM 密文托管，访问码仅经钉钉下发给管理者本人；解密只发生在你的浏览器内存中，本页不上传任何数据。访问码遗忘请找页城（工程侧）重新下发。
+    </div>
+    <a class="back" href="index.html">← 返回公共作业地图（无需访问码）</a>
+  </div>
+</div>
+
+<div id="loading"><div class="bar"><i id="loadBar"></i></div><div class="t" id="loadTxt">准备中…</div></div>
+
+<div id="app" style="display:none">
+<header>
+  <h1><span class="mark"><i></i><i></i><i></i></span>顶钻展 · 管理档<small>督导驾驶舱 · 内部</small></h1>
+  <div class="badges">
+    <span class="badge ok" id="badgeDate">数据截至 —</span>
+    <span class="badge warn">内部资产 · 访问码保护</span>
+    <span class="badge gold">金额=刊例口径</span>
+    <button class="hbtn" id="btnTheme">浅色</button>
+    <a class="hbtn" href="index.html">公共作业地图</a>
+    <button class="hbtn exit" id="btnExit">退出管理档</button>
+  </div>
+</header>
+<div id="banner"></div>
+
+<!-- 常驻控制舱：所有控件即时生效 -->
+<div class="bar noprint" id="bar1">
+  <div class="pod" style="--pod:var(--h-blue)">
+    <span class="podlbl">时间窗</span>
+    <div class="seg" id="segWin"></div>
+    <input type="date" id="winS" title="自定义窗起"><input type="date" id="winE" title="自定义窗止">
+  </div>
+  <div class="pod" style="--pod:var(--h-teal)">
+    <span class="podlbl">行业线</span>
+    <div class="seg" id="segLine"></div>
+  </div>
+  <div class="pod" style="--pod:var(--h-violet)">
+    <span class="podlbl">方案层</span>
+    <div class="seg" id="segPlan"></div>
+  </div>
+  <div class="pod" style="--pod:var(--gold)">
+    <span class="podlbl">统计月份</span>
+    <select id="selMonth"></select>
+  </div>
+</div>
+<div class="bar noprint" id="bar2">
+  <div class="pod" style="--pod:var(--h-amber)">
+    <span class="podlbl">机会门槛</span>
+    <input type="range" id="rngMinVal" min="0" max="50000" step="1000" value="0">
+    <label id="minValLbl">¥0</label>
+  </div>
+  <div class="pod" style="--pod:var(--h-cyan)">
+    <span class="podlbl">排序</span>
+    <select id="selSort">
+      <option value="freeVal">机会价值 ↓</option>
+      <option value="dispatch">可派率 ↑</option>
+      <option value="occ">占率 ↓</option>
+      <option value="nwVal">本月新占 ↓</option>
+    </select>
+    <label class="ck ck-zero"><input type="checkbox" id="ckZero">只看零新占</label>
+  </div>
+  <div class="pod" style="--pod:var(--h-mag)">
+    <span class="podlbl">查找</span>
+    <input type="text" id="qSearch" placeholder="管理者 / 服务商 / 城市 / 类目" style="width:190px">
+  </div>
+  <button class="reset" id="btnReset">重置筛选</button>
+  <button class="btn gold" id="btnCSV">导出辖区 CSV</button>
+  <button class="btn cy" id="btnPrint">打印一页纸</button>
+</div>
+
+<div class="layout">
+  <aside id="tree"></aside>
+  <main id="main">
+    <div class="drillbar" id="drillbar"></div>
+    <div class="crumb" id="crumb"></div>
+    <div class="kpis" id="kpis"></div>
+    <div class="panel" id="pChild" style="--ph:var(--h-teal)">
+      <h3 id="childTitle">下级横比<span class="hint" id="childHint"></span></h3>
+      <div class="tblwrap" id="childTbl"></div>
+      <div class="pager" id="childPager"></div>
+    </div>
+    <div class="grid2">
+      <div class="panel" style="--ph:var(--h-mag)">
+        <h3>四象限督导图<span class="hint">横轴=占率 · 纵轴=空白机会价值 · 点大小=本月新占 · 点击下钻</span></h3>
+        <div class="qchips" id="qchips"></div>
+        <div id="quad"></div>
+      </div>
+      <div class="panel" style="--ph:var(--h-orange)">
+        <h3>自动待办 · 本周该督谁<span class="hint">每条可跳转 + 复制派单话术</span></h3>
+        <div id="todos"></div>
+      </div>
+    </div>
+    <div class="panel" style="--ph:var(--h-amber)">
+      <h3>无覆盖缺口榜<span class="hint">覆盖城市内高价值空白、但无下属服务商可接 → 扩城 / 招商清单（刊例口径）</span></h3>
+      <div class="tblwrap" id="gapTbl" style="max-height:330px"></div>
+    </div>
+    <div class="panel" id="pCells" style="--ph:var(--h-lime); display:none">
+      <h3>城市 × 类目格明细<span class="hint">点行 → 单格甘特 + 三级派单话术</span></h3>
+      <div class="tblwrap" id="cellTbl"></div>
+      <div class="pager" id="cellPager"></div>
+    </div>
+  </main>
+</div>
+<footer id="footer"></footer>
+</div>
+
+<div id="modal"><div class="box" id="modalBox"></div></div>
+<div id="toast"></div>
+
+<script src="echarts.min.js"></script>
+<script>
+'use strict';
+/* ============ 口径常量（镜像 index.html / m0/config.js，改口径改那里再同步此处） ============ */
+const CFG = {
+  statusWhitelist: ['PERFORMANCING','WAIT_PUBLISH','SIGNING','WAIT_SIGN','COMPLETED'],
+  planNames: ['高频&顶展2.0','高频&钻展v1','高频&顶展&行政区'],
+  planLabels: ['顶展2.0','钻展v1','顶展行政区'],
+  windowDays: 30,
+  recommend: { topN:3,
+    lineMatch: {'美食':['美食'],'休娱丽人':['高频'],'生活服务':['高频'],scenic:['文旅','美食']},
+    weights: {city:6,province:3,national:1,specificCat:2,firstOpen:2,coreTier:1,is12:1} },
+  heatInquiryWeight: 0
+};
+const NEW_STATUS = ['PERFORMANCING','WAIT_PUBLISH','SIGNING','WAIT_SIGN']; // 新占量口径：非已完成单按上刊起始月归属
+const PIPE_STATUS = ['SIGNING','WAIT_SIGN','WAIT_PUBLISH'];
+const STATE_LABEL = {free:'全窗空白', partial:'部分空白', full:'全窗占满', expiring:'即将释放'};
+const OCC_COLOR = {PERFORMANCING:'#35d0ba', WAIT_PUBLISH:'#4aa3ff', SIGNING:'#f5c451', WAIT_SIGN:'#f5c451', COMPLETED:'#6b7a89'};
+const OCC_LABEL = {PERFORMANCING:'在投', WAIT_PUBLISH:'待上刊', SIGNING:'签约中', WAIT_SIGN:'待签约', COMPLETED:'已完成'};
+const LINE_HUES = ['var(--h-teal)','var(--h-mag)','var(--h-amber)'];
+const QUAD_META = [
+  {key:'dud', name:'高机会低作业 · 重点督导', color:'#ff6b6b'},
+  {key:'star', name:'高机会高作业 · 标杆', color:'#35d0ba'},
+  {key:'mature', name:'低机会高作业 · 成熟', color:'#4aa3ff'},
+  {key:'watch', name:'低机会低作业 · 观察', color:'#8fa3b5'}
+];
+
+/* ============ 工具 ============ */
+const TODAY = new Date(); TODAY.setHours(0,0,0,0);
+const iso = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const dparse = s => new Date(s.slice(0,10)+'T00:00:00');
+const DAY = 864e5;
+const fmtN = n => n>=1e8 ? (n/1e8).toFixed(2)+'亿' : n>=1e4 ? (n/1e4).toFixed(1)+'万' : Math.round(n).toLocaleString();
+const fmtMoney = n => '¥'+fmtN(n);
+const monthKey = d => iso(d).slice(0,7);
+const addDays = (d,n) => { const x=new Date(d); x.setDate(x.getDate()+n); return x; };
+const addMonths = (d,n) => { const x=new Date(d); x.setDate(1); x.setMonth(x.getMonth()+n); return x; };
+const esc = s => String(s==null?'':s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const pct = (a,b) => b>0 ? Math.round(a/b*100) : 0;
+const $ = id => document.getElementById(id);
+function toast(msg){ const t=$('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove('show'),2200); }
+function copyText(txt, okMsg){
+  const done = () => toast(okMsg||'已复制到剪贴板');
+  if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(done).catch(()=>fallbackCopy(txt,done)); }
+  else fallbackCopy(txt,done);
+}
+function fallbackCopy(txt,done){ const ta=document.createElement('textarea'); ta.value=txt; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select(); try{document.execCommand('copy');done();}catch(e){toast('复制失败，请手动选择文本');} document.body.removeChild(ta); }
+
+/* ============ 状态 ============ */
+const A = {
+  level:'root', reg:-1, sub:-1, mgr:-1, grp:-1,
+  W:30, winS:null, winE:null, line:'all', plan:'all', month:monthKey(TODAY),
+  minVal:0, sort:'freeVal', q:'', zeroOnly:false, quadFilter:null,
+  childPage:0, cellPage:0, cellSort:{key:'value',dir:-1}, unlocked:false
+};
+let MGR=null, IDX=null, SHARDS={}, SCENIC=null, CELLS=[], SCELLS=[], ALL=[];
+let GROUPS=[], groupsByCity=[], NODES={}, mgrBits=[];
+const covCache=new Map(); // gi|path → 类目覆盖（与城市无关，462×234 量级）
+let chart=null, renderTimer=null;
+
+/* ============ 访问码门（WebCrypto：PBKDF2-SHA256 → AES-256-GCM，仅内存解密） ============ */
+const normCode = s => String(s).toUpperCase().replace(/[^A-Z0-9]/g,'');
+const b64buf = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+async function decryptBundle(code, bundle){
+  const enc = new TextEncoder();
+  const baseKey = await crypto.subtle.importKey('raw', enc.encode(normCode(code)), 'PBKDF2', false, ['deriveKey']);
+  const key = await crypto.subtle.deriveKey(
+    {name:'PBKDF2', salt:b64buf(bundle.salt), iterations:bundle.it, hash:'SHA-256'},
+    baseKey, {name:'AES-GCM', length:256}, false, ['decrypt']);
+  const plain = await crypto.subtle.decrypt({name:'AES-GCM', iv:b64buf(bundle.iv)}, key, b64buf(bundle.ct));
+  return JSON.parse(new TextDecoder().decode(plain));
+}
+let BUNDLE=null;
+async function fetchBundle(){
+  const r = await fetch('m0/out/admin-bundle.enc?v='+iso(TODAY));
+  if(!r.ok) throw new Error('封包加载失败 '+r.status);
+  BUNDLE = await r.json();
+}
+async function tryUnlock(code, fromSession){
+  const btn=$('btnUnlock'); btn.disabled=true; btn.textContent='解密中…';
+  $('gateErr').textContent='';
+  try{
+    if(!BUNDLE) await fetchBundle();
+    MGR = await decryptBundle(code, BUNDLE);
+    if(!MGR || !Array.isArray(MGR.providers)) throw new Error('bad payload');
+    try{ sessionStorage.setItem('tdz_admin_k', normCode(code)); }catch(e){}
+    $('gate').style.display='none';
+  }catch(e){
+    try{ sessionStorage.removeItem('tdz_admin_k'); }catch(_){}
+    MGR=null;
+    $('gate').style.display='flex';
+    $('gateErr').textContent = fromSession ? '' : '访问码不正确或封包已更新，请核对后重试（区分大小写自动处理，连字符可省略）';
+    const c=$('gateCard'); c.classList.remove('shake'); void c.offsetWidth; c.classList.add('shake');
+    btn.disabled=false; btn.textContent='解锁';
+    return;
+  }
+  try{ await boot(); }
+  catch(e){
+    $('gate').style.display='flex';
+    $('gateErr').textContent='数据资产加载失败：'+e.message+'（本地预览请先运行 python3 -m http.server 8765）';
+  }
+  btn.disabled=false; btn.textContent='解锁';
+}
+$('btnUnlock').onclick = () => { const v=$('codeInput').value.trim(); if(v.length<8){ $('gateErr').textContent='请输入完整访问码'; return; } tryUnlock(v,false); };
+$('codeInput').addEventListener('keydown', e => { if(e.key==='Enter') $('btnUnlock').click(); });
+$('btnExit').onclick = () => { try{sessionStorage.removeItem('tdz_admin_k');}catch(e){} location.reload(); };
+
+/* ============ 加载公共资产 + 构建覆盖索引 ============ */
+function setLoad(p, txt){ $('loading').style.display='flex'; $('loadBar').style.width=p+'%'; $('loadTxt').textContent=txt; }
+async function boot(){
+  setLoad(6,'解密成功 · 加载公共数据资产…');
+  const V='?v='+iso(TODAY);
+  const j = async u => { const r=await fetch(u+V); if(!r.ok) throw new Error(u+' '+r.status); return r.json(); };
+  IDX = await j('m0/out/public-index.json');
+  const [a,b,c,sc] = await Promise.all([
+    j('m0/out/public_美食.json'), j('m0/out/public_休娱丽人.json'), j('m0/out/public_生活服务.json'), j('m0/out/scenic.json')
+  ]);
+  SHARDS={'美食':a,'休娱丽人':b,'生活服务':c}; SCENIC=sc;
+  CELLS=[];
+  IDX.dicts.lines.forEach((ln,li)=>{
+    const sh=SHARDS[ln]; if(!sh) return;
+    for(const r of sh.cells) CELLS.push({pi:r[0],ci:r[1],ai:r[2],hi:r[3],list:r[4],ti:r[5],combo:r[6],wins:r[7]||[],code:r[8]||null,li,prov:IDX.cityProv[r[1]],scenic:false});
+  });
+  SCELLS = SCENIC.cells.map(r=>({pi:r[0],ci:r[1],di:r[2],bi:r[3],wins:r[4]||[],scenic:true}));
+  ALL = CELLS.concat(SCELLS);
+  GROUPS = MGR.providers;
+  await buildIndex();
+  buildOrg();
+  A.month = monthKey(TODAY);
+  if(localStorage.getItem('tdz_theme')==='light') document.body.classList.add('light');
+  applyThemeBtn();
+  $('badgeDate').textContent='数据截至 '+IDX.meta.pullDate+'（T+1）';
+  freshness();
+  $('loading').style.display='none';
+  $('app').style.display='block';
+  A.unlocked=true;
+  buildControls(); render();
+}
+function freshness(){
+  const pull=new Date(IDX.meta.pullDate+'T09:00:00');
+  const hrs=(Date.now()-pull.getTime())/36e5;
+  if(hrs>26){ const b=$('banner'); b.style.display='block'; b.textContent='数据时效告警：超过26h未更新（当前展示上次成功口径 '+IDX.meta.pullDate+'）'; }
+}
+/* 覆盖索引：每格 → 覆盖它的渠道经理位图（47 位）；组织节点用位图并集做 territory 判定。
+   同时预计算：新占量按月归属 nw / 在投格今昔 aNow·aPrev / 到期 _exp / 续约管道 _pipe。 */
+function covers(p, path){
+  if(p.cat==='all') return true;
+  return (p.cat||[]).some(t=>t.name && (path===t.name || path.startsWith(t.name+';') || (';'+path+';').includes(';'+t.name+';')));
+}
+async function buildIndex(){
+  const NC=IDX.dicts.cities.length;
+  groupsByCity=Array.from({length:NC},()=>[]);
+  const lineKeys=IDX.dicts.lines;
+  GROUPS.forEach((g,gi)=>{
+    g.ok=lineKeys.map(ln=>(g.lines||[]).some(l=>(CFG.recommend.lineMatch[ln]||[]).includes(l)));
+    g.okS=(g.lines||[]).some(l=>CFG.recommend.lineMatch.scenic.includes(l));
+    g.citySet=new Uint8Array(NC);
+    for(const ci of g.cities){ if(ci>=0&&ci<NC){ groupsByCity[ci].push(gi); g.citySet[ci]=1; } }
+  });
+  const T30=addDays(TODAY,-30);
+  const all=ALL;
+  for(let i=0;i<all.length;i++){
+    const c=all[i];
+    c._i=i;
+    const path=c.scenic?SCENIC.dicts.buckets[c.bi]:SHARDS[lineKeys[c.li]].dicts.paths[c.hi];
+    const bucket=groupsByCity[c.ci]||[];
+    let ml=0,mh=0;
+    for(const gi of bucket){
+      const g=GROUPS[gi];
+      if(!(c.scenic?g.okS:g.ok[c.li])) continue;
+      const k=gi+'|'+path;
+      let cov=covCache.get(k);
+      if(cov===undefined){ cov=covers(g,path); covCache.set(k,cov); }
+      if(cov){ const mi=g.mgr; if(mi<32) ml|=(1<<mi); else mh|=(1<<(mi-32)); }
+    }
+    c.ml=ml; c.mh=mh;
+    // 新占量 / 在投今昔 / 到期 / 续约管道
+    const nw={}; let aNow=false,aPrev=false,exp=null; const pipe=[];
+    for(const w of c.wins){
+      const st=w[2]; if(!CFG.statusWhitelist.includes(st)) continue;
+      const ds=dparse(w[0]), de=dparse(w[1]);
+      if(st==='PERFORMANCING'){
+        if(ds<=TODAY&&de>=TODAY){ aNow=true; if(!exp||de<exp) exp=de; }
+        if(ds<=T30&&de>=T30) aPrev=true;
+      }
+      if(NEW_STATUS.includes(st)){
+        const mk=w[0].slice(0,7);
+        const days=Math.round((de-ds)/DAY)+1;
+        const val=Math.round((c.list||0)/30*days);
+        if(!nw[mk]) nw[mk]=[0,0];
+        nw[mk][0]++; nw[mk][1]+=val;
+      }
+      if(PIPE_STATUS.includes(st)) pipe.push(ds.getTime());
+    }
+    c.nw=nw; c.aNow=aNow; c.aPrev=aPrev; c._exp=exp; c._pipe=pipe;
+    if(i%20000===0){ setLoad(10+Math.round(i/all.length*78),'构建覆盖索引 '+Math.round(i/all.length*100)+'%（'+fmtN(all.length)+' 格 × '+GROUPS.length+' 牌照组）'); await new Promise(r=>setTimeout(r,0)); }
+  }
+  setLoad(92,'组织树 rollup…');
+}
+/* 组织节点：root / reg / sub / mgr 位图 + 城市并集 + 主体去重计数 */
+function buildOrg(){
+  const NM=MGR.mgrs.length;
+  mgrBits=MGR.mgrs.map((_,i)=> i<32?{lo:1<<i,hi:0}:{lo:0,hi:1<<(i-32)});
+  const orMask=(a,b)=>({lo:a.lo|b.lo, hi:a.hi|b.hi});
+  const NC=IDX.dicts.cities.length;
+  function nodeBase(){ return {mask:{lo:0,hi:0}, cities:new Uint8Array(NC), ids:new Set(), groups:[]}; }
+  const root=nodeBase();
+  const regs=MGR.regions.map(()=>nodeBase());
+  const subs=MGR.subs.map(()=>nodeBase());
+  const mgrs=MGR.mgrs.map(()=>nodeBase());
+  GROUPS.forEach((g,gi)=>{
+    const m=MGR.mgrs[g.mgr], s=MGR.subs[m.sub], r=MGR.regions[s.reg];
+    for(const n of [root,regs[s.reg],subs[m.sub],mgrs[g.mgr]]){
+      n.mask=orMask(n.mask,mgrBits[g.mgr]);
+      n.ids.add(g.id); n.groups.push(gi);
+      for(const ci of g.cities) if(ci>=0&&ci<NC) n.cities[ci]=1;
+    }
+  });
+  NODES={root,regs,subs,mgrs};
+}
+function currentNode(){
+  if(A.level==='reg') return NODES.regs[A.reg];
+  if(A.level==='sub') return NODES.subs[A.sub];
+  if(A.level==='mgr') return NODES.mgrs[A.mgr];
+  if(A.level==='prov') return NODES.mgrs[A.mgr]; // prov 级 territory=该经理地盘，格表按组过滤
+  return NODES.root;
+}
+function nodeName(){
+  if(A.level==='reg'){ const r=MGR.regions[A.reg]; return r.name+(r.alias?'（'+r.alias+'）':''); }
+  if(A.level==='sub'){ const s=MGR.subs[A.sub]; return s.name+(s.alias?'（'+s.alias+'）':''); }
+  if(A.level==='mgr'){ const m=MGR.mgrs[A.mgr]; return m.name+(m.alias?'（'+m.alias+'）':''); }
+  if(A.level==='prov') return GROUPS[A.grp].name;
+  return '全国';
+}
+function nodeRole(){
+  return {root:'全国总览',reg:'大区总',sub:'小区总',mgr:'渠道经理',prov:'服务商主体'}[A.level];
+}
+
+/* ============ 时间窗 & 六态（与 index.html 同口径） ============ */
+function winRange(){
+  if(A.winS && A.winE) return [dparse(A.winS), dparse(A.winE)];
+  return [TODAY, addDays(TODAY, A.W)];
+}
+const mCache=new Map();
+function metrics(c){
+  const [t1,t2]=winRange();
+  const key=c.scenic?'s'+c.pi+'_'+c.ci+'_'+c.di+'_'+c.bi:c.pi+'_'+c.ci+'_'+c.ai+'_'+c.hi;
+  const ck=key+'@'+iso(t1)+'_'+iso(t2);
+  if(mCache.has(ck)) return mCache.get(ck);
+  let occDays=0,active=false,expiring=false,conflict=false; const iv=[];
+  for(const w of c.wins){
+    const ds=dparse(w[0]),de=dparse(w[1]);
+    if(w[2]==='PERFORMANCING'&&ds<=TODAY&&de>=TODAY) active=true;
+    if(active&&de>=TODAY&&de<=t2) expiring=true;
+    const a=Math.max(ds.getTime(),t1.getTime()),b=Math.min(de.getTime(),t2.getTime());
+    if(b>=a) iv.push([a,b]);
+  }
+  iv.sort((x,y)=>x[0]-y[0]);
+  let cur=null;
+  for(const [a,b] of iv){ if(!cur)cur=[a,b]; else if(a<=cur[1])cur[1]=Math.max(cur[1],b); else {occDays+=(cur[1]-cur[0])/DAY+1;cur=[a,b];} }
+  if(cur) occDays+=(cur[1]-cur[0])/DAY+1;
+  const Wd=Math.round((t2-t1)/DAY)+1;
+  const freeDays=Wd-occDays;
+  const state=occDays===0?'free':freeDays<=0?'full':expiring?'expiring':'partial';
+  const act=c.wins.filter(w=>w[2]!=='COMPLETED').map(w=>[dparse(w[0]).getTime(),dparse(w[1]).getTime()]).sort((x,y)=>x[0]-y[0]);
+  for(let i=1;i<act.length;i++) if(act[i][0]<=act[i-1][1]) conflict=true;
+  let earliest=null;
+  if(freeDays>0){
+    const covered=new Set();
+    for(const [a,b] of iv){ for(let t=a;t<=b;t+=DAY) covered.add(t); }
+    for(let t=t1.getTime();t<=t2.getTime();t+=DAY){ if(!covered.has(t)){ earliest=new Date(t); break; } }
+  }
+  const deals=c.wins.filter(w=>w[2]==='COMPLETED'&&dparse(w[1])>=addDays(TODAY,-180)&&dparse(w[1])<=TODAY);
+  const lastDeal=deals.length?deals.map(w=>w[1]).sort().pop():null;
+  const since=lastDeal?Math.round((TODAY-dparse(lastDeal))/DAY):999;
+  const heat=Math.round(40*Math.min(1,deals.length/5)+30*Math.max(0,1-since/180));
+  const m={occDays,freeDays,state,active,expiring,conflict,earliest,deals:deals.length,lastDeal,heat,Wd,value:Math.round((c.list||0)/30*freeDays)};
+  mCache.set(ck,m); return m;
+}
+function cellPath(c){ return c.scenic?SCENIC.dicts.buckets[c.bi]:SHARDS[IDX.dicts.lines[c.li]].dicts.paths[c.hi]; }
+function cellCity(c){ return IDX.dicts.cities[c.ci]; }
+function cellArea(c){ if(c.scenic) return SCENIC.dicts.districts[c.di]; const sh=SHARDS[IDX.dicts.lines[c.li]]; return c.ai<0?cellCity(c):sh.dicts.areas[c.ai]; }
+function cellPlan(c){ return c.scenic?SCENIC.dicts.plans[c.pi]:IDX.dicts.plans[c.pi]; }
+function cellLine(c){ return c.scenic?'景区':IDX.dicts.lines[c.li]; }
+function expiryOf(c){ return c._exp||null; }
+function freeDaysIn(c,a,b){
+  if(b<a) return 0;
+  const iv=[];
+  for(const w of c.wins){ const x=Math.max(dparse(w[0]).getTime(),a.getTime()),y=Math.min(dparse(w[1]).getTime(),b.getTime()); if(y>=x) iv.push([x,y]); }
+  iv.sort((x,y)=>x[0]-y[0]); let cur=null,occ=0;
+  for(const [x,y] of iv){ if(!cur)cur=[x,y]; else if(x<=cur[1])cur[1]=Math.max(cur[1],y); else {occ+=(cur[1]-cur[0])/DAY+1;cur=[x,y];} }
+  if(cur)occ+=(cur[1]-cur[0])/DAY+1;
+  return Math.round((b-a)/DAY)+1-occ;
+}
+function releaseInfo(c){
+  const exp=expiryOf(c); if(!exp) return null;
+  const [w1,w2]=winRange();
+  const a=new Date(Math.max(exp.getTime()+DAY,w1.getTime()));
+  const days=a<=w2?freeDaysIn(c,a,w2):0;
+  return {exp,days,value:Math.round((c.list||0)/30*days)};
+}
+function renewedPipe(c){ const e=expiryOf(c); if(!e) return false; return (c._pipe||[]).some(t=>t>e.getTime()); }
+function filteredCells(){
+  let arr;
+  if(A.line==='scenic') arr=SCELLS;
+  else if(A.line==='all') arr=ALL; // 全部=三行业线+景区
+  else arr=CELLS.filter(c=>c.li===A.line);
+  if(A.plan!=='all' && A.line!=='scenic') arr=arr.filter(c=>!c.scenic && IDX.dicts.plans[c.pi]===CFG.planNames[A.plan]);
+  return arr;
+}
+function covPath(gi,path){
+  const k=gi+'|'+path;
+  let cov=covCache.get(k);
+  if(cov===undefined){ cov=covers(GROUPS[gi],path); covCache.set(k,cov); }
+  return cov;
+}
+function groupCovers(gi,c){
+  const g=GROUPS[gi];
+  if(!(c.scenic?g.okS:g.ok[c.li])) return false;
+  if(g.citySet[c.ci]!==1) return false;
+  return covPath(gi,cellPath(c));
+}
+
+/* ============ 聚合：一次遍历算当前节点 + 全部下级 ============ */
+function newAgg(){ return {cells:0,freeCells:0,freeVal:0,poolVal:0,occDays:0,Wd:0,aNow:0,aPrev:0,expCells:0,expVal:0,renewable:0,nwCnt:0,nwVal:0,prevNwVal:0,spark:{},gap:[],ids:new Set()}; }
+function sparkMonths(){ const out=[]; const base=dparse(A.month+'-01'); for(let i=5;i>=0;i--) out.push(monthKey(addMonths(base,-i))); return out; }
+function aggPass(){
+  const node=currentNode();
+  const cells=filteredCells();
+  const tot=newAgg();
+  const months=sparkMonths();
+  const prevMk=monthKey(addMonths(dparse(A.month+'-01'),-1));
+  // 下级集合
+  let children=[];
+  if(A.level==='root') children=MGR.regions.map((r,i)=>({kind:'reg',i,name:r.name,alias:r.alias,node:NODES.regs[i]}));
+  else if(A.level==='reg') children=MGR.subs.map((s,i)=>({s,i})).filter(x=>x.s.reg===A.reg).map(x=>({kind:'sub',i:x.i,name:x.s.name,alias:x.s.alias,node:NODES.subs[x.i]}));
+  else if(A.level==='sub') children=MGR.mgrs.map((m,i)=>({m,i})).filter(x=>x.m.sub===A.sub).map(x=>({kind:'mgr',i:x.i,name:x.m.name,alias:x.m.alias,id:x.m.id,node:NODES.mgrs[x.i]}));
+  else if(A.level==='mgr') children=NODES.mgrs[A.mgr].groups.map(gi=>({kind:'grp',i:gi,name:GROUPS[gi].name,g:GROUPS[gi]}));
+  const cAgg=children.map(()=>newAgg());
+  const mask=node.mask;
+  const inTerr=A.level==='prov' ? (c=>groupCovers(A.grp,c)) : (c=>((c.ml&mask.lo)|(c.mh&mask.hi))!==0);
+  const citySet=A.level==='prov' ? GROUPS[A.grp].citySet : node.cities;
+  const [w1,w2]=winRange();
+  for(const c of cells){
+    const m=metrics(c);
+    const terr=inTerr(c);
+    const inCities=citySet[c.ci]===1;
+    if(!terr && !inCities) continue;
+    const nw=c.nw[A.month]||[0,0];
+    const pv=c.nw[prevMk]||[0,0];
+    const rel=m.expiring?releaseInfo(c):null;
+    const acc=(a)=>{
+      if(terr){
+        a.cells++; a.occDays+=m.occDays; a.Wd+=m.Wd;
+        if(m.freeDays>0){ a.freeCells++; a.freeVal+=m.value; }
+        if(c.aNow) a.aNow++;
+        if(c.aPrev) a.aPrev++;
+        if(rel){ a.expCells++; a.expVal+=rel.value; if(m.deals>0) a.renewable++; }
+        a.nwCnt+=nw[0]; a.nwVal+=nw[1]; a.prevNwVal+=pv[1];
+        for(const mk of months){ const x=c.nw[mk]; if(x){ if(!a.spark[mk])a.spark[mk]=[0,0]; a.spark[mk][0]+=x[0]; a.spark[mk][1]+=x[1]; } }
+      }
+      if(inCities) a.poolVal+=m.value;
+    };
+    acc(tot);
+    // 缺口：覆盖城市内、无下属可接、达门槛的空白格
+    if(inCities && !terr && m.freeDays>0 && m.value>=A.minVal){
+      tot.gap.push({c,m});
+      if(tot.gap.length>400){ tot.gap.sort((a,b)=>b.m.value-a.m.value); tot.gap.length=80; }
+    }
+    // 下级（含下级地盘池①：child 城市内全部空白价值，用于可派率）
+    for(let k=0;k<children.length;k++){
+      const ch=children[k];
+      const chCities=ch.kind==='grp'?ch.g.citySet:ch.node.cities;
+      const inChCities=chCities[c.ci]===1;
+      const hit=ch.kind==='grp'?groupCovers(ch.i,c):(((c.ml&ch.node.mask.lo)|(c.mh&ch.node.mask.hi))!==0);
+      if(!hit && !inChCities) continue;
+      const a=cAgg[k];
+      if(inChCities) a.poolVal+=m.value;
+      if(!hit) continue;
+      a.cells++; a.occDays+=m.occDays; a.Wd+=m.Wd;
+      if(m.freeDays>0){ a.freeCells++; a.freeVal+=m.value; }
+      if(c.aNow) a.aNow++;
+      if(c.aPrev) a.aPrev++;
+      if(rel){ a.expCells++; a.expVal+=rel.value; if(m.deals>0) a.renewable++; }
+      a.nwCnt+=nw[0]; a.nwVal+=nw[1]; a.prevNwVal+=pv[1];
+      if(ch.kind==='grp') a.ids.add(ch.g.id);
+    }
+  }
+  tot.gap.sort((a,b)=>b.m.value-a.m.value); tot.gap.length=Math.min(tot.gap.length,80);
+  // 下级派生指标
+  children.forEach((ch,k)=>{
+    const a=cAgg[k];
+    a.occ=a.Wd>0?a.occDays/a.Wd:0;
+    a.dispatch=a.poolVal>0?Math.min(1,a.freeVal/a.poolVal):(a.freeVal>0?1:0);
+    a.name=ch.name; a.alias=ch.alias||''; a.kind=ch.kind; a.i=ch.i;
+    if(ch.kind==='grp'){ a.cities=ch.g.cities.length; a.licenses=ch.g.licenses; a.scope=ch.g.scope; a.expiry=ch.g.expiry; a.id=ch.g.id; }
+    else { a.ids=ch.node.ids; a.cities=countCities(ch.node.cities); }
+  });
+  tot.occ=tot.Wd>0?tot.occDays/tot.Wd:0;
+  tot.dispatch=tot.poolVal>0?Math.min(1,tot.freeVal/tot.poolVal):0;
+  return {tot,children,cAgg,cells};
+}
+function countCities(set){ let n=0; for(let i=0;i<set.length;i++) if(set[i]) n++; return n; }
+
+/* ============ 控件 ============ */
+function buildControls(){
+  const sw=$('segWin');
+  sw.innerHTML=[30,60,90].map(w=>'<button data-w="'+w+'" style="--h:var(--h-blue)"'+(!A.winS&&A.W===w?' class="on"':'')+'>'+w+'天</button>').join('');
+  sw.onclick=e=>{ const b=e.target.closest('button'); if(!b)return; A.W=+b.dataset.w; A.winS=A.winE=null; $('winS').value=''; $('winE').value=''; mCache.clear(); buildControls(); render(); };
+  $('winS').value=A.winS||''; $('winE').value=A.winE||'';
+  const onWin=()=>{ const s=$('winS').value,e=$('winE').value; if(s&&e&&s<=e){ A.winS=s; A.winE=e; mCache.clear(); buildControls(); render(); } };
+  $('winS').onchange=onWin; $('winE').onchange=onWin;
+  const sl=$('segLine');
+  const opts=[{v:'all',t:'全部',h:'var(--h-cyan)'}].concat(IDX.dicts.lines.map((l,i)=>({v:i,t:l,h:LINE_HUES[i]}))).concat([{v:'scenic',t:'景区',h:'var(--h-lime)'}]);
+  sl.innerHTML=opts.map(o=>'<button data-v="'+o.v+'" style="--h:'+o.h+'"'+(String(A.line)===String(o.v)?' class="on"':'')+'>'+o.t+'</button>').join('');
+  sl.onclick=e=>{ const b=e.target.closest('button'); if(!b)return; const v=b.dataset.v; A.line=(v==='all'||v==='scenic')?v:+v; A.childPage=0; A.cellPage=0; buildControls(); render(); };
+  const sp=$('segPlan');
+  const popts=[{v:'all',t:'全部'}].concat(CFG.planLabels.map((l,i)=>({v:i,t:l})));
+  sp.innerHTML=popts.map(o=>'<button data-v="'+o.v+'" style="--h:var(--h-violet)"'+(String(A.plan)===String(o.v)?' class="on"':'')+(A.line==='scenic'?' disabled':'')+'>'+o.t+'</button>').join('');
+  sp.onclick=e=>{ const b=e.target.closest('button'); if(!b||b.disabled)return; const v=b.dataset.v; A.plan=v==='all'?'all':+v; A.childPage=0; buildControls(); render(); };
+  const sm=$('selMonth');
+  const ms=[]; for(let i=0;i<6;i++) ms.push(monthKey(addMonths(TODAY,-i)));
+  sm.innerHTML=ms.map(m=>'<option value="'+m+'"'+(m===A.month?' selected':'')+'>'+m+'</option>').join('');
+  sm.onchange=()=>{ A.month=sm.value; render(); };
+  $('rngMinVal').value=A.minVal; $('minValLbl').textContent=fmtMoney(A.minVal);
+  $('rngMinVal').oninput=()=>{ A.minVal=+$('rngMinVal').value; $('minValLbl').textContent=fmtMoney(A.minVal); clearTimeout(renderTimer); renderTimer=setTimeout(render,140); };
+  $('selSort').value=A.sort;
+  $('selSort').onchange=()=>{ A.sort=$('selSort').value; A.childPage=0; render(); };
+  $('ckZero').checked=A.zeroOnly;
+  $('ckZero').onchange=()=>{ A.zeroOnly=$('ckZero').checked; A.childPage=0; render(); };
+  $('qSearch').value=A.q;
+  $('qSearch').oninput=()=>{ A.q=$('qSearch').value.trim(); A.childPage=0; A.cellPage=0; clearTimeout(renderTimer); renderTimer=setTimeout(render,160); };
+  $('btnReset').onclick=()=>{ Object.assign(A,{W:30,winS:null,winE:null,line:'all',plan:'all',month:monthKey(TODAY),minVal:0,sort:'freeVal',q:'',zeroOnly:false,quadFilter:null,childPage:0,cellPage:0}); mCache.clear(); buildControls(); render(); toast('筛选已重置'); };
+  $('btnCSV').onclick=exportCSV;
+  $('btnPrint').onclick=()=>window.print();
+  $('btnTheme').onclick=()=>{ document.body.classList.toggle('light'); localStorage.setItem('tdz_theme',document.body.classList.contains('light')?'light':'dark'); applyThemeBtn(); render(); };
+  $('treeToggle') && ($('treeToggle').onclick=()=>$('tree').classList.toggle('open'));
+}
+function applyThemeBtn(){ $('btnTheme').textContent=document.body.classList.contains('light')?'深色':'浅色'; }
+function theme(){
+  return document.body.classList.contains('light')
+    ? {txt:'#1f2937',sub:'#5b6b7c',line:'#d8e0e8',panel:'#ffffff',panel2:'#eef2f6',split:'#e3e9ef'}
+    : {txt:'#e8eef4',sub:'#8fa3b5',line:'#263544',panel:'#1a2634',panel2:'#14202b',split:'#1f2c39'};
+}
+
+/* ============ 导航 ============ */
+function go(level, idx){
+  A.level=level; A.childPage=0; A.cellPage=0; A.quadFilter=null;
+  if(level==='reg'){ A.reg=idx; A.sub=A.mgr=A.grp=-1; }
+  else if(level==='sub'){ A.sub=idx; A.reg=MGR.subs[idx].reg; A.mgr=A.grp=-1; }
+  else if(level==='mgr'){ A.mgr=idx; A.sub=MGR.mgrs[idx].sub; A.reg=MGR.subs[A.sub].reg; A.grp=-1; }
+  else if(level==='prov'){ A.grp=idx; A.mgr=GROUPS[idx].mgr; A.sub=MGR.mgrs[A.mgr].sub; A.reg=MGR.subs[A.sub].reg; }
+  else { A.reg=A.sub=A.mgr=A.grp=-1; }
+  render(); window.scrollTo(0,0);
+  $('tree').classList.remove('open');
+}
+function upOne(){
+  if(A.level==='prov') go('mgr',A.mgr);
+  else if(A.level==='mgr') go('sub',A.sub);
+  else if(A.level==='sub') go('reg',A.reg);
+  else go('root');
+}
+
+/* ============ 渲染 ============ */
+let LAST=null;
+function render(){
+  if(!A.unlocked) return;
+  LAST=aggPass();
+  renderDrillbar(); renderCrumb(); renderTree(); renderKpis(); renderChildren(); renderQuad(); renderTodos(); renderGap(); renderCells(); renderFooter();
+}
+function renderDrillbar(){
+  const d=$('drillbar');
+  let back='';
+  if(A.level!=='root') back='<button class="btn pri" id="dUp">← 返回上级</button><button class="btn cy" id="dRoot">全国总览</button>';
+  const treeBtn='<button class="btn" id="treeToggle">组织树</button>';
+  d.innerHTML=treeBtn+back
+    +'<span class="where"><b>'+esc(nodeName())+'</b><span>'+nodeRole()+' · '+({root:'3 大区 / 11 小区 / 47 渠道经理',reg:'小区总横比',sub:'渠道经理横比',mgr:'服务商主体横比',prov:'城市×类目格明细'}[A.level])+'</span></span>'
+    +'<span class="sp"></span><span class="hint">'+(A.level==='prov'?'点格行 → 甘特+派单话术':'点下级行 → 逐级下钻')+'</span>';
+  $('dUp') && ($('dUp').onclick=upOne);
+  $('dRoot') && ($('dRoot').onclick=()=>go('root'));
+  $('treeToggle').onclick=()=>$('tree').classList.toggle('open');
+}
+function renderCrumb(){
+  const parts=[{t:'全国',lv:'root'}];
+  if(A.reg>=0) parts.push({t:MGR.regions[A.reg].name,lv:'reg',i:A.reg});
+  if(A.sub>=0) parts.push({t:MGR.subs[A.sub].name,lv:'sub',i:A.sub});
+  if(A.mgr>=0) parts.push({t:MGR.mgrs[A.mgr].name,lv:'mgr',i:A.mgr});
+  if(A.grp>=0) parts.push({t:GROUPS[A.grp].name,lv:'prov',i:A.grp});
+  $('crumb').innerHTML=parts.map((p,i)=> i===parts.length-1?'<b style="color:var(--adm)">'+esc(p.t)+'</b>':'<button data-lv="'+p.lv+'" data-i="'+(p.i==null?-1:p.i)+'">'+esc(p.t)+'</button><span>›</span>').join('');
+  $('crumb').onclick=e=>{ const b=e.target.closest('button'); if(!b)return; go(b.dataset.lv,+b.dataset.i); };
+}
+function renderTree(){
+  const t=$('tree');
+  const on=(lv,i)=> A.level===lv&&(i==null||A[ {reg:'reg',sub:'sub',mgr:'mgr',prov:'grp'}[lv] ]===i);
+  let h='<h3>组织树 · 点击下钻</h3>';
+  h+='<button class="tnode lv1'+(A.level==='root'?' on':'')+'" data-lv="root"><span class="dot" style="background:var(--adm)"></span><span class="nm">全国总览</span><span class="ct">'+NODES.root.ids.size+'主体</span></button>';
+  MGR.regions.forEach((r,ri)=>{
+    const open=A.reg===ri;
+    h+='<details'+(open?' open':'')+'><summary><span class="tnode lv1'+(on('reg',ri)?' on':'')+'" data-lv="reg" data-i="'+ri+'"><span class="dot" style="background:var(--h-mag)"></span><span class="nm">'+esc(r.name)+'<small>'+esc(r.alias)+'</small></span><span class="ct">'+NODES.regs[ri].ids.size+'</span></span></summary>';
+    MGR.subs.forEach((s,si)=>{
+      if(s.reg!==ri) return;
+      const open2=A.sub===si;
+      h+='<details'+(open2?' open':'')+'><summary><span class="tnode lv2'+(on('sub',si)?' on':'')+'" data-lv="sub" data-i="'+si+'"><span class="dot" style="background:var(--h-blue)"></span><span class="nm">'+esc(s.name)+'<small>'+esc(s.alias)+'</small></span><span class="ct">'+NODES.subs[si].ids.size+'</span></span></summary>';
+      MGR.mgrs.forEach((m,mi)=>{
+        if(m.sub!==si) return;
+        h+='<button class="tnode lv3'+(on('mgr',mi)||(A.level==='prov'&&A.mgr===mi)?' on':'')+'" data-lv="mgr" data-i="'+mi+'"><span class="dot" style="background:var(--h-teal)"></span><span class="nm">'+esc(m.name)+'<small>'+esc(m.alias)+'</small></span><span class="ct">'+NODES.mgrs[mi].ids.size+'</span></button>';
+      });
+      h+='</details>';
+    });
+    h+='</details>';
+  });
+  t.innerHTML=h;
+  t.onclick=e=>{
+    const b=e.target.closest('.tnode'); if(!b)return;
+    e.preventDefault();
+    go(b.dataset.lv, b.dataset.i==null?-1:+b.dataset.i);
+  };
+}
+function sparkSVG(vals,color){
+  const w=86,h=26,max=Math.max(1,...vals);
+  const pts=vals.map((v,i)=>[Math.round(i/(vals.length-1)*(w-4))+2, h-3-Math.round(v/max*(h-8))]);
+  const line=pts.map(p=>p.join(',')).join(' ');
+  return '<svg class="spark" width="'+w+'" height="'+h+'"><polyline points="'+line+'" fill="none" stroke="'+color+'" stroke-width="1.6"/><circle cx="'+pts[pts.length-1][0]+'" cy="'+pts[pts.length-1][1]+'" r="2.2" fill="'+color+'"/></svg>';
+}
+function renderKpis(){
+  const {tot}=LAST;
+  const months=sparkMonths();
+  const sparkVals=months.map(m=>(tot.spark[m]||[0,0])[1]);
+  const mom=tot.prevNwVal>0?Math.round((tot.nwVal-tot.prevNwVal)/tot.prevNwVal*100):null;
+  const ids=A.level==='prov'?new Set([GROUPS[A.grp].id]):currentNode().ids;
+  const cities=A.level==='prov'?GROUPS[A.grp].cities.length:countCities(currentNode().cities);
+  const K=[
+    {lbl:'服务商主体',val:ids.size,sub:A.level==='prov'?'牌照 '+GROUPS[A.grp].licenses+' 张':'牌照组 '+currentNode().groups.length+' 个（多牌照分属不同经理）',c:'var(--h-violet)'},
+    {lbl:'覆盖城市',val:cities,sub:'城市宇宙 '+IDX.dicts.cities.length+' 城',c:'var(--h-blue)'},
+    {lbl:'可售格（地盘池）',val:fmtN(tot.cells),sub:'空白格 '+fmtN(tot.freeCells)+' 个',c:'var(--h-teal)'},
+    {lbl:'① 地盘机会池',val:fmtMoney(tot.poolVal),sub:'覆盖城市内全部空白格价值',c:'var(--h-cyan)'},
+    {lbl:'② 可派机会池',val:fmtMoney(tot.freeVal),sub:'可派率 '+pct(tot.freeVal,tot.poolVal)+'%（有下属牌照可接）',c:'var(--h-lime)'},
+    {lbl:'占率（窗内）',val:Math.round(tot.occ*100)+'%',sub:'在投格 '+tot.aNow+' · 30天前 '+tot.aPrev,c:'var(--h-amber)'},
+    {lbl:'窗内释放',val:fmtMoney(tot.expVal),sub:tot.expCells+' 格到期 · 老客可续 '+pct(tot.renewable,tot.expCells)+'%',c:'var(--h-orange)'},
+    {lbl:'本月新占（'+A.month+'）',val:fmtMoney(tot.nwVal),sub:tot.nwCnt+' 笔 · 环比 '+(mom==null?'—':(mom>=0?'+':'')+mom+'%'),c:'var(--h-mag)',spark:sparkVals,mom}
+  ];
+  $('kpis').innerHTML=K.map(k=>'<div class="kpi" style="--kc:'+k.c+'"><div class="lbl"><span>'+k.lbl+'</span></div><div class="val">'+k.val+(k.spark?'':'')+'</div><div class="subnote'+(k.mom!=null?(k.mom>=0?' up':' down'):'')+'">'+k.sub+'</div>'+(k.spark?sparkSVG(k.spark,k.mom!=null&&k.mom<0?'#ff6b6b':'#ff5fa2'):'')+'</div>').join('');
+}
+function childTags(a,peers){
+  const tags=[];
+  const medOcc=median(peers.map(x=>x.occ)), medFree=median(peers.map(x=>x.freeVal)), medDisp=median(peers.map(x=>x.dispatch));
+  if(a.nwCnt===0) tags.push('<span class="tag mag">零新占</span>');
+  if(a.expCells>0) tags.push('<span class="tag blue">'+a.expCells+'格待释放</span>');
+  if(a.dispatch<medDisp*0.6 && a.poolVal>0) tags.push('<span class="tag red">缺覆盖</span>');
+  if(a.occ<medOcc && a.freeVal>medFree) tags.push('<span class="tag red">缺作业</span>');
+  if(a.expCells>=3 && a.renewable/a.expCells<0.5) tags.push('<span class="tag red">缺续签</span>');
+  if(a.aPrev>=3 && a.aNow<a.aPrev*0.8) tags.push('<span class="tag mag">在投下滑</span>');
+  return tags.join('');
+}
+function median(arr){ if(!arr.length) return 0; const s=[...arr].sort((a,b)=>a-b); return s[Math.floor(s.length/2)]; }
+function sortChildren(list){
+  const k=A.sort;
+  const kfn={freeVal:a=>a.freeVal, dispatch:a=>-a.dispatch, occ:a=>a.occ, nwVal:a=>a.nwVal}[k]||(a=>a.freeVal);
+  return [...list].sort((a,b)=>kfn(b)-kfn(a));
+}
+function renderChildren(){
+  const {children,cAgg}=LAST;
+  const isProv=A.level==='mgr';
+  $('pChild').style.display=A.level==='prov'?'none':'block';
+  if(A.level==='prov') return;
+  $('childTitle').innerHTML=({root:'大区总横比',reg:'小区总横比',sub:'渠道经理横比',mgr:'服务商主体横比'}[A.level])+'<span class="hint" id="childHint">点行下钻 · 标签=自动差距归因 · bottom3 见归因列</span>';
+  let list=cAgg.map((a,i)=>({...a,kind:children[i].kind,i:children[i].i}));
+  const peers=list;
+  if(A.q){ const q=A.q.toLowerCase(); list=list.filter(a=>(a.name+(a.alias||'')).toLowerCase().includes(q)); }
+  if(A.zeroOnly) list=list.filter(a=>a.nwCnt===0);
+  if(A.quadFilter) list=list.filter(a=>quadOf(a,peers)===A.quadFilter);
+  list=sortChildren(list);
+  const sortedAll=sortChildren(peers);
+  const bottom3=new Set(sortedAll.slice(-3).map(a=>a.kind+'|'+a.i));
+  const PS=20, pages=Math.max(1,Math.ceil(list.length/PS));
+  A.childPage=Math.min(A.childPage,pages-1);
+  const page=list.slice(A.childPage*PS,(A.childPage+1)*PS);
+  let h='<table><thead><tr><th>#</th><th>'+(isProv?'服务商':'管理者')+'</th><th>主体数</th><th>覆盖城</th><th>可售格</th><th>占率</th><th>空白机会价值</th><th>可派率</th><th>本月新占</th><th>环比</th><th>归因标签</th></tr></thead><tbody>';
+  page.forEach((a,rk)=>{
+    const no=A.childPage*PS+rk+1;
+    const mom=a.prevNwVal>0?Math.round((a.nwVal-a.prevNwVal)/a.prevNwVal*100):null;
+    const nm=esc(a.name)+(a.alias?'<small style="color:var(--sub)">（'+esc(a.alias)+'）</small>':'');
+    const isB=bottom3.has(a.kind+'|'+a.i)&&peers.length>3;
+    h+='<tr data-kind="'+a.kind+'" data-i="'+a.i+'"'+(isB?' style="box-shadow:inset 3px 0 0 var(--danger)"':'')+'>'
+      +'<td>'+(no<=3?'<b style="color:var(--gold)">'+no+'</b>':no)+'</td>'
+      +'<td><b>'+nm+'</b>'+(isProv?'<div style="color:var(--sub);font-size:10px">'+({city:'本地包城',province:'本省',national:'全国',special:'特殊',unresolved:'未解析'}[a.scope]||a.scope)+' · 牌照'+a.licenses+'</div>':'')+'</td>'
+      +'<td>'+(a.ids?a.ids.size:1)+'</td><td>'+a.cities+'</td><td>'+fmtN(a.cells)+'</td>'
+      +'<td>'+Math.round(a.occ*100)+'%<div class="pb" style="--pc:'+(a.occ>=0.5?'var(--accent)':'var(--h-amber)')+'"><i style="width:'+Math.round(a.occ*100)+'%"></i></div></td>'
+      +'<td class="money">'+fmtMoney(a.freeVal)+'</td>'
+      +'<td>'+Math.round(a.dispatch*100)+'%</td>'
+      +'<td>'+a.nwCnt+'笔 / <span class="money">'+fmtMoney(a.nwVal)+'</span></td>'
+      +'<td>'+(mom==null?'—':'<span class="'+(mom>=0?'up':'down')+'" style="color:'+(mom>=0?'var(--accent)':'var(--danger)')+'">'+(mom>=0?'+':'')+mom+'%</span>')+'</td>'
+      +'<td>'+childTags(a,peers)+(isB?'<span class="tag gray">bottom3</span>':'')+'</td></tr>';
+  });
+  h+='</tbody></table>';
+  $('childTbl').innerHTML=list.length?h:'<div class="empty">当前筛选下无匹配下级（试试清空查找 / 关闭零新占过滤）</div>';
+  $('childTbl').onclick=e=>{ const tr=e.target.closest('tr[data-kind]'); if(!tr)return; const kind=tr.dataset.kind,i=+tr.dataset.i; go(kind==='grp'?'prov':kind,i); };
+  $('childPager').innerHTML=pages>1?'<button id="cpPrev"'+(A.childPage===0?' disabled':'')+'>上一页</button><span>'+ (A.childPage+1)+' / '+pages+' 页 · 共 '+list.length+' 行</span><button id="cpNext"'+(A.childPage>=pages-1?' disabled':'')+'>下一页</button>':'<span>共 '+list.length+' 行</span>';
+  $('cpPrev')&&($('cpPrev').onclick=()=>{A.childPage--;renderChildren();});
+  $('cpNext')&&($('cpNext').onclick=()=>{A.childPage++;renderChildren();});
+}
+/* 四象限：相对中位数划分；点=直接下级 */
+function quadOf(a,peers){
+  const mx=median(peers.map(x=>x.occ)), my=median(peers.map(x=>x.freeVal));
+  const hiO=a.occ>=mx, hiV=a.freeVal>=my;
+  return hiV&&!hiO?'dud':hiV&&hiO?'star':!hiV&&hiO?'mature':'watch';
+}
+function renderQuad(){
+  const {children,cAgg}=LAST;
+  if(A.level==='prov'){ if(chart){chart.dispose();chart=null;} $('quad').innerHTML='<div class="empty">服务商主体级无下级散点 —— 请看下方格明细</div>'; $('qchips').innerHTML=''; return; }
+  const peers=cAgg;
+  const qm={}; QUAD_META.forEach(q=>qm[q.key]=0);
+  const data=cAgg.map((a,i)=>{ const q=quadOf(a,peers); qm[q]++; return {a,q,kind:children[i].kind,i:children[i].i}; });
+  $('qchips').innerHTML=QUAD_META.map(q=>'<button class="qchip'+(A.quadFilter===q.key?' on':'')+'" style="--qc:'+q.color+'" data-q="'+q.key+'">'+q.name.split(' · ')[1]+'<span class="n">'+qm[q.key]+'</span></button>').join('')+(A.quadFilter?'<button class="qchip" data-q="">清除过滤</button>':'');
+  $('qchips').onclick=e=>{ const b=e.target.closest('.qchip'); if(!b)return; A.quadFilter=b.dataset.q||null; A.childPage=0; renderChildren(); renderQuad(); };
+  const t=theme();
+  if(!chart){ $('quad').innerHTML=''; chart=echarts.init($('quad')); }
+  const maxV=Math.max(1,...cAgg.map(a=>a.freeVal));
+  chart.setOption({
+    backgroundColor:'transparent',
+    grid:{left:64,right:20,top:30,bottom:40},
+    tooltip:{trigger:'item',backgroundColor:t.panel,borderColor:t.line,textStyle:{color:t.txt,fontSize:11},
+      formatter:p=>{ const d=p.data; return '<b>'+esc(d.nm)+'</b><br>占率 '+d.value[0]+'% · 空白机会 '+fmtMoney(d.value[1])+'<br>本月新占 '+fmtMoney(d.sz)+' · '+d.qn+'<br><span style="color:'+t.sub+'">点击下钻</span>'; }},
+    xAxis:{name:'占率%',nameTextStyle:{color:t.sub},type:'value',min:0,max:100,axisLabel:{color:t.sub},splitLine:{lineStyle:{color:t.split}},axisLine:{lineStyle:{color:t.line}}},
+    yAxis:{name:'空白机会价值',nameTextStyle:{color:t.sub},type:'value',axisLabel:{color:t.sub,formatter:v=>fmtN(v)},splitLine:{lineStyle:{color:t.split}},axisLine:{lineStyle:{color:t.line}}},
+    series:[{type:'scatter',
+      data:data.map(d=>({value:[Math.round(d.a.occ*100),d.a.freeVal],sz:d.a.nwVal,nm:d.a.name+(d.a.alias?'（'+d.a.alias+'）':''),qn:QUAD_META.find(q=>q.key===d.q).name,kind:d.kind,i:d.i,
+        itemStyle:{color:QUAD_META.find(q=>q.key===d.q).color,opacity:A.quadFilter&&A.quadFilter!==d.q?0.18:0.85,borderColor:'rgba(0,0,0,.25)',borderWidth:1}})),
+      symbolSize:(val,params)=>8+Math.min(22,Math.sqrt((params.data.sz||0)/maxV*400)),
+      markLine:{silent:true,symbol:'none',lineStyle:{color:t.sub,type:'dashed',opacity:.5},label:{color:t.sub,fontSize:10},
+        data:[{xAxis:Math.round(median(peers.map(a=>a.occ))*100)},{yAxis:median(peers.map(a=>a.freeVal))}]}
+    }]
+  },true);
+  chart.off('click'); chart.on('click',p=>{ if(p.data&&p.data.kind) go(p.data.kind==='grp'?'prov':p.data.kind,p.data.i); });
+}
+/* 自动待办 4 类 */
+function renderTodos(){
+  const {tot,children,cAgg}=LAST;
+  const node=currentNode();
+  const mask=node.mask;
+  const [w1,w2]=winRange();
+  // ① 即将释放未续 TOP（territory 内、窗内到期、无续约管道）
+  const rel=[];
+  if(A.level!=='prov'){
+    for(const c of filteredCells()){
+      if(((c.ml&mask.lo)|(c.mh&mask.hi))===0) continue;
+      const m=metrics(c);
+      if(!m.expiring) continue;
+      if(renewedPipe(c)) continue;
+      const r=releaseInfo(c); if(!r||r.days<=0) continue;
+      rel.push({c,m,r});
+      if(rel.length>300){ rel.sort((a,b)=>b.r.value-a.r.value); rel.length=40; }
+    }
+    rel.sort((a,b)=>b.r.value-a.r.value); rel.length=Math.min(rel.length,6);
+  } else {
+    for(const c of filteredCells()){
+      if(!groupCovers(A.grp,c)) continue;
+      const m=metrics(c);
+      if(!m.expiring||renewedPipe(c)) continue;
+      const r=releaseInfo(c); if(!r||r.days<=0) continue;
+      rel.push({c,m,r});
+    }
+    rel.sort((a,b)=>b.r.value-a.r.value); rel.length=Math.min(rel.length,6);
+  }
+  // ③ 零新占下级 / ④ 在投下滑下级
+  const zero=cAgg.map((a,i)=>({a,ch:children[i]})).filter(x=>x.a.nwCnt===0&&x.a.cells>0);
+  const drop=cAgg.map((a,i)=>({a,ch:children[i]})).filter(x=>x.a.aPrev>=3&&x.a.aNow<x.a.aPrev*0.8).sort((a,b)=>(b.a.aPrev-b.a.aNow)-(a.a.aPrev-a.a.aNow));
+  const gap=tot.gap.slice(0,6);
+  const sec=(title,color,items,emptyTxt)=>{
+    let h='<div class="tsec"><h4><span class="ic" style="background:'+color+';width:16px;height:16px;border-radius:5px;display:inline-block"></span>'+title+'<span class="cnt">'+items.length+'</span></h4>';
+    if(!items.length) h+='<div class="empty" style="padding:8px">'+emptyTxt+'</div>';
+    return h;
+  };
+  let h='';
+  h+=sec('① 即将释放未续 TOP','var(--h-orange)',rel,'窗内无未续释放格');
+  rel.forEach((x,i)=>{
+    h+='<div class="todo"><span class="ic" style="background:var(--h-orange)">释</span><div class="tx"><b>'+esc(cellCity(x.c))+' · '+esc(shortPath(x.c))+'</b><small>'+iso(x.r.exp)+' 到期 → 释放 '+x.r.days+' 天 · 机会 '+fmtMoney(x.r.value)+' · 无续约管道</small></div><div class="act"><button data-td="cell" data-ci="'+cellIdx(x.c)+'">详情</button><button data-td="talk" data-ci="'+cellIdx(x.c)+'">话术</button></div></div>';
+  });
+  h+='</div>';
+  h+=sec('② 高价值空白无覆盖 TOP','var(--h-amber)',gap,'覆盖城市内无达标缺口');
+  gap.forEach(x=>{
+    h+='<div class="todo"><span class="ic" style="background:var(--h-amber)">缺</span><div class="tx"><b>'+esc(cellCity(x.c))+' · '+esc(shortPath(x.c))+'</b><small>空白 '+x.m.freeDays+' 天 · 刊例机会 '+fmtMoney(x.m.value)+' · 无下属可接 → 扩城/招商</small></div><div class="act"><button data-td="cell" data-ci="'+cellIdx(x.c)+'">详情</button><button data-td="gap" data-ci="'+cellIdx(x.c)+'">话术</button></div></div>';
+  });
+  h+='</div>';
+  h+=sec('③ 本月零新占（'+A.month+'）','var(--h-mag)',zero,'下级本月均有新占');
+  zero.slice(0,6).forEach(x=>{
+    h+='<div class="todo"><span class="ic" style="background:var(--h-mag)">零</span><div class="tx"><b>'+esc(x.a.name)+(x.a.alias?'（'+esc(x.a.alias)+'）':'')+'</b><small>可售格 '+fmtN(x.a.cells)+' · 空白机会 '+fmtMoney(x.a.freeVal)+' · 本月新占 0 笔</small></div><div class="act"><button data-td="go" data-kind="'+x.ch.kind+'" data-i="'+x.ch.i+'">下钻</button><button data-td="督" data-kind="'+x.ch.kind+'" data-i="'+x.ch.i+'">话术</button></div></div>';
+  });
+  h+='</div>';
+  h+=sec('④ 在投格环比下滑','var(--h-blue)',drop,'无显著下滑（30天前≥3格且今降>20%）');
+  drop.slice(0,6).forEach(x=>{
+    h+='<div class="todo"><span class="ic" style="background:var(--h-blue)">降</span><div class="tx"><b>'+esc(x.a.name)+(x.a.alias?'（'+esc(x.a.alias)+'）':'')+'</b><small>在投格 '+x.a.aPrev+' → '+x.a.aNow+'（-'+(x.a.aPrev-x.a.aNow)+'）· 占率 '+Math.round(x.a.occ*100)+'%</small></div><div class="act"><button data-td="go" data-kind="'+x.ch.kind+'" data-i="'+x.ch.i+'">下钻</button><button data-td="督" data-kind="'+x.ch.kind+'" data-i="'+x.ch.i+'">话术</button></div></div>';
+  });
+  h+='</div>';
+  $('todos').innerHTML=h;
+  $('todos').onclick=e=>{
+    const b=e.target.closest('button[data-td]'); if(!b)return;
+    const td=b.dataset.td;
+    if(td==='cell'||td==='talk'||td==='gap'){ openCell(+b.dataset.ci, td==='talk'||td==='gap'); }
+    else if(td==='go'){ go(b.dataset.kind==='grp'?'prov':b.dataset.kind,+b.dataset.i); }
+    else if(td==='督'){ openSupervise(b.dataset.kind,+b.dataset.i); }
+  };
+}
+function shortPath(c){ const p=cellPath(c); const seg=p.split(';'); return seg.length>2?seg[0]+';…;'+seg[seg.length-1]:p; }
+function cellIdx(c){ return c._i; }
+function cellByIdx(i){ return ALL[i]; }
+/* 无覆盖缺口榜 */
+function renderGap(){
+  const {tot}=LAST;
+  const list=tot.gap.filter(x=>!A.q||(cellCity(x.c)+cellPath(x.c)).toLowerCase().includes(A.q.toLowerCase()));
+  let h='<table><thead><tr><th>#</th><th>城市</th><th>行业线</th><th>类目路径</th><th>方案</th><th>空白天</th><th>刊例机会</th><th>动作</th></tr></thead><tbody>';
+  list.slice(0,40).forEach((x,i)=>{
+    h+='<tr data-ci="'+cellIdx(x.c)+'"><td>'+(i+1)+'</td><td>'+esc(cellCity(x.c))+'</td><td>'+esc(cellLine(x.c))+'</td><td style="max-width:280px">'+esc(cellPath(x.c))+'</td><td>'+esc(cellPlan(x.c))+'</td><td>'+x.m.freeDays+'</td><td class="money">'+fmtMoney(x.m.value)+'</td><td><button class="btn" style="padding:2px 9px;font-size:10.5px" data-gap="'+cellIdx(x.c)+'">招商话术</button></td></tr>';
+  });
+  h+='</tbody></table>';
+  $('gapTbl').innerHTML=list.length?h:'<div class="empty">当前门槛下无缺口 —— 下属覆盖完整，或提高时间窗看看</div>';
+  $('gapTbl').onclick=e=>{
+    const gb=e.target.closest('button[data-gap]');
+    if(gb){ openCell(+gb.dataset.gap,true); return; }
+    const tr=e.target.closest('tr[data-ci]'); if(tr) openCell(+tr.dataset.ci,false);
+  };
+}
+/* 服务商主体级：格明细表 */
+function renderCells(){
+  const show=A.level==='prov';
+  $('pCells').style.display=show?'block':'none';
+  if(!show) return;
+  const g=GROUPS[A.grp];
+  let list=[];
+  for(const c of filteredCells()){
+    if(!groupCovers(A.grp,c)) continue;
+    if(A.minVal>0){ const m=metrics(c); if(m.value<A.minVal) continue; }
+    if(A.q){ const q=A.q.toLowerCase(); if(!(cellCity(c)+cellPath(c)).toLowerCase().includes(q)) continue; }
+    list.push({c,m:metrics(c)});
+  }
+  const sk=A.cellSort.key, dir=A.cellSort.dir;
+  const kf={value:x=>x.m.value, free:x=>x.m.freeDays, occ:x=>x.m.occDays, city:x=>cellCity(x.c), nw:x=>(x.c.nw[A.month]||[0,0])[1]}[sk]|| (x=>x.m.value);
+  list.sort((a,b)=>{ const va=kf(a),vb=kf(b); return (typeof va==='string'?va.localeCompare(vb,'zh'):va-vb)*dir; });
+  const PS=30, pages=Math.max(1,Math.ceil(list.length/PS));
+  A.cellPage=Math.min(A.cellPage,pages-1);
+  const page=list.slice(A.cellPage*PS,(A.cellPage+1)*PS);
+  const ar=k=>A.cellSort.key===k?'<span class="ar">'+(dir===-1?'↓':'↑')+'</span>':'';
+  let h='<table><thead><tr><th class="sortable" data-k="city">城市'+ar('city')+'</th><th>类目路径</th><th>方案</th><th>状态</th><th class="sortable" data-k="free">空闲天'+ar('free')+'</th><th class="sortable" data-k="value">机会价值'+ar('value')+'</th><th>到期</th><th class="sortable" data-k="nw">本月新占'+ar('nw')+'</th><th>动作</th></tr></thead><tbody>';
+  page.forEach(x=>{
+    const e=expiryOf(x.c); const nw=x.c.nw[A.month]||[0,0];
+    h+='<tr data-ci="'+cellIdx(x.c)+'"><td>'+esc(cellCity(x.c))+'</td><td style="max-width:260px">'+esc(cellPath(x.c))+'</td><td>'+esc(cellPlan(x.c))+'</td><td><span class="st '+x.m.state+'">'+STATE_LABEL[x.m.state]+'</span>'+(x.m.conflict?'<span class="tag red">冲突</span>':'')+'</td><td>'+x.m.freeDays+'</td><td class="money">'+fmtMoney(x.m.value)+'</td><td>'+(e?iso(e):'—')+'</td><td>'+nw[0]+'笔 / '+fmtMoney(nw[1])+'</td><td><button class="btn" style="padding:2px 9px;font-size:10.5px" data-open="'+cellIdx(x.c)+'">甘特+话术</button></td></tr>';
+  });
+  h+='</tbody></table>';
+  $('cellTbl').innerHTML=list.length?h:'<div class="empty">该服务商在当前行业线/方案/门槛下无覆盖格</div>';
+  $('cellTbl').onclick=e=>{
+    const th=e.target.closest('th.sortable');
+    if(th){ const k=th.dataset.k; if(A.cellSort.key===k) A.cellSort.dir*=-1; else A.cellSort={key:k,dir:k==='city'?1:-1}; renderCells(); return; }
+    const ob=e.target.closest('button[data-open]');
+    if(ob){ openCell(+ob.dataset.open,true); return; }
+    const tr=e.target.closest('tr[data-ci]'); if(tr) openCell(+tr.dataset.ci,false);
+  };
+  $('cellPager').innerHTML='<button id="clPrev"'+(A.cellPage===0?' disabled':'')+'>上一页</button><span>'+(A.cellPage+1)+' / '+pages+' 页 · 共 '+list.length+' 格</span><button id="clNext"'+(A.cellPage>=pages-1?' disabled':'')+'>下一页</button>';
+  $('clPrev').onclick=()=>{A.cellPage--;renderCells();};
+  $('clNext').onclick=()=>{A.cellPage++;renderCells();};
+}
+/* ============ 单格抽屉：迷你甘特 + 三级派单话术 ============ */
+function talkCards(c,m){
+  const city=cellCity(c), path=cellPath(c), plan=cellPlan(c);
+  const [w1,w2]=winRange();
+  const e=expiryOf(c); const rel=e?releaseInfo(c):null;
+  let gi=A.level==='prov'?A.grp:-1;
+  if(gi<0){ for(let k=0;k<GROUPS.length;k++){ if(groupCovers(k,c)){ gi=k; break; } } }
+  const provName=gi>=0?GROUPS[gi].name:'覆盖服务商';
+  const mgrName=A.mgr>=0?MGR.mgrs[A.mgr].name:(gi>=0?MGR.mgrs[GROUPS[gi].mgr].name:'渠道经理');
+  const t1='【督导派单 · 管理者→渠道经理】\n'+mgrName+'：'+city+' · '+path+'（'+plan+'）当前「'+STATE_LABEL[m.state]+'」，'+iso(w1)+'~'+iso(w2)+' 窗内空闲 '+m.freeDays+' 天，刊例机会约 '+fmtMoney(m.value)+'。'+(e?'\n在投单 '+iso(e)+' 到期，释放 '+ (rel?rel.days:0) +' 天'+(renewedPipe(c)?'（已有续约管道）':'（未见续约管道，优先跟进）')+'。':'')+'\n请本周内反馈作业计划与预计上刊时间。';
+  const t2='【作业机会 · 渠道经理→服务商】\n'+provName+'：贵司覆盖的 '+city+' · '+path+' 在 '+iso(w1)+'~'+iso(w2)+' 有 '+m.freeDays+' 天空档，日均刊例约 '+fmtMoney(Math.round((c.list||0)/30))+'，窗内机会合计 '+fmtMoney(m.value)+'。'+(m.earliest?'最早可上刊 '+iso(m.earliest)+'。':'')+'建议优先锁定档期，本周回复意向。';
+  const t3='【商户沟通 · 服务商→商户】\n您好，高德'+plan+' '+city+'「'+path.split(';').pop()+'」词包近期有搜索曝光空档，用户搜相关词时首位展示，适合本地门店抢占客流。档期有限，建议尽快确认上刊时间，我帮您锁位。';
+  return [{t:'管理者 → 渠道经理',c:'var(--adm)',txt:t1},{t:'渠道经理 → 服务商',c:'var(--h-teal)',txt:t2},{t:'服务商 → 商户',c:'var(--h-amber)',txt:t3}];
+}
+function miniGantt(c){
+  const [w1,w2]=winRange();
+  const span=w2-w1||DAY;
+  const pos=d=>Math.max(0,Math.min(100,(d-w1)/span*100));
+  let h='<div class="gantt-track"><div class="win" style="left:0;right:0"></div>';
+  for(const w of c.wins){
+    const ds=dparse(w[0]).getTime(), de=dparse(w[1]).getTime();
+    if(de<w1.getTime()||ds>w2.getTime()) continue;
+    const l=pos(ds), r=pos(de+DAY);
+    h+='<div class="occ" title="'+OCC_LABEL[w[2]]+' '+w[0].slice(0,10)+'~'+w[1].slice(0,10)+'" style="left:'+l+'%;width:'+Math.max(0.6,r-l)+'%;background:'+(OCC_COLOR[w[2]]||'#6b7a89')+'"></div>';
+  }
+  // 空闲段
+  const iv=[];
+  for(const w of c.wins){ const a=Math.max(dparse(w[0]).getTime(),w1.getTime()),b=Math.min(dparse(w[1]).getTime(),w2.getTime()); if(b>=a)iv.push([a,b]); }
+  iv.sort((a,b)=>a[0]-b[0]); let cur=null; const merged=[];
+  for(const [a,b] of iv){ if(!cur)cur=[a,b]; else if(a<=cur[1])cur[1]=Math.max(cur[1],b); else {merged.push(cur);cur=[a,b];} }
+  if(cur)merged.push(cur);
+  let t=w1.getTime();
+  for(const [a,b] of merged){ if(a>t) h+='<div class="blank" style="left:'+pos(t)+'%;width:'+Math.max(0.6,pos(a)-pos(t))+'%"></div>'; t=Math.max(t,b+DAY); }
+  if(t<=w2.getTime()) h+='<div class="blank" style="left:'+pos(t)+'%;width:'+Math.max(0.6,100-pos(t))+'%"></div>';
+  if(TODAY>=w1&&TODAY<=w2) h+='<div class="now" style="left:'+pos(TODAY.getTime())+'%"></div>';
+  h+='</div><div class="gantt-axis"><span style="left:0">'+iso(w1)+'</span><span style="left:50%">'+iso(addDays(w1,Math.round(span/DAY/2)))+'</span><span style="left:100%">'+iso(w2)+'</span></div>';
+  h+='<div style="display:flex;gap:10px;flex-wrap:wrap;color:var(--sub);font-size:10.5px;margin-top:6px">'+Object.keys(OCC_LABEL).map(k=>'<span><span class="dot" style="width:8px;height:8px;border-radius:2px;display:inline-block;background:'+OCC_COLOR[k]+';margin-right:3px"></span>'+OCC_LABEL[k]+'</span>').join('')+'<span><span class="dot" style="width:8px;height:8px;border-radius:2px;display:inline-block;background:var(--accent);margin-right:3px"></span>空闲</span></div>';
+  return h;
+}
+function deepLink(c){
+  if(c.scenic) return 'index.html#pl=scenic&ct='+c.ci;
+  return 'index.html#v=city&ln='+c.li+'&ct='+c.ci+'&cat='+encodeURIComponent(cellPath(c));
+}
+function openCell(ci, focusTalk){
+  const c=cellByIdx(ci); if(!c) return;
+  const m=metrics(c);
+  const e=expiryOf(c); const rel=e?releaseInfo(c):null;
+  const cards=talkCards(c,m);
+  const nw=c.nw[A.month]||[0,0];
+  let h='<h3>'+esc(cellCity(c))+' · '+esc(cellPath(c))+'<button class="x" id="mClose">关闭</button></h3>';
+  h+='<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px"><span class="st '+m.state+'">'+STATE_LABEL[m.state]+'</span><span class="tag gray">'+esc(cellLine(c))+'</span><span class="tag gray">'+esc(cellPlan(c))+'</span>'+(m.conflict?'<span class="tag red">档期冲突</span>':'')+'</div>';
+  h+=miniGantt(c);
+  h+='<div class="kvgrid" style="display:grid;grid-template-columns:1fr 1fr;gap:4px 18px;margin:10px 0">';
+  h+='<div class="kv"><span>日均刊例</span><b>'+fmtMoney(Math.round((c.list||0)/30))+'</b></div>';
+  h+='<div class="kv"><span>窗内空闲</span><b>'+m.freeDays+' 天 / '+m.Wd+' 天</b></div>';
+  h+='<div class="kv"><span>机会价值（刊例）</span><b class="money">'+fmtMoney(m.value)+'</b></div>';
+  h+='<div class="kv"><span>最早可上刊</span><b>'+(m.earliest?iso(m.earliest):'—')+'</b></div>';
+  h+='<div class="kv"><span>在投到期</span><b>'+(e?iso(e)+(rel?' → 释放'+rel.days+'天':''):'—')+'</b></div>';
+  h+='<div class="kv"><span>本月新占（覆盖格口径）</span><b>'+nw[0]+' 笔 / '+fmtMoney(nw[1])+'</b></div>';
+  h+='</div>';
+  h+='<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px"><a class="btn cy" href="'+deepLink(c)+'" target="_blank" rel="noopener">在公共作业地图打开完整甘特 ↗</a><button class="btn" id="mCopyAll">复制全部话术</button></div>';
+  h+='<div id="talks">'+cards.map((cd,i)=>'<div class="talk" style="--tc:'+cd.c+'"><h5>'+cd.t+'<button data-copy="'+i+'">复制</button></h5><p>'+esc(cd.txt)+'</p></div>').join('')+'</div>';
+  h+='<div style="color:var(--sub);font-size:10.5px">口径：金额=刊例（无实付字段）；新占量=覆盖格内按上刊起始月归属，非服务商签约归属。钉钉直发为 v1.1 可选开关，本版未启用。</div>';
+  $('modalBox').innerHTML=h;
+  $('modal').style.display='flex';
+  $('mClose').onclick=closeModal;
+  $('mCopyAll').onclick=()=>copyText(cards.map(c=>c.txt).join('\n\n'),'三级话术已全部复制');
+  $('talks').onclick=e=>{ const b=e.target.closest('button[data-copy]'); if(!b)return; copyText(cards[+b.dataset.copy].txt); };
+  if(focusTalk) setTimeout(()=>$('talks').scrollIntoView({behavior:'smooth',block:'nearest'}),60);
+}
+function openSupervise(kind,i){
+  const a=LAST.cAgg[LAST.children.findIndex(c=>c.kind===kind&&c.i===i)];
+  if(!a){ toast('未找到该下级'); return; }
+  const nm=a.name+(a.alias?'（'+a.alias+'）':'');
+  const months=sparkMonths();
+  const txt='【督导沟通 · '+nodeRole()+'→'+({reg:'大区总',sub:'小区总',mgr:'渠道经理',grp:'服务商'}[kind])+'】\n'+nm+'：截至 '+IDX.meta.pullDate+'，你辖区可售格 '+fmtN(a.cells)+' 个，窗内占率 '+Math.round(a.occ*100)+'%，空白机会 '+fmtMoney(a.freeVal)+'（可派率 '+Math.round(a.dispatch*100)+'%）。\n本月（'+A.month+'）新占 '+a.nwCnt+' 笔 / '+fmtMoney(a.nwVal)+''+(a.prevNwVal>0?'，环比 '+Math.round((a.nwVal-a.prevNwVal)/a.prevNwVal*100)+'%':'')+'。\n'+(a.nwCnt===0?'本月尚无新占，请优先盘点高价值空白格并给出作业排期。':'')+(a.expCells>0?'另有 '+a.expCells+' 格窗内到期（释放价值 '+fmtMoney(a.expVal)+'），请确认续约跟进。':'')+'\n请于本周反馈：重点作业格清单 + 预计上刊时间。';
+  let h='<h3>督导话术 · '+esc(nm)+'<button class="x" id="mClose">关闭</button></h3>';
+  h+='<div class="talk" style="--tc:var(--adm)"><h5>'+nodeRole()+' → '+({reg:'大区总',sub:'小区总',mgr:'渠道经理',grp:'服务商'}[kind])+'<button id="supCopy">复制</button></h5><p>'+esc(txt)+'</p></div>';
+  h+='<div style="display:flex;gap:8px"><button class="btn pri" id="supGo">下钻查看明细</button></div>';
+  $('modalBox').innerHTML=h; $('modal').style.display='flex';
+  $('mClose').onclick=closeModal;
+  $('supCopy').onclick=()=>copyText(txt);
+  $('supGo').onclick=()=>{ closeModal(); go(kind==='grp'?'prov':kind,i); };
+}
+function closeModal(){ $('modal').style.display='none'; }
+$('modal').onclick=e=>{ if(e.target===$('modal')) closeModal(); };
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeModal(); });
+
+/* ============ 导出 ============ */
+function exportCSV(){
+  const {children,cAgg}=LAST;
+  const q=s=>'"'+String(s==null?'':s).replace(/"/g,'""')+'"';
+  let rows;
+  if(A.level==='prov'){
+    rows=[['城市','行业线','类目路径','方案','状态','空闲天','机会价值(刊例)','在投到期','本月新占笔数','本月新占刊例'].map(q).join(',')];
+    for(const c of filteredCells()){
+      if(!groupCovers(A.grp,c)) continue;
+      const m=metrics(c); const e=expiryOf(c); const nw=c.nw[A.month]||[0,0];
+      rows.push([cellCity(c),cellLine(c),cellPath(c),cellPlan(c),STATE_LABEL[m.state],m.freeDays,m.value,e?iso(e):'',nw[0],nw[1]].map(q).join(','));
+    }
+  }else{
+    rows=[['层级','名称','花名','主体数','覆盖城市','可售格','占率%','空白机会价值(刊例)','可派率%','本月新占笔数','本月新占刊例','上月新占刊例','窗内到期格','释放价值','在投格(今)','在投格(30天前)'].map(q).join(',')];
+    cAgg.forEach(a=>{
+      rows.push([nodeRole(),a.name,a.alias||'',a.ids?a.ids.size:1,a.cities,a.cells,Math.round(a.occ*100),a.freeVal,Math.round(a.dispatch*100),a.nwCnt,a.nwVal,a.prevNwVal,a.expCells,a.expVal,a.aNow,a.aPrev].map(q).join(','));
+    });
+  }
+  const blob=new Blob(['\uFEFF'+rows.join('\n')],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='管理档_'+nodeName()+'_'+iso(TODAY)+'.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(a.href),3000);
+  toast('CSV 已导出（'+(rows.length-1)+' 行 · 刊例口径）');
+}
+function renderFooter(){
+  $('footer').innerHTML='<b>顶钻展 · 管理档 v1.1</b> · 数据截至 '+IDX.meta.pullDate+'（T+1 每日09:00同步） · 组织底座：'+MGR.meta.counts.regions+' 大区 / '+MGR.meta.counts.subs+' 小区 / '+MGR.meta.counts.managers+' 渠道经理 / '+MGR.meta.counts.entities+' 服务商主体（'+MGR.meta.counts.licenseRows+' 牌照行，多牌照按经理×主体归属）<br>'
+  +'口径：金额=刊例（上游无实付字段，不露底价）；机会双口径 ①地盘池=覆盖城市全部空白格 ②可派池=有下属牌照可接的空白格；<b>作业结果=新占量口径</b>（覆盖格内按上刊起始月归属，营收明细无服务商归属字段，非签约归属）；询量权重0；CITY-AREA 格仅标注。<br>'
+  +'安全：组织/真名/工号为内部资产，AES-256-GCM 密文托管 + 访问码门，明文仅在本机内存；本页不外发任何数据。<span class="noprint">钉钉直发派单为可选开关，本版未启用（先复制话术卡）。</span>';
+}
+/* ============ 启动 ============ */
+window.addEventListener('resize',()=>{ if(chart) chart.resize(); });
+(async()=>{
+  let saved=null; try{ saved=sessionStorage.getItem('tdz_admin_k'); }catch(e){}
+  if(saved){ tryUnlock(saved,true); }
+  else { $('codeInput').focus(); }
+})();
+</script>
+</body>
+</html>
