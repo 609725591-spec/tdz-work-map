@@ -42,7 +42,7 @@
     if (!user || user.demo) return;
     var row = {
       kind: user.kind, name: user.name, emp: user.emp || null, company: user.company || null,
-      event: event, view: (window.S && window.S.view) || null,
+      event: event, view: (detail && detail.view) || (window.S && window.S.view) || null,
       detail: detail == null ? null : detail, sid: SID,
       ua: (navigator.userAgent || '').slice(0, 120), client_ts: new Date().toISOString()
     };
