@@ -484,7 +484,7 @@ function track(type,detail){
     while(ev.length>2000) ev.shift();
     localStorage.setItem('tdz_events',JSON.stringify(ev));
   }catch(e){}
-  if(window.tdzLog) window.tdzLog(type,detail); /* 决策#18：登记身份后同步云端使用日志（anon 仅写） */
+  if(window.tdzLog) window.tdzLog(type, Object.assign({view:S.view}, detail||{})); /* 决策#18：登记身份后同步云端使用日志（anon 仅写）；view 显式带上（S 是顶层 const 不在 window 上），leave 的 detail.view 为旧视图优先 */
 }
 let lastView=null, viewSince=Date.now();
 function statsModal(){
