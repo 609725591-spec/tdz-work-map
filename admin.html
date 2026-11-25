@@ -271,6 +271,7 @@ footer b{color:var(--txt);}
     <span class="badge ok" id="badgeDate">数据截至 —</span>
     <span class="badge warn">内部资产 · 访问码保护</span>
     <span class="badge gold">金额=刊例口径</span>
+    <span class="badge info" data-tdz-user style="display:none"></span>
     <button class="hbtn" id="btnTheme">浅色</button>
     <a class="hbtn" href="index.html">公共作业地图</a>
     <button class="hbtn exit" id="btnExit">退出管理档</button>
@@ -363,6 +364,7 @@ footer b{color:var(--txt);}
 <div id="toast"></div>
 
 <script src="echarts.min.js"></script>
+<script src="auth.js"></script>
 <script>
 'use strict';
 /* ============ 口径常量（镜像 index.html / m0/config.js，改口径改那里再同步此处） ============ */
@@ -498,6 +500,7 @@ async function boot(){
   $('loading').style.display='none';
   $('app').style.display='block';
   A.unlocked=true;
+  if(window.tdzLog) window.tdzLog('admin_unlock'); /* 决策#18：管理档解锁计入使用统计 */
   buildControls(); render();
 }
 function freshness(){
